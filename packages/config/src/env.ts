@@ -32,6 +32,45 @@ const supabaseUrl = z
     },
   );
 
+/**
+ * The local development keys that ship with the Supabase CLI.
+ *
+ * Every install has the same ones, signed by `supabase-demo`. They sit in the
+ * repository's own .env files for local work, which makes them the nearest
+ * thing to hand when a deployment asks for a key — and pointing one at a real
+ * project produces "Invalid API key" from Supabase, which says nothing about
+ * why.
+ */
+export function isLocalDemoKey(key: string): boolean {
+  const payload = key.split('.')[1];
+  if (payload === undefined) return false;
+  try {
+    const decoded: unknown = JSON.parse(Buffer.from(payload, 'base64').toString('utf8'));
+    return (
+      typeof decoded === 'object' &&
+      decoded !== null &&
+      (decoded as { iss?: unknown }).iss === 'supabase-demo'
+    );
+  } catch {
+    // Not a JWT at all — the newer sb_publishable_ keys, for instance.
+    return false;
+  }
+}
+
+/** Whether the URL points at a Supabase running on this machine. */
+export function isLocalSupabaseUrl(url: string): boolean {
+  try {
+    const { hostname } = new URL(url);
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '[::1]';
+  } catch {
+    return false;
+  }
+}
+
+export const DEMO_KEY_MESSAGE =
+  'is the local development key that ships with the Supabase CLI, not your ' +
+  'project key. Copy it from Supabase: Project Settings > API.';
+
 const boolish = z.enum(['true', 'false', '1', '0']).transform((v) => v === 'true' || v === '1');
 
 /** Variables every process needs, regardless of app. */
@@ -115,14 +154,39 @@ function parse<T extends z.ZodTypeAny>(
   return result.data;
 }
 
+function assertKeysMatchProject(env: {
+  SUPABASE_URL: string;
+  SUPABASE_ANON_KEY: string;
+  SUPABASE_SERVICE_ROLE_KEY?: string;
+}): void {
+  if (isLocalSupabaseUrl(env.SUPABASE_URL)) return;
+
+  const offenders = [
+    ['SUPABASE_ANON_KEY', env.SUPABASE_ANON_KEY],
+    ['SUPABASE_SERVICE_ROLE_KEY', env.SUPABASE_SERVICE_ROLE_KEY],
+  ].filter(([, value]) => typeof value === 'string' && isLocalDemoKey(value));
+
+  if (offenders.length === 0) return;
+
+  throw new Error(
+    ['Invalid environment:', ...offenders.map(([name]) => `  - ${name}: ${DEMO_KEY_MESSAGE}`)].join(
+      '\n',
+    ),
+  );
+}
+
 export function loadAgentServiceEnv(source: NodeJS.ProcessEnv = process.env): AgentServiceEnv {
-  return parse(agentServiceSchema.merge(flagSchema), source, 'agent-service');
+  const env = parse(agentServiceSchema.merge(flagSchema), source, 'agent-service');
+  assertKeysMatchProject(env);
+  return env;
 }
 
 export function loadServerEnv(
   source: NodeJS.ProcessEnv = process.env,
 ): ServerEnv & z.infer<typeof flagSchema> {
-  return parse(serverSchema.merge(flagSchema), source, 'server');
+  const env = parse(serverSchema.merge(flagSchema), source, 'server');
+  assertKeysMatchProject(env);
+  return env;
 }
 
 export function loadPublicEnv(source: NodeJS.ProcessEnv = process.env): PublicEnv {

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { DEMO_KEY_MESSAGE, isLocalDemoKey, isLocalSupabaseUrl } from '@reservai/config';
 
 /**
  * Browser-visible configuration. Next inlines NEXT_PUBLIC_* at build time, so
@@ -6,20 +7,27 @@ import { z } from 'zod';
  * Nothing secret belongs here — the service role key is read only in code that
  * never reaches the client bundle.
  */
-const schema = z.object({
-  // The project address only. The client appends /auth/v1 and /rest/v1 itself,
-  // so a URL with a path on the end produces requests to nonsense paths and an
-  // error that names neither the setting nor the cause.
-  supabaseUrl: z
-    .string()
-    .url()
-    .refine((value) => ['', '/'].includes(new URL(value).pathname), {
-      message:
-        'must be the project address only, with nothing after it — ' +
-        'https://YOUR-REF.supabase.co, not .../rest/v1/',
-    }),
-  supabaseAnonKey: z.string().min(1),
-});
+const schema = z
+  .object({
+    // The project address only. The client appends /auth/v1 and /rest/v1 itself,
+    // so a URL with a path on the end produces requests to nonsense paths and an
+    // error that names neither the setting nor the cause.
+    supabaseUrl: z
+      .string()
+      .url()
+      .refine((value) => ['', '/'].includes(new URL(value).pathname), {
+        message:
+          'must be the project address only, with nothing after it — ' +
+          'https://YOUR-REF.supabase.co, not .../rest/v1/',
+      }),
+    supabaseAnonKey: z.string().min(1),
+  })
+  // A demo key is correct against a local Supabase and wrong against a real
+  // project, so the pair is what has to be checked rather than either value.
+  .refine(
+    (value) => isLocalSupabaseUrl(value.supabaseUrl) || !isLocalDemoKey(value.supabaseAnonKey),
+    { path: ['supabaseAnonKey'], message: DEMO_KEY_MESSAGE },
+  );
 
 const NAMES: Record<string, string> = {
   supabaseUrl: 'NEXT_PUBLIC_SUPABASE_URL',
