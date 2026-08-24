@@ -96,11 +96,29 @@ export function SignInForm({ next }: { next: string }) {
           >
             {busy ? 'Sending…' : 'Send code'}
           </button>
+          {/*
+            Sending and entering are separate problems. A code can be in hand
+            while a fresh send is refused — the mail allowance is per project
+            and per hour, so one person exhausts it for everyone — and without
+            this the box for the code you are holding cannot be reached.
+          */}
+          <button
+            type="button"
+            onClick={() => {
+              if (!emailValid) return;
+              setError(null);
+              setStep('code');
+            }}
+            disabled={!emailValid || busy}
+            className="text-sm text-neutral-500 underline-offset-4 hover:underline disabled:no-underline disabled:opacity-50 dark:text-neutral-400"
+          >
+            I already have a code
+          </button>
         </form>
       ) : (
         <form onSubmit={verify} className="mt-8 flex flex-col gap-3">
           <label htmlFor="code" className="text-sm text-neutral-600 dark:text-neutral-400">
-            Six-digit code sent to {email}
+            Six-digit code for {email}
           </label>
           <input
             id="code"
