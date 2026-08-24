@@ -359,24 +359,40 @@ says so rather than pretending.
 
 ## Step 5 — Give yourself access
 
-The console will not let you in yet. Nobody is an administrator.
+The console will not let you in yet, and it will not let you sign up either.
+It only sends a code to an address that already has an account, so that a
+stranger who finds the address cannot create one. Nobody has an account yet,
+so the first one has to be made in Supabase.
 
-**5a.** Open your Vercel site and sign in with your email. It sends you a
-six-digit code. Enter it.
+If you try to sign in first, you will be told **"That address has no console
+account"**. That is this step, not a fault.
 
-**5b.** You will be told you do not have access. That is correct — signing in
-created your account, which is what step 5c needs.
+**5a.** In Supabase, click **Authentication** in the left sidebar, then
+**Users**, then **Add user** > **Create new user**.
 
-**5c.** In Supabase, click **SQL Editor** in the left sidebar, then **New
-query**. Paste this, with your own email:
+Enter your email and any password, and tick **Auto Confirm User**. You will
+never use the password — the console signs you in with an emailed code — but
+Supabase asks for one, and without Auto Confirm the account cannot sign in.
+
+**5b.** Click **SQL Editor** in the left sidebar, then **New query**. Paste
+this, with the same email:
 
 ```sql
 select public.grant_role_by_email('you@yourdomain.com', 'admin');
 ```
 
-Click **Run**.
+Click **Run**. It returns a long id, which means it worked. If it says **"No
+auth user with email"**, the address here does not match 5a exactly.
 
-**5d.** Go back to your site and refresh. You are in.
+**5c.** Open your site and sign in. Enter the six-digit code it emails you.
+You are in.
+
+### Adding anyone else
+
+The same two steps, with `'ops'` instead of `'admin'` in 5b — ops staff run
+bookings, admins can also grant roles. There is no invite screen in the
+console; during the pilot, adding a colleague is deliberate enough to be worth
+doing by hand.
 
 ---
 
