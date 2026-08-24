@@ -445,6 +445,31 @@ if the name is definitely right, it is the token — see the note in step 1e.
 one word too many. Copy it again from this guide — it is easy to end up with a
 stray word when pasting across two lines.
 
+**Fly says "error getting machine ... wsarecv: A connection attempt failed".**
+Your computer lost its connection to Fly partway through, usually while waiting
+for the new machine to report in. The image built and uploaded fine; only the
+waiting failed.
+
+It can leave a half-created machine behind, so check before retrying:
+
+```bash
+fly status
+```
+
+If it lists a machine that is not `started`, remove it and deploy again:
+
+```bash
+fly machine destroy MACHINE-ID --force
+```
+
+```bash
+fly deploy --ha=false
+```
+
+If it keeps timing out at the same point, the connection between you and Fly is
+the problem rather than anything in this project — try again on a different
+network, or from a phone hotspot.
+
 **Fly says a region "is deprecated and cannot have new resources".** Fly has
 retired that location. Change `primary_region` at the top of `fly.toml` to
 whatever it suggests, and deploy again.
