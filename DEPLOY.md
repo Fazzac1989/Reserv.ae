@@ -237,35 +237,51 @@ fly auth signup
 It asks for a card. There is a free allowance; one small machine like this
 costs a few dollars a month.
 
-**4c.** From your project folder:
+**4c.** Create the app. From your project folder:
 
 ```bash
-fly launch --no-deploy --copy-config --name reservai-agent
+fly apps create reservai-agent
 ```
 
-Answer **no** if it offers to tweak settings. The configuration is already
-written and committed.
+Do **not** run `fly launch`. It tries to write its own configuration and would
+overwrite the one in this repository, which is already set up correctly.
+
+> **"Name has already been taken"?** App names are shared across everyone on
+> Fly, so someone else has it. Pick another — `reserv-agent-ae`, say — and then
+> change it in two places:
+>
+> 1. `fly.toml` in this folder: the `app = "reservai-agent"` line at the top.
+> 2. Vercel: **Settings → Environment Variables → `AGENT_SERVICE_URL`**, which
+>    must become `https://YOUR-NAME.fly.dev`. Redeploy afterwards.
+>
+> Everywhere below that says `reservai-agent`, use your name instead.
 
 **4d.** Now the secrets. This is the one place the `service_role` key goes.
 
-Type this as **one single line**, replacing the four bracketed parts. It is
+Type this as **one single line**, replacing the five bracketed parts. It is
 long — that is expected.
 
 ```bash
-fly secrets set SUPABASE_URL="[YOUR PROJECT URL]" SUPABASE_ANON_KEY="[YOUR ANON KEY]" SUPABASE_SERVICE_ROLE_KEY="[YOUR SERVICE ROLE KEY]" ANTHROPIC_API_KEY="[YOUR ANTHROPIC KEY]" INTERNAL_API_SECRET="pick-any-long-random-string-here" AI_MODEL_FAST="claude-haiku-4-5" AI_MODEL_STRONG="claude-opus-5" REDIS_URL="redis://127.0.0.1:6379"
+fly secrets set SUPABASE_URL="[YOUR PROJECT URL]" SUPABASE_ANON_KEY="[YOUR ANON KEY]" SUPABASE_SERVICE_ROLE_KEY="[YOUR SERVICE ROLE KEY]" ANTHROPIC_API_KEY="[YOUR ANTHROPIC KEY]" INTERNAL_API_SECRET="[ANY LONG RANDOM STRING]" AI_MODEL_FAST="claude-haiku-4-5" AI_MODEL_STRONG="claude-opus-5" REDIS_URL="redis://127.0.0.1:6379"
 ```
 
-Notes on two of those:
+Notes on three of those:
 
+- **`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`** — the
+  three values from step 2h. This is the only place the third one ever goes.
 - **`ANTHROPIC_API_KEY`** — from
-  [console.anthropic.com](https://console.anthropic.com) → API Keys. This is
-  what makes the AI work. Without it the app runs but cannot understand
-  requests or suggest anywhere.
-- **`INTERNAL_API_SECRET`** — invent one. Mash the keyboard for 30 characters.
-  It stops strangers triggering internal jobs.
+  [console.anthropic.com](https://console.anthropic.com) → **API Keys** →
+  **Create Key**. This is what makes the AI work. Without it the service starts
+  but cannot understand a request or suggest anywhere. It starts with `sk-ant-`.
+- **`INTERNAL_API_SECRET`** — invent one. Thirty-odd random letters and
+  numbers. It stops strangers triggering internal jobs. Nothing else needs to
+  know it.
 
-`REDIS_URL` is not used yet. It is there because the app checks for it on
+`REDIS_URL` is not used yet. It is there because the service checks for it on
 startup; the value is ignored.
+
+**What should happen:** it lists the secret names it set. It may also say there
+are no machines to update — that is fine, you have not deployed yet.
 
 **4e.** Now the switches that say which features are on:
 
