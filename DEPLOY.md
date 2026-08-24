@@ -115,42 +115,44 @@ GitHub page and your files are there.
 
 **2c.** Click **Create new project**, then wait. It takes about two minutes.
 
-**2d.** Now send your database structure up to it. In your terminal:
+**2d.** Now get the connection string for your new database.
 
-```bash
-npx supabase login
+In Supabase, click the **Connect** button at the top of the page. Choose the
+**URI** tab. You will see something like:
+
+```
+postgresql://postgres.abcdefghijklmnopqrst:[YOUR-PASSWORD]@aws-0-ap-south-1.pooler.supabase.com:5432/postgres
 ```
 
-This opens your browser. Click to approve, then come back to the terminal.
+Copy it, then replace `[YOUR-PASSWORD]` — including the square brackets — with
+the database password you saved in step 2b.
 
-**2e.** Connect your local project to the one you just created. You need your
-"project ref" — it is in your Supabase dashboard URL. If the URL is
-`supabase.com/dashboard/project/abcdefghijklmnop`, then `abcdefghijklmnop` is
-the ref.
+> If your password contains any of `@ : / ? # [ ] %` it has to be
+> "percent-encoded" or the connection will fail in a confusing way. The simple
+> fix is to avoid the problem: in **Project Settings → Database → Reset
+> database password**, generate a new one and pick one with only letters and
+> numbers.
 
-```bash
-npx supabase link --project-ref PASTE-YOUR-REF-HERE
-```
-
-It asks for the database password from step 2b.
-
-**2f.** Create all the tables:
+**2e.** Create all the tables. Paste your connection string between the quotes:
 
 ```bash
-npx supabase db push
+npx supabase db push --db-url "PASTE-YOUR-CONNECTION-STRING-HERE"
 ```
 
 **What should happen:** a list of migration files scrolls past, ending without
 an error. In Supabase, click **Table Editor** in the left sidebar — you should
 see `venues`, `bookings`, `users` and about fifteen others.
 
-**2g. Optional.** Add fifteen made-up demo venues so the console has something
+**2f. Optional.** Add fifteen made-up demo venues so the console has something
 in it. These are invented places, useful for finding your way around. Skip this
 if you would rather start with a clean list and add real venues yourself.
 
 ```bash
-npx supabase db execute --file supabase/seed.sql
+npx supabase db query --db-url "PASTE-YOUR-CONNECTION-STRING-HERE" --file supabase/seed.sql
 ```
+
+**2g.** Keep that connection string somewhere safe for now. You will not need it
+again after this, but it is easier than fetching it twice.
 
 **2h.** Now collect three keys. In Supabase: **Project Settings** (the gear, bottom
 left) → **API**.
@@ -354,4 +356,9 @@ the one you signed in with, exactly.
 **`fly deploy` fails.** Run `fly logs` to see why. Usually a missing secret from
 4d — check for a typo in one of the names.
 
-**Anything else.** Tell me what you did and what it said, and I will sort it.
+**A Supabase command says "Unexpected positional argument".** The command has
+one word too many. Copy it again from this guide — it is easy to end up with a
+stray word when pasting across two lines.
+
+**Anything else.** Tell me the command you typed and what it said, and I will
+sort it.
