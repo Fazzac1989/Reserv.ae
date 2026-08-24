@@ -66,8 +66,9 @@ Right now it only exists on your laptop.
 
 **1a.** Go to [github.com/new](https://github.com/new).
 
-**1b.** Name it `reservai`. Set it to **Private** — this is your business logic
-and your venue relationships.
+**1b.** Give it any name — `reserv.ae` is fine. Whatever you choose, use that
+same name everywhere this guide says "your repository". Set it to **Private** —
+this is your business logic and your venue relationships.
 
 **1c.** Do **not** tick "Add a README", "Add .gitignore", or "Choose a license".
 The repository must start empty or the next step will complain.
@@ -75,11 +76,17 @@ The repository must start empty or the next step will complain.
 **1d.** Click **Create repository**.
 
 **1e.** GitHub shows you a page with commands. Ignore them and use these
-instead, from your terminal in the project folder. Replace `YOUR-USERNAME`:
+instead, from your terminal in the project folder.
+
+Replace `YOUR-USERNAME` and `YOUR-REPO` with what you actually used — the
+name has to match exactly, capital letters included:
 
 ```bash
-git remote add origin https://github.com/YOUR-USERNAME/reservai.git
+git remote set-url origin https://github.com/YOUR-USERNAME/YOUR-REPO.git
 ```
+
+> Getting `error: No such remote 'origin'`? Then nothing is set yet — use
+> `git remote add origin ...` instead of `set-url`.
 
 ```bash
 git branch -M main
@@ -178,7 +185,7 @@ shortly:
 
 **3b.** Click **Add New** → **Project**.
 
-**3c.** Find `reservai` in the list and click **Import**.
+**3c.** Find your repository in the list and click **Import**.
 
 **3d.** This next bit matters. Under **Root Directory**, click **Edit** and
 choose the `apps/ops` folder.
@@ -355,6 +362,14 @@ the one you signed in with, exactly.
 
 **`fly deploy` fails.** Run `fly logs` to see why. Usually a missing secret from
 4d — check for a typo in one of the names.
+
+**`git push` says "Repository not found".** The name in the remote does not
+match the repository on GitHub — check for capital letters and any `.` in the
+name. Confirm what git is aiming at with `git remote -v`, then correct it with
+`git remote set-url origin https://github.com/YOUR-USERNAME/YOUR-REPO.git`.
+
+A private repository also reports "not found" when git cannot authenticate, so
+if the name is definitely right, it is the token — see the note in step 1e.
 
 **A Supabase command says "Unexpected positional argument".** The command has
 one word too many. Copy it again from this guide — it is easy to end up with a
