@@ -4,11 +4,19 @@
 # workspace: the service bundles @reservai/* from source. Deploy with
 # `fly deploy` from here.
 #
-# Mumbai is the closest Fly region to Dubai. Frankfurt (fra) is the
-# alternative if Indian data residency is ever a concern.
+# Singapore, not because it is closest to Dubai — Frankfurt is marginally
+# closer — but because it is closest to the database.
+#
+# Supabase runs in Mumbai. A single booking request makes many database round
+# trips and only one round trip to the user, so the distance that dominates is
+# service-to-database, not user-to-service. Singapore to Mumbai is about half
+# the distance of Frankfurt to Mumbai.
+#
+# Fly's Mumbai region (bom) is deprecated and refuses new machines, so
+# co-locating with Supabase exactly is not an option.
 
 app = "reserv-agent"
-primary_region = "bom"
+primary_region = "sin"
 
 [build]
   dockerfile = "apps/agent-service/Dockerfile"

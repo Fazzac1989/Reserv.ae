@@ -327,8 +327,13 @@ exactly how the pilot is meant to start.
 **4f.** Send it up:
 
 ```bash
-fly deploy
+fly deploy --ha=false
 ```
+
+`--ha=false` matters. Fly creates **two** machines by default for redundancy.
+Two is safe — the every-minute job is written so that running it twice changes
+nothing — but the limit on how often the AI can be called is counted per
+machine, so two machines means twice the spending cap you meant to set.
 
 **What should happen:** several minutes of building, then a success message.
 
@@ -439,6 +444,10 @@ if the name is definitely right, it is the token — see the note in step 1e.
 **A Supabase command says "Unexpected positional argument".** The command has
 one word too many. Copy it again from this guide — it is easy to end up with a
 stray word when pasting across two lines.
+
+**Fly says a region "is deprecated and cannot have new resources".** Fly has
+retired that location. Change `primary_region` at the top of `fly.toml` to
+whatever it suggests, and deploy again.
 
 **Anything else.** Tell me the command you typed and what it said, and I will
 sort it.
