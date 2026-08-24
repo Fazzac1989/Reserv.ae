@@ -11,10 +11,39 @@ const schema = z.object({
   supabaseAnonKey: z.string().min(1),
 });
 
-export const publicEnv = schema.parse({
+const NAMES: Record<string, string> = {
+  supabaseUrl: 'NEXT_PUBLIC_SUPABASE_URL',
+  supabaseAnonKey: 'NEXT_PUBLIC_SUPABASE_ANON_KEY',
+};
+
+const parsed = schema.safeParse({
   supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
   supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 });
+
+if (!parsed.success) {
+  // This runs during `next build`, where an unhandled zod error surfaces only
+  // as "Failed to collect page data" — which says nothing about the cause.
+  // Deploying to a host with a missing variable is the single most likely way
+  // this build fails, so it has to name the variable.
+  const problems = parsed.error.issues
+    .map((issue) => {
+      const key = String(issue.path[0] ?? '');
+      const name = NAMES[key] ?? key;
+      const missing = issue.code === 'invalid_type' && process.env[name] === undefined;
+      return `  - ${name}: ${missing ? 'is not set' : issue.message}`;
+    })
+    .join('\n');
+
+  throw new Error(
+    `The ops console is missing its configuration:\n${problems}\n\n` +
+      'Locally: set these in apps/ops/.env.local (copy apps/ops/.env.example).\n' +
+      'On Vercel: Project Settings > Environment Variables, then redeploy.\n' +
+      'Both values are in Supabase under Project Settings > API.',
+  );
+}
+
+export const publicEnv = parsed.data;
 
 /**
  * Server-only. The console never writes booking status itself — it asks the
