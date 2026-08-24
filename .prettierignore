@@ -1,0 +1,10 @@
+node_modules
+dist
+.next
+.turbo
+coverage
+pnpm-lock.yaml
+packages/db/src/generated
+
+# The build plan is a source document, not code. Leave its formatting alone.
+reservai-mvp-build-plan.md

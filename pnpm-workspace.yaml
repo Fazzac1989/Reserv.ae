@@ -1,0 +1,17 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Expo and Metro resolve peer dependencies by walking node_modules, so the
+# isolated store layout breaks React Native builds. Hoist instead.
+nodeLinker: hoisted
+shamefullyHoist: true
+strictPeerDependencies: false
+autoInstallPeers: true
+
+# Native postinstall scripts we explicitly trust. Anything not listed here is
+# blocked from running install scripts.
+allowBuilds:
+  esbuild: true
+  msgpackr-extract: true
+  sharp: true

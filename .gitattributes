@@ -1,0 +1,8 @@
+# Keep the repository LF-only so Windows and CI agree on file contents.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.hbc binary
+pnpm-lock.yaml -diff

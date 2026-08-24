@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "reservAI",
+    "slug": "reservai",
+    "version": "0.1.0",
+    "scheme": "reservai",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "ae.reservai.app"
+    },
+    "android": {
+      "package": "ae.reservai.app",
+      "edgeToEdgeEnabled": true
+    },
+    "plugins": ["expo-router", "expo-audio"],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "supabaseUrl": "",
+      "supabaseAnonKey": "",
+      "agentServiceUrl": ""
+    }
+  }
+}
