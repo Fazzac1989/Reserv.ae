@@ -58,6 +58,8 @@ config, and the agent service bundles them with tsup.
 
 ---
 
+Deployment is in [DEPLOY.md](DEPLOY.md).
+
 ## Getting started
 
 Requires Node 22+, pnpm 11+, and Docker (for local Supabase).

@@ -1,0 +1,13 @@
+node_modules
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/.expo
+coverage
+.git
+.env
+.env.*
+!.env.example
+supabase/.branches
+supabase/.temp
