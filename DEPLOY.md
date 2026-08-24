@@ -426,6 +426,13 @@ the one you signed in with, exactly.
 **`fly deploy` fails.** Run `fly logs` to see why. Usually a missing secret from
 4d — check for a typo in one of the names.
 
+**The machine keeps stopping on its own, and `fly logs` says "Trial machine
+stopping".** The account has no payment method, so Fly stops every machine after
+five minutes regardless of the configuration. Add a card at
+[fly.io/dashboard](https://fly.io/dashboard) → **Billing**. Nothing in the
+project can work around this — the every-minute job needs a machine that stays
+up.
+
 **The machine keeps restarting, and `fly logs` shows "Invalid agent-service
 environment".** One of the secrets is missing or malformed, and the message
 names which. Set that one and the machine restarts itself:
