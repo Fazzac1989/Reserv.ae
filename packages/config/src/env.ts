@@ -9,6 +9,29 @@ import { z } from 'zod';
 export const RESERVAI_ENVS = ['demo', 'development', 'staging', 'production'] as const;
 export type ReservaiEnv = (typeof RESERVAI_ENVS)[number];
 
+/**
+ * A Supabase project URL is an origin and nothing more.
+ *
+ * The client appends its own `/auth/v1`, `/rest/v1` and `/storage/v1`. Pasting
+ * the REST URL from the dashboard — which ends in `/rest/v1/` — produces
+ * requests to paths like `/rest/v1/auth/v1/otp`, and the resulting error
+ * mentions neither the setting nor what is wrong with it.
+ */
+const supabaseUrl = z
+  .string()
+  .url()
+  .refine(
+    (value) => {
+      const { pathname } = new URL(value);
+      return pathname === '' || pathname === '/';
+    },
+    {
+      message:
+        'must be the project address only, with nothing after it — ' +
+        'https://YOUR-REF.supabase.co, not .../rest/v1/',
+    },
+  );
+
 const boolish = z.enum(['true', 'false', '1', '0']).transform((v) => v === 'true' || v === '1');
 
 /** Variables every process needs, regardless of app. */
@@ -22,7 +45,7 @@ const baseSchema = z.object({
 
 /** Anything that touches Postgres with elevated rights. */
 const serverSchema = baseSchema.extend({
-  SUPABASE_URL: z.string().url(),
+  SUPABASE_URL: supabaseUrl,
   SUPABASE_ANON_KEY: z.string().min(1),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
   REDIS_URL: z.string().url(),
@@ -54,7 +77,7 @@ const agentServiceSchema = serverSchema.extend({
 
 /** Client bundles: only ever the anon key. */
 const publicSchema = baseSchema.extend({
-  SUPABASE_URL: z.string().url(),
+  SUPABASE_URL: supabaseUrl,
   SUPABASE_ANON_KEY: z.string().min(1),
   AGENT_SERVICE_URL: z.string().url(),
 });

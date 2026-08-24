@@ -7,7 +7,17 @@ import { z } from 'zod';
  * never reaches the client bundle.
  */
 const schema = z.object({
-  supabaseUrl: z.string().url(),
+  // The project address only. The client appends /auth/v1 and /rest/v1 itself,
+  // so a URL with a path on the end produces requests to nonsense paths and an
+  // error that names neither the setting nor the cause.
+  supabaseUrl: z
+    .string()
+    .url()
+    .refine((value) => ['', '/'].includes(new URL(value).pathname), {
+      message:
+        'must be the project address only, with nothing after it — ' +
+        'https://YOUR-REF.supabase.co, not .../rest/v1/',
+    }),
   supabaseAnonKey: z.string().min(1),
 });
 
