@@ -276,15 +276,21 @@ AI_MODEL_STRONG=claude-opus-5
 REDIS_URL=redis://127.0.0.1:6379
 ```
 
-Then send it to Fly and delete it:
+Then send it to Fly and delete it. **On Windows PowerShell:**
 
-```bash
-fly secrets import < fly-secrets.txt
+```powershell
+Get-Content fly-secrets.txt | fly secrets import
 ```
 
-```bash
-rm fly-secrets.txt
+```powershell
+Remove-Item fly-secrets.txt
 ```
+
+> PowerShell does not support `<` for feeding a file into a command — it
+> answers `The '<' operator is reserved for future use.` Piping from
+> `Get-Content` is how you do the same thing.
+
+On macOS or Linux, `fly secrets import < fly-secrets.txt` works as written.
 
 The file is already listed in `.gitignore`, so it cannot be committed by
 accident — but delete it anyway once the import succeeds.
@@ -327,11 +333,7 @@ fly deploy
 **What should happen:** several minutes of building, then a success message.
 Check it:
 
-```bash
-curl https://reserv-agent.fly.dev/capabilities
-```
-
-You should get back a line of text mentioning `"concierge_chat":true`. If you
+You should get back something mentioning `"concierge_chat": true`. If you
 see that, it is running.
 
 ---
@@ -404,6 +406,10 @@ the one you signed in with, exactly.
 
 **`fly deploy` fails.** Run `fly logs` to see why. Usually a missing secret from
 4d — check for a typo in one of the names.
+
+**PowerShell says "The '<' operator is reserved for future use".** PowerShell
+cannot feed a file into a command with `<`. Use
+`Get-Content thefile.txt | thecommand` instead.
 
 **Fly says "the config for your app is missing an app name".** You are not in
 the project folder. Every `fly` command has to run from the folder containing
