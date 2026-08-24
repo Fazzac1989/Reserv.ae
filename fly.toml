@@ -7,7 +7,7 @@
 # Mumbai is the closest Fly region to Dubai. Frankfurt (fra) is the
 # alternative if Indian data residency is ever a concern.
 
-app = "reservai-agent"
+app = "reserv-agent"
 primary_region = "bom"
 
 [build]

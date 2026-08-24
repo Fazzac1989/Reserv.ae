@@ -196,11 +196,11 @@ website one. Without it, the build fails with a confusing error.
 **3e.** Expand **Environment Variables** and add three. Name on the left, value
 on the right:
 
-| Name                            | Value                            |
-| ------------------------------- | -------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Your Project URL from 2h         |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | The **anon public** key from 2h  |
-| `AGENT_SERVICE_URL`             | `https://reservai-agent.fly.dev` |
+| Name                            | Value                           |
+| ------------------------------- | ------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Your Project URL from 2h        |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | The **anon public** key from 2h |
+| `AGENT_SERVICE_URL`             | `https://reserv-agent.fly.dev`  |
 
 That third one does not exist yet — you create it in step 4. Type it in anyway;
 it will be correct by the time anything uses it.
@@ -240,7 +240,7 @@ costs a few dollars a month.
 **4c.** Create the app. From your project folder:
 
 ```bash
-fly apps create reservai-agent
+fly apps create reserv-agent
 ```
 
 Do **not** run `fly launch`. It tries to write its own configuration and would
@@ -250,32 +250,58 @@ overwrite the one in this repository, which is already set up correctly.
 > Fly, so someone else has it. Pick another — `reserv-agent-ae`, say — and then
 > change it in two places:
 >
-> 1. `fly.toml` in this folder: the `app = "reservai-agent"` line at the top.
+> 1. `fly.toml` in this folder: the `app = "reserv-agent"` line at the top.
 > 2. Vercel: **Settings → Environment Variables → `AGENT_SERVICE_URL`**, which
 >    must become `https://YOUR-NAME.fly.dev`. Redeploy afterwards.
 >
-> Everywhere below that says `reservai-agent`, use your name instead.
+> Everywhere below that says `reserv-agent`, use your name instead.
 
-**4d.** Now the secrets. This is the one place the `service_role` key goes.
+**4d.** Now the secrets.
 
-Type this as **one single line**, replacing the five bracketed parts. It is
-long — that is expected.
+**Do not type these on the command line.** A command line ends up in your shell
+history, in your scrollback, and in any screenshot of your terminal. Secrets
+that leak this way are the ordinary way secrets leak.
 
-```bash
-fly secrets set SUPABASE_URL="[YOUR PROJECT URL]" SUPABASE_ANON_KEY="[YOUR ANON KEY]" SUPABASE_SERVICE_ROLE_KEY="[YOUR SERVICE ROLE KEY]" ANTHROPIC_API_KEY="[YOUR ANTHROPIC KEY]" INTERNAL_API_SECRET="[ANY LONG RANDOM STRING]" AI_MODEL_FAST="claude-haiku-4-5" AI_MODEL_STRONG="claude-opus-5" REDIS_URL="redis://127.0.0.1:6379"
+Instead, create a file called `fly-secrets.txt` in this folder, with one
+`NAME=value` per line and no quotes:
+
+```
+SUPABASE_URL=https://YOUR-REF.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+ANTHROPIC_API_KEY=sk-ant-your-key
+INTERNAL_API_SECRET=any-long-random-string
+AI_MODEL_FAST=claude-haiku-4-5
+AI_MODEL_STRONG=claude-opus-5
+REDIS_URL=redis://127.0.0.1:6379
 ```
 
-Notes on three of those:
+Then send it to Fly and delete it:
 
-- **`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`** — the
-  three values from step 2h. This is the only place the third one ever goes.
+```bash
+fly secrets import < fly-secrets.txt
+```
+
+```bash
+rm fly-secrets.txt
+```
+
+The file is already listed in `.gitignore`, so it cannot be committed by
+accident — but delete it anyway once the import succeeds.
+
+Notes on three of the values:
+
+- **`SUPABASE_URL`** — the bare project address and **nothing after it**:
+  `https://abcdef.supabase.co`. Not `/rest/v1/`, no trailing slash. The app
+  adds the paths it needs; an address with a path on the end fails in a way
+  that is hard to trace.
 - **`ANTHROPIC_API_KEY`** — from
   [console.anthropic.com](https://console.anthropic.com) → **API Keys** →
-  **Create Key**. This is what makes the AI work. Without it the service starts
-  but cannot understand a request or suggest anywhere. It starts with `sk-ant-`.
-- **`INTERNAL_API_SECRET`** — invent one. Thirty-odd random letters and
-  numbers. It stops strangers triggering internal jobs. Nothing else needs to
-  know it.
+  **Create Key**. Without it the service starts but cannot understand a request
+  or suggest anywhere. It starts with `sk-ant-`.
+- **`INTERNAL_API_SECRET`** — invent one, thirty-odd random letters and
+  numbers. Not a memorable phrase: it is a password, and nothing needs to
+  remember it.
 
 `REDIS_URL` is not used yet. It is there because the service checks for it on
 startup; the value is ignored.
@@ -302,7 +328,7 @@ fly deploy
 Check it:
 
 ```bash
-curl https://reservai-agent.fly.dev/capabilities
+curl https://reserv-agent.fly.dev/capabilities
 ```
 
 You should get back a line of text mentioning `"concierge_chat":true`. If you
@@ -378,6 +404,10 @@ the one you signed in with, exactly.
 
 **`fly deploy` fails.** Run `fly logs` to see why. Usually a missing secret from
 4d — check for a typo in one of the names.
+
+**Fly says "the config for your app is missing an app name".** You are not in
+the project folder. Every `fly` command has to run from the folder containing
+`fly.toml`. Use `cd` to get there first — `pwd` shows where you are.
 
 **`git push` says "Repository not found".** The name in the remote does not
 match the repository on GitHub — check for capital letters and any `.` in the

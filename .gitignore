@@ -40,3 +40,6 @@ Thumbs.db
 secrets/
 *.pem
 venue-contacts*.csv
+
+# Never commit secrets, even in transit to a host.
+fly-secrets.txt
