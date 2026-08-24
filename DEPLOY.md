@@ -384,7 +384,25 @@ select public.grant_role_by_email('you@yourdomain.com', 'admin');
 Click **Run**. It returns a long id, which means it worked. If it says **"No
 auth user with email"**, the address here does not match 5a exactly.
 
-**5c.** Open your site and sign in. Enter the six-digit code it emails you.
+**5c.** Still in Supabase, click **Authentication** > **Emails**, and choose
+the **Magic Link** template.
+
+Supabase sends a sign-in _link_ by default, but the console asks for a
+six-digit _code_ — a link mailed to an inbox can be forwarded or opened on the
+wrong machine, and a code has to be typed into the page that asked for it.
+Both come from the same one-time token, so this is only a matter of showing it.
+
+Replace the message body with:
+
+```html
+<h2>Your reservAI sign-in code</h2>
+<p style="font-size:28px;letter-spacing:6px"><strong>{{ .Token }}</strong></p>
+<p>It can be used once, and expires shortly.</p>
+```
+
+Click **Save**. `{{ .Token }}` is the part that matters; the rest is wording.
+
+**5d.** Open your site and sign in. Enter the six-digit code it emails you.
 You are in.
 
 ### Adding anyone else
@@ -441,6 +459,15 @@ the one you signed in with, exactly.
 
 **`fly deploy` fails.** Run `fly logs` to see why. Usually a missing secret from
 4d — check for a typo in one of the names.
+
+**The sign-in email arrives with a link instead of a six-digit code.** The
+Magic Link template still has Supabase's default wording. See 5c.
+
+**The sign-in email never arrives.** Supabase's built-in mail is meant for
+testing and allows only a handful of messages an hour, shared across the whole
+project. It is enough for you and a colleague; before real staff use this,
+connect your own mail provider under **Authentication > Emails > SMTP
+Settings**, or sign-ins will start failing silently.
 
 **The machine keeps stopping on its own, and `fly logs` says "Trial machine
 stopping".** The account has no payment method, so Fly stops every machine after
