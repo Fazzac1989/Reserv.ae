@@ -1,165 +1,357 @@
-# Deploying reservAI
+# Putting reservAI online
 
-Three things run in three places, and they are not interchangeable:
+This walks through it from nothing. Follow it top to bottom — each step needs
+the one before it.
 
-| Piece                   | Where    | Why there                                            |
-| ----------------------- | -------- | ---------------------------------------------------- |
-| `apps/ops`              | Vercel   | A Next.js app. Nothing unusual.                      |
-| `apps/agent-service`    | Fly.io   | Holds a scheduler. Needs a process that stays alive. |
-| Database, auth, storage | Supabase | —                                                    |
-| `apps/mobile`           | Expo EAS | Later, once there are testers.                       |
+Set aside about an hour. Most of it is waiting.
 
-## Why the agent service cannot go on Vercel
+## What you are setting up, and why there are three of them
 
-It sweeps every minute for reminders that are due, venues past their SLA, and
-users due a proactive nudge. A serverless function does not stay running
-between requests, so that loop would simply never fire: no reminders, no
-escalation when a venue goes quiet.
+reservAI is three separate programs that talk to each other. They each need a
+different kind of home.
 
-Vercel Cron could call `/internal/sweep` on a schedule instead, but that means
-an adapter layer and a second moving part for something a single small machine
-already does. Fly runs the process as written.
+**The database** holds everything — venues, users, bookings. It lives on
+**Supabase**. Think of it as the filing cabinet.
+
+**The ops console** is the website you use to add venues and confirm bookings.
+It lives on **Vercel**. It is a normal website, so it goes in a normal website
+place.
+
+**The agent service** is the part that does the work: it talks to the AI, sends
+reminders, and chases venues that have not replied. It lives on **Fly.io**.
+
+That last one needs its own home for a specific reason. It has a job that runs
+**every single minute**, checking whether anyone needs a reminder or whether a
+venue has gone quiet. Vercel only wakes a website up when somebody visits it —
+so on Vercel, that every-minute job would never run at all. Nobody would get a
+reminder. Fly keeps it switched on permanently.
+
+You will end up with three accounts. Two are free to start; Vercel is $20/month
+because this is a company.
 
 ---
 
-## 1. Supabase
+## Before you start
 
-Create a project. **Region: `ap-south-1` (Mumbai)** — closest to Dubai; Frankfurt
-is the alternative if Indian data residency ever matters.
-
-Link it and push the schema:
+You need three things installed. Open your terminal and check each one by
+typing the command and pressing enter.
 
 ```bash
-npx supabase link --project-ref <your-project-ref>
+node --version
 ```
+
+Should print `v22` or higher. If it says "command not found", install from
+[nodejs.org](https://nodejs.org).
+
+```bash
+git --version
+```
+
+Should print a version number.
+
+```bash
+pnpm --version
+```
+
+Should print `11` or higher.
+
+If all three printed a version, you are ready.
+
+---
+
+## Step 1 — Put the code on GitHub
+
+Vercel builds your website from GitHub, so the code has to be there first.
+Right now it only exists on your laptop.
+
+**1a.** Go to [github.com/new](https://github.com/new).
+
+**1b.** Name it `reservai`. Set it to **Private** — this is your business logic
+and your venue relationships.
+
+**1c.** Do **not** tick "Add a README", "Add .gitignore", or "Choose a license".
+The repository must start empty or the next step will complain.
+
+**1d.** Click **Create repository**.
+
+**1e.** GitHub shows you a page with commands. Ignore them and use these
+instead, from your terminal in the project folder. Replace `YOUR-USERNAME`:
+
+```bash
+git remote add origin https://github.com/YOUR-USERNAME/reservai.git
+```
+
+```bash
+git branch -M main
+```
+
+```bash
+git push -u origin main
+```
+
+**What should happen:** it counts up some numbers and finishes. Refresh the
+GitHub page and your files are there.
+
+> If it asks for a password: GitHub does not accept your account password here.
+> It wants a "personal access token". Go to
+> [github.com/settings/tokens](https://github.com/settings/tokens) → **Generate
+> new token (classic)** → tick **repo** → generate → copy it → paste that as the
+> password.
+
+---
+
+## Step 2 — Supabase (the database)
+
+**2a.** Go to [supabase.com](https://supabase.com) and sign up.
+
+**2b.** Click **New project**.
+
+- **Name:** `reservai`
+- **Database password:** click Generate, then **save it somewhere safe** — a
+  password manager, not a text file. You will rarely need it, but there is no
+  way to recover it.
+- **Region:** choose **South Asia (Mumbai)**. It is the closest one to Dubai,
+  which means the app feels faster.
+
+**2c.** Click **Create new project**, then wait. It takes about two minutes.
+
+**2d.** Now send your database structure up to it. In your terminal:
+
+```bash
+npx supabase login
+```
+
+This opens your browser. Click to approve, then come back to the terminal.
+
+**2e.** Connect your local project to the one you just created. You need your
+"project ref" — it is in your Supabase dashboard URL. If the URL is
+`supabase.com/dashboard/project/abcdefghijklmnop`, then `abcdefghijklmnop` is
+the ref.
+
+```bash
+npx supabase link --project-ref PASTE-YOUR-REF-HERE
+```
+
+It asks for the database password from step 2b.
+
+**2f.** Create all the tables:
 
 ```bash
 npx supabase db push
 ```
 
-Then seed the demo venues — **only if you want them.** They are fictional and
-useful for a demo; skip this on a production project you intend to fill with
-real venues.
+**What should happen:** a list of migration files scrolls past, ending without
+an error. In Supabase, click **Table Editor** in the left sidebar — you should
+see `venues`, `bookings`, `users` and about fifteen others.
+
+**2g. Optional.** Add fifteen made-up demo venues so the console has something
+in it. These are invented places, useful for finding your way around. Skip this
+if you would rather start with a clean list and add real venues yourself.
 
 ```bash
 npx supabase db execute --file supabase/seed.sql
 ```
 
-Give yourself ops access. You must sign in through the console once first, so
-the account exists:
+**2h.** Now collect three keys. In Supabase: **Project Settings** (the gear, bottom
+left) → **API**.
 
-```sql
-select public.grant_role_by_email('you@yourdomain.com', 'admin');
+Copy these into a temporary note — you will paste them into two other websites
+shortly:
+
+| What it is called there | Looks like                   | What it is                                                                         |
+| ----------------------- | ---------------------------- | ---------------------------------------------------------------------------------- |
+| **Project URL**         | `https://abcdef.supabase.co` | The address of your database                                                       |
+| **anon public**         | a very long string           | Safe to put in an app people download                                              |
+| **service_role secret** | another very long string     | **Never share this.** It can read and change anything, ignoring all security rules |
+
+> **About that third key.** Treat it like the master key to your office. It goes
+> into exactly one place (step 4) and nowhere else. Never in the website,
+> never in an email, never in a screenshot.
+
+---
+
+## Step 3 — Vercel (the ops console)
+
+**3a.** Go to [vercel.com](https://vercel.com), sign in **with GitHub**.
+
+**3b.** Click **Add New** → **Project**.
+
+**3c.** Find `reservai` in the list and click **Import**.
+
+**3d.** This next bit matters. Under **Root Directory**, click **Edit** and
+choose the `apps/ops` folder.
+
+Your repository holds three programs. This tells Vercel to build only the
+website one. Without it, the build fails with a confusing error.
+
+**3e.** Expand **Environment Variables** and add three. Name on the left, value
+on the right:
+
+| Name                            | Value                            |
+| ------------------------------- | -------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Your Project URL from 2h         |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | The **anon public** key from 2h  |
+| `AGENT_SERVICE_URL`             | `https://reservai-agent.fly.dev` |
+
+That third one does not exist yet — you create it in step 4. Type it in anyway;
+it will be correct by the time anything uses it.
+
+Notice the `service_role` key is **not** here. The console does not get one. It
+can only see what the person signed into it is allowed to see.
+
+**3f.** Click **Deploy** and wait two or three minutes.
+
+**What should happen:** confetti, and a link to your site. Click it. You should
+see a sign-in page asking for an email address.
+
+---
+
+## Step 4 — Fly.io (the agent service)
+
+This is the part that runs every minute.
+
+**4a.** Install the Fly command-line tool. On Windows, open **PowerShell** and
+paste:
+
+```powershell
+iwr https://fly.io/install.ps1 -useb | iex
 ```
 
-Take these from **Project Settings → API**:
+Then **close and reopen your terminal** so it picks up the new command.
 
-- Project URL
-- `anon` key — safe in client bundles
-- `service_role` key — **server only.** It bypasses RLS entirely.
+**4b.** Create an account:
 
----
+```bash
+fly auth signup
+```
 
-## 2. Vercel — the ops console
+It asks for a card. There is a free allowance; one small machine like this
+costs a few dollars a month.
 
-In the project settings:
-
-- **Root Directory:** `apps/ops`
-- **Framework:** Next.js (detected)
-- Install and build commands come from `apps/ops/vercel.json`
-
-Environment variables:
-
-| Name                            | Value                                          |
-| ------------------------------- | ---------------------------------------------- |
-| `NEXT_PUBLIC_SUPABASE_URL`      | Your Supabase project URL                      |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | The `anon` key                                 |
-| `AGENT_SERVICE_URL`             | `https://reservai-agent.fly.dev` (from step 3) |
-
-That is all it needs. The console never holds the service-role key — it acts as
-the signed-in operator, and booking changes go through the agent service.
-
-Point `ops.reserv.ae` at it, or use the root domain and put the app elsewhere.
-
----
-
-## 3. Fly.io — the agent service
+**4c.** From your project folder:
 
 ```bash
 fly launch --no-deploy --copy-config --name reservai-agent
 ```
 
-Set the secrets. These never appear in a file or a build log:
+Answer **no** if it offers to tweak settings. The configuration is already
+written and committed.
+
+**4d.** Now the secrets. This is the one place the `service_role` key goes.
+
+Type this as **one single line**, replacing the four bracketed parts. It is
+long — that is expected.
 
 ```bash
-fly secrets set SUPABASE_URL="https://<ref>.supabase.co" SUPABASE_ANON_KEY="<anon>" SUPABASE_SERVICE_ROLE_KEY="<service-role>" ANTHROPIC_API_KEY="<sk-ant-...>" INTERNAL_API_SECRET="$(openssl rand -hex 24)" AI_MODEL_FAST="claude-haiku-4-5" AI_MODEL_STRONG="claude-opus-5"
+fly secrets set SUPABASE_URL="[YOUR PROJECT URL]" SUPABASE_ANON_KEY="[YOUR ANON KEY]" SUPABASE_SERVICE_ROLE_KEY="[YOUR SERVICE ROLE KEY]" ANTHROPIC_API_KEY="[YOUR ANTHROPIC KEY]" INTERNAL_API_SECRET="pick-any-long-random-string-here" AI_MODEL_FAST="claude-haiku-4-5" AI_MODEL_STRONG="claude-opus-5" REDIS_URL="redis://127.0.0.1:6379"
 ```
 
-Flags are ordinary config, not secrets:
+Notes on two of those:
+
+- **`ANTHROPIC_API_KEY`** — from
+  [console.anthropic.com](https://console.anthropic.com) → API Keys. This is
+  what makes the AI work. Without it the app runs but cannot understand
+  requests or suggest anywhere.
+- **`INTERNAL_API_SECRET`** — invent one. Mash the keyboard for 30 characters.
+  It stops strangers triggering internal jobs.
+
+`REDIS_URL` is not used yet. It is there because the app checks for it on
+startup; the value is ignored.
+
+**4e.** Now the switches that say which features are on:
 
 ```bash
 fly secrets set FLAG_RAIL_MANUAL=true FLAG_RAIL_WHATSAPP=false FLAG_RAIL_API=false FLAG_RAIL_VOICE=false FLAG_PROACTIVE_SUGGESTIONS=false FLAG_STRIPE_SUBSCRIPTIONS=false
 ```
 
-Deploy from the repository root — the build context has to be the whole
-workspace, because the service bundles `@reservai/*` from source:
+Only the manual one is on. That means you confirm bookings by hand, which is
+exactly how the pilot is meant to start.
+
+**4f.** Send it up:
 
 ```bash
 fly deploy
 ```
 
-Check it came up honest about what is switched on:
+**What should happen:** several minutes of building, then a success message.
+Check it:
 
 ```bash
 curl https://reservai-agent.fly.dev/capabilities
 ```
 
-`REDIS_URL` is in the environment schema but nothing reads it yet. Set it to
-anything valid — `redis://127.0.0.1:6379` — until Phase 8 needs a queue.
-
-### Do not scale to more than one machine yet
-
-`auto_stop_machines = false` and `min_machines_running = 1` are deliberate. A
-stopped machine means no reminders and no SLA escalation until something
-happens to wake it.
-
-Two machines would be safe for correctness — every sweep is idempotent — but
-rate limiting is in-memory and per-instance, so the effective limit would
-double. Moving to the Redis store is the prerequisite for scaling out.
+You should get back a line of text mentioning `"concierge_chat":true`. If you
+see that, it is running.
 
 ---
 
-## 4. What to check once it is up
+## Step 5 — Give yourself access
 
-Sign into the console and confirm:
+The console will not let you in yet. Nobody is an administrator.
 
-- `/venues` lists what you seeded
-- `/metrics` renders (all zeros is correct on a fresh project)
-- `/messages` says the WhatsApp rail is not live, and why
+**5a.** Open your Vercel site and sign in with your email. It sends you a
+six-digit code. Enter it.
 
-Then, from your machine against the deployed service:
+**5b.** You will be told you do not have access. That is correct — signing in
+created your account, which is what step 5c needs.
 
-```bash
-AGENT_SERVICE_URL=https://reservai-agent.fly.dev pnpm db:verify
+**5c.** In Supabase, click **SQL Editor** in the left sidebar, then **New
+query**. Paste this, with your own email:
+
+```sql
+select public.grant_role_by_email('you@yourdomain.com', 'admin');
 ```
 
-Some suites need a local database and will skip. The ones that exercise the
-deployed API will not.
+Click **Run**.
+
+**5d.** Go back to your site and refresh. You are in.
 
 ---
 
-## Still not live, and why
+## Step 6 — Check it works
 
-**The rails.** `FLAG_RAIL_WHATSAPP` stays off until there is a BSP account, an
-approved template and a booker number. `/capabilities` reports it as off with a
-reason, and the console says so on the approvals page.
+Click around the console:
 
-**Voice.** Blocked on the UAE call-recording consent question. The schema
-already refuses to enable a voice channel without `recording_consent_obtained`.
+- **Venues** — the demo venues, if you added them in 2g
+- **Bookings** — empty, which is right
+- **Metrics** — all zeros, which is also right
+- **Approvals** — should say the WhatsApp rail is not live
 
-**Billing.** `FLAG_STRIPE_SUBSCRIPTIONS` off, and `/billing/checkout` is
-deliberately unimplemented even when on. Willingness to pay is measured by
-asking, which needs no Stripe account at all.
+That last one is the app being honest rather than broken. WhatsApp is switched
+off until you have an account with a provider, so it says so instead of
+pretending.
 
-**Push notifications** work without extra setup — Expo routes them — but only
-from a real device build, not a simulator.
+---
+
+## What is still switched off, and why
+
+**WhatsApp messaging to venues.** Needs a business account with a provider
+(Twilio or 360dialog) and a message template approved by WhatsApp. **Approval
+takes weeks**, so it is worth applying early even though the feature is not
+needed until later.
+
+**AI phone calls to venues.** Needs a legal answer first: UAE rules on
+recording phone calls. The app currently refuses to switch this on until
+someone has confirmed a venue agreed to be recorded.
+
+**Subscriptions.** Free during the pilot. The app asks users whether they
+_would_ pay AED 99/month, which is the number you need. Nobody is charged.
+
+**The phone app.** Works, but needs an Apple Developer account ($99/year) to
+get onto anyone's phone. Apple's approval for a company takes days to weeks —
+also worth starting early.
+
+---
+
+## If something goes wrong
+
+**Vercel build fails.** Almost always the Root Directory in step 3d. It must be
+`apps/ops`.
+
+**Console says "no access" after step 5.** Check the email in the SQL matches
+the one you signed in with, exactly.
+
+**`fly deploy` fails.** Run `fly logs` to see why. Usually a missing secret from
+4d — check for a typo in one of the names.
+
+**Anything else.** Tell me what you did and what it said, and I will sort it.
