@@ -270,7 +270,7 @@ SUPABASE_URL=https://YOUR-REF.supabase.co
 SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ANTHROPIC_API_KEY=sk-ant-your-key
-INTERNAL_API_SECRET=any-long-random-string
+INTERNAL_API_SECRET=at-least-16-characters-of-random-letters-and-numbers
 AI_MODEL_FAST=claude-haiku-4-5
 AI_MODEL_STRONG=claude-opus-5
 REDIS_URL=redis://127.0.0.1:6379
@@ -305,9 +305,10 @@ Notes on three of the values:
   [console.anthropic.com](https://console.anthropic.com) → **API Keys** →
   **Create Key**. Without it the service starts but cannot understand a request
   or suggest anywhere. It starts with `sk-ant-`.
-- **`INTERNAL_API_SECRET`** — invent one, thirty-odd random letters and
-  numbers. Not a memorable phrase: it is a password, and nothing needs to
-  remember it.
+- **`INTERNAL_API_SECRET`** — invent one. **At least 16 characters**, and the
+  service refuses to start if it is shorter. Use around 32 random letters and
+  numbers. Not a memorable phrase — nothing has to remember it, so there is no
+  reason for it to be guessable.
 
 `REDIS_URL` is not used yet. It is there because the service checks for it on
 startup; the value is ignored.
@@ -424,6 +425,21 @@ the one you signed in with, exactly.
 
 **`fly deploy` fails.** Run `fly logs` to see why. Usually a missing secret from
 4d — check for a typo in one of the names.
+
+**The machine keeps restarting, and `fly logs` shows "Invalid agent-service
+environment".** One of the secrets is missing or malformed, and the message
+names which. Set that one and the machine restarts itself:
+
+```bash
+fly secrets set THE_NAME="the correct value"
+```
+
+If it had already given up — `machine has reached its max restart count` —
+start it again by hand:
+
+```bash
+fly machine restart MACHINE-ID
+```
 
 **PowerShell says "The '<' operator is reserved for future use".** PowerShell
 cannot feed a file into a command with `<`. Use
