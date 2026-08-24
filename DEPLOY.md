@@ -331,10 +331,23 @@ fly deploy
 ```
 
 **What should happen:** several minutes of building, then a success message.
-Check it:
 
-You should get back something mentioning `"concierge_chat": true`. If you
-see that, it is running.
+Check it came up honest about what is switched on. **On PowerShell:**
+
+```powershell
+Invoke-RestMethod https://reserv-agent.fly.dev/capabilities | ConvertTo-Json
+```
+
+> Do not use `curl` in PowerShell. It is an alias for a different command that
+> prints a wall of headers rather than the answer. `curl.exe` is the real one
+> if you prefer it.
+
+You should get back something mentioning `"concierge_chat": true`. If you see
+that, it is running.
+
+You will also see `"whatsapp_rail": false` with a reason next to it. That is
+correct — WhatsApp is off until you have a provider account, so the service
+says so rather than pretending.
 
 ---
 
