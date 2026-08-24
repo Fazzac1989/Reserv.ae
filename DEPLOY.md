@@ -402,6 +402,11 @@ Replace the message body with:
 
 Click **Save**. `{{ .Token }}` is the part that matters; the rest is wording.
 
+Then open **Authentication** > **Sign In / Providers** > **Email** and set
+**Email OTP Length** to **6**. Both apps ask for six digits and their code
+boxes accept no more, so a longer code cannot even be typed in. If yours is
+already 6, leave it.
+
 **5d.** Open your site and sign in. Enter the six-digit code it emails you.
 You are in.
 
@@ -462,6 +467,9 @@ the one you signed in with, exactly.
 
 **The sign-in email arrives with a link instead of a six-digit code.** The
 Magic Link template still has Supabase's default wording. See 5c.
+
+**The emailed code is longer than the box allows.** Email OTP Length is not 6.
+See 5c. Changing it affects only codes sent afterwards, so ask for a new one.
 
 **The sign-in email never arrives.** Supabase's built-in mail is meant for
 testing and allows only a handful of messages an hour, shared across the whole
