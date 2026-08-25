@@ -463,7 +463,18 @@ people's phones.
 
 **7d.** Click **Deploy**, and note the address it gives you.
 
-**7e.** Tell the agent service to accept that address. A browser may only call
+**7e.** Give this project the domain. Open its **Settings** > **Domains**, add
+`reserv.ae`, and let Vercel move it across from the console project when it
+offers to. Customers get the bare address; the console moves to
+`reserv.ae/admin`.
+
+The console reaches that address by being forwarded from this project, which
+needs its Vercel address written into `apps/mobile/vercel.json`. Open the
+console project, copy its `.vercel.app` address from the top of the page, and
+replace `OPS-PROJECT.vercel.app` in that file with it — both times it
+appears. Commit and push, and both projects rebuild.
+
+**7f.** Tell the agent service to accept that address. A browser may only call
 a service that names it, and until you do this the app answers every request
 with "Failed to fetch":
 
@@ -474,7 +485,7 @@ fly secrets set WEB_ORIGINS=https://your-app-address --app reserv-agent
 No slash on the end, and no path. Add the console's address too if you ever
 call the service from it, separated by commas.
 
-**7f.** Open the address and ask for something. A reply means the whole chain
+**7g.** Open the address and ask for something. A reply means the whole chain
 works: browser to Supabase for the sign-in, browser to Fly for the concierge,
 Fly to Anthropic for the answer.
 
@@ -525,6 +536,14 @@ testing and allows only a handful of messages an hour, shared across the whole
 project. It is enough for you and a colleague; before real staff use this,
 connect your own mail provider under **Authentication > Emails > SMTP
 Settings**, or sign-ins will start failing silently.
+
+**reserv.ae shows a 404 but reserv.ae/admin works.** The console has moved
+under /admin and the customer app is not on the domain yet. Finish 7a–7e.
+
+**Every form in the console fails with an invalid request.** Server Actions
+refuse an Origin that does not match the host they were served from, and the
+forwarding means those differ. The domain has to be listed in
+`allowedOrigins` in `apps/ops/next.config.mjs`.
 
 **The customer app says "Failed to fetch" on every request.** The agent
 service has not been told to accept that address. See 7e.
