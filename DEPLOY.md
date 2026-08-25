@@ -271,7 +271,7 @@ SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 ANTHROPIC_API_KEY=sk-ant-your-key
 INTERNAL_API_SECRET=at-least-16-characters-of-random-letters-and-numbers
-AI_MODEL_FAST=claude-haiku-4-5
+AI_MODEL_FAST=claude-sonnet-5
 AI_MODEL_STRONG=claude-opus-5
 REDIS_URL=redis://127.0.0.1:6379
 ```
@@ -434,6 +434,55 @@ pretending.
 
 ---
 
+## Step 7 — The customer app on the web
+
+Steps 1 to 6 put the staff console live. This step puts the thing customers
+use somewhere they can reach without installing anything.
+
+It is the same app as the phone build, exported to the browser, so a pilot is a
+link you send rather than an App Store review you wait a week for.
+
+**7a.** In Vercel, click **Add New** > **Project** and pick the same
+**Reserv.ae** repository. Vercel does not mind that it is already used by the
+console — a repository can serve several projects.
+
+**7b.** Set **Root Directory** to `apps/mobile`. Leave the build settings
+alone; the repository already carries them.
+
+**7c.** Add three **Environment Variables**. The first two are the same values
+the console uses, and the third is your Fly address:
+
+```
+EXPO_PUBLIC_SUPABASE_URL=https://YOUR-REF.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your anon public key
+EXPO_PUBLIC_AGENT_SERVICE_URL=https://reserv-agent.fly.dev
+```
+
+The anon key again, never the service role one. This bundle runs on other
+people's phones.
+
+**7d.** Click **Deploy**, and note the address it gives you.
+
+**7e.** Tell the agent service to accept that address. A browser may only call
+a service that names it, and until you do this the app answers every request
+with "Failed to fetch":
+
+```powershell
+fly secrets set WEB_ORIGINS=https://your-app-address --app reserv-agent
+```
+
+No slash on the end, and no path. Add the console's address too if you ever
+call the service from it, separated by commas.
+
+**7f.** Open the address and ask for something. A reply means the whole chain
+works: browser to Supabase for the sign-in, browser to Fly for the concierge,
+Fly to Anthropic for the answer.
+
+With no venues added yet it will tell you nothing fits. That is the correct
+answer, and a good sign — it would rather say so than invent a restaurant.
+
+---
+
 ## What is still switched off, and why
 
 **WhatsApp messaging to venues.** Needs a business account with a provider
@@ -476,6 +525,14 @@ testing and allows only a handful of messages an hour, shared across the whole
 project. It is enough for you and a colleague; before real staff use this,
 connect your own mail provider under **Authentication > Emails > SMTP
 Settings**, or sign-ins will start failing silently.
+
+**The customer app says "Failed to fetch" on every request.** The agent
+service has not been told to accept that address. See 7e.
+
+**The chat answers with "Internal Server Error".** Check `fly logs`. If it
+mentions adaptive thinking, `AI_MODEL_FAST` names a model that does not
+support it — Haiku 4.5 and anything older take neither adaptive thinking nor
+an effort setting, both of which every request uses.
 
 **The machine keeps stopping on its own, and `fly logs` says "Trial machine
 stopping".** The account has no payment method, so Fly stops every machine after

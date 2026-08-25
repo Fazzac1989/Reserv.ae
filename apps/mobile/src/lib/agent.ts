@@ -60,7 +60,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${env.agentServiceUrl}${path}`, {
     ...init,
     headers: {
-      'Content-Type': 'application/json',
+      // Only when something is actually being sent. A request that declares
+      // JSON and carries nothing is rejected before it reaches a route, and
+      // several endpoints take no body at all.
+      ...(init?.body === undefined || init.body === null
+        ? {}
+        : { 'Content-Type': 'application/json' }),
       Authorization: `Bearer ${token}`,
       ...init?.headers,
     },
