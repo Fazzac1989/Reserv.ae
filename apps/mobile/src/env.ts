@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { keyMatchesProject, wrongProjectMessage } from '@reservai/config';
 
 /**
  * Client-side environment. Only EXPO_PUBLIC_* values reach the device bundle,
@@ -7,13 +8,25 @@ import { z } from 'zod';
  * Inlined by Metro at build time, so these must be referenced as full literal
  * property accesses rather than destructured from process.env.
  */
-const schema = z.object({
-  supabaseUrl: z.string().url(),
-  supabaseAnonKey: z.string().min(1),
-  agentServiceUrl: z.string().url(),
-  /** Sign in with Apple is iOS-only and needs no client id of our own. */
-  googleClientId: z.string().min(1).optional(),
-});
+const schema = z
+  .object({
+    supabaseUrl: z.string().url(),
+    supabaseAnonKey: z.string().min(1),
+    agentServiceUrl: z.string().url(),
+    /** Sign in with Apple is iOS-only and needs no client id of our own. */
+    googleClientId: z.string().min(1).optional(),
+  })
+  // A key from another of your own Supabase projects is a valid key pointed at
+  // the wrong place. Supabase calls it "Invalid API key", which sends you to
+  // check the characters rather than which dashboard they came from — and in a
+  // built app the answer only appears when someone tries to sign in.
+  .refine(
+    (value) => keyMatchesProject(value.supabaseUrl, value.supabaseAnonKey),
+    (value) => ({
+      path: ['supabaseAnonKey'],
+      message: wrongProjectMessage(value.supabaseUrl, value.supabaseAnonKey),
+    }),
+  );
 
 const parsed = schema.safeParse({
   supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,

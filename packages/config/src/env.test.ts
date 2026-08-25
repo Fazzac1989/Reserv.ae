@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { loadAgentServiceEnv } from './env';
+import { keyMatchesProject, loadAgentServiceEnv, projectRefFromKey } from './env';
 
 /**
  * WEB_ORIGINS decides which browsers may call the agent service, so a value
@@ -66,5 +66,48 @@ describe('WEB_ORIGINS', () => {
 
   it('refuses one bad entry among good ones', () => {
     expect(() => load('https://app.reserv.ae,*')).toThrow(/nothing after the host/);
+  });
+});
+
+function keyFor(ref: string, role = 'anon'): string {
+  const part = (o: unknown) => Buffer.from(JSON.stringify(o)).toString('base64url');
+  return [part({ alg: 'HS256', typ: 'JWT' }), part({ iss: 'supabase', ref, role }), 'sig'].join(
+    '.',
+  );
+}
+
+describe('keys from the wrong project', () => {
+  it('reads the project out of a key', () => {
+    expect(projectRefFromKey(keyFor('abcdefghijklmnopqrst'))).toBe('abcdefghijklmnopqrst');
+  });
+
+  it('accepts a key issued for the project the URL names', () => {
+    expect(keyMatchesProject('https://abc.supabase.co', keyFor('abc'))).toBe(true);
+  });
+
+  it('rejects a key issued for a different project', () => {
+    // The failure this was written for: eight projects in one account, and the
+    // key copied from the dashboard that happened to be open.
+    expect(keyMatchesProject('https://abc.supabase.co', keyFor('xyz'))).toBe(false);
+  });
+
+  it('says which project the key belongs to', () => {
+    expect(() =>
+      loadAgentServiceEnv({
+        ...base,
+        SUPABASE_URL: 'https://gtolhuxoreacaqwxjccq.supabase.co',
+        SUPABASE_ANON_KEY: keyFor('taawgixxkvqkbhnzxxzm'),
+      }),
+    ).toThrow(/taawgixxkvqkbhnzxxzm.*gtolhuxoreacaqwxjccq/s);
+  });
+
+  it('passes a key with no readable claims rather than guessing', () => {
+    // sb_publishable_ keys carry nothing to compare, and refusing them would
+    // block the format Supabase is moving to.
+    expect(keyMatchesProject('https://abc.supabase.co', 'sb_publishable_Ab3xY')).toBe(true);
+  });
+
+  it('ignores a URL that is not a Supabase project address', () => {
+    expect(keyMatchesProject('http://127.0.0.1:54421', keyFor('xyz'))).toBe(true);
   });
 });

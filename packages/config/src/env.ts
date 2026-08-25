@@ -67,6 +67,58 @@ export function isLocalSupabaseUrl(url: string): boolean {
   }
 }
 
+/** The project a Supabase URL points at, from `https://REF.supabase.co`. */
+export function projectRefFromUrl(url: string): string | null {
+  try {
+    const { hostname } = new URL(url);
+    const [ref, ...rest] = hostname.split('.');
+    return rest.join('.') === 'supabase.co' && ref ? ref : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The project a Supabase key was issued for, from its `ref` claim.
+ *
+ * Null for the newer sb_publishable_ keys, which carry no readable claims. An
+ * unknown project cannot be compared, so it is never called a mismatch.
+ */
+export function projectRefFromKey(key: string): string | null {
+  const payload = key.split('.')[1];
+  if (payload === undefined) return null;
+  try {
+    const decoded: unknown = JSON.parse(Buffer.from(payload, 'base64').toString('utf8'));
+    if (typeof decoded !== 'object' || decoded === null) return null;
+    const ref = (decoded as { ref?: unknown }).ref;
+    return typeof ref === 'string' ? ref : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Whether a key belongs to the project its URL names.
+ *
+ * A key from another of your own projects is perfectly valid and simply
+ * belongs elsewhere, so Supabase answers "Invalid API key" — which reads as a
+ * typo and sends you to check the characters you copied rather than which
+ * dashboard you copied them from.
+ */
+export function keyMatchesProject(url: string, key: string): boolean {
+  const urlRef = projectRefFromUrl(url);
+  const keyRef = projectRefFromKey(key);
+  if (urlRef === null || keyRef === null) return true;
+  return urlRef === keyRef;
+}
+
+export function wrongProjectMessage(url: string, key: string): string {
+  return (
+    `belongs to Supabase project ${projectRefFromKey(key)}, but the URL points at ` +
+    `${projectRefFromUrl(url)}. Copy the key from that project: Project Settings > API.`
+  );
+}
+
 export const DEMO_KEY_MESSAGE =
   'is the local development key that ships with the Supabase CLI, not your ' +
   'project key. Copy it from Supabase: Project Settings > API.';
@@ -204,18 +256,23 @@ function assertKeysMatchProject(env: {
 }): void {
   if (isLocalSupabaseUrl(env.SUPABASE_URL)) return;
 
-  const offenders = [
+  const keys: [string, string | undefined][] = [
     ['SUPABASE_ANON_KEY', env.SUPABASE_ANON_KEY],
     ['SUPABASE_SERVICE_ROLE_KEY', env.SUPABASE_SERVICE_ROLE_KEY],
-  ].filter(([, value]) => typeof value === 'string' && isLocalDemoKey(value));
+  ];
 
-  if (offenders.length === 0) return;
+  const problems = keys.flatMap(([name, value]) => {
+    if (typeof value !== 'string') return [];
+    if (isLocalDemoKey(value)) return [`  - ${name}: ${DEMO_KEY_MESSAGE}`];
+    if (!keyMatchesProject(env.SUPABASE_URL, value)) {
+      return [`  - ${name}: ${wrongProjectMessage(env.SUPABASE_URL, value)}`];
+    }
+    return [];
+  });
 
-  throw new Error(
-    ['Invalid environment:', ...offenders.map(([name]) => `  - ${name}: ${DEMO_KEY_MESSAGE}`)].join(
-      '\n',
-    ),
-  );
+  if (problems.length === 0) return;
+
+  throw new Error(['Invalid environment:', ...problems].join('\n'));
 }
 
 export function loadAgentServiceEnv(source: NodeJS.ProcessEnv = process.env): AgentServiceEnv {

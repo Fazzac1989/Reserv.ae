@@ -1,5 +1,11 @@
 import { z } from 'zod';
-import { DEMO_KEY_MESSAGE, isLocalDemoKey, isLocalSupabaseUrl } from '@reservai/config';
+import {
+  DEMO_KEY_MESSAGE,
+  isLocalDemoKey,
+  isLocalSupabaseUrl,
+  keyMatchesProject,
+  wrongProjectMessage,
+} from '@reservai/config';
 
 /**
  * Browser-visible configuration. Next inlines NEXT_PUBLIC_* at build time, so
@@ -27,6 +33,16 @@ const schema = z
   .refine(
     (value) => isLocalSupabaseUrl(value.supabaseUrl) || !isLocalDemoKey(value.supabaseAnonKey),
     { path: ['supabaseAnonKey'], message: DEMO_KEY_MESSAGE },
+  )
+  // A key from another of your own Supabase projects is a valid key in the
+  // wrong place, and Supabase reports it as "Invalid API key" — which reads as
+  // a mistyped character rather than the wrong dashboard.
+  .refine(
+    (value) => keyMatchesProject(value.supabaseUrl, value.supabaseAnonKey),
+    (value) => ({
+      path: ['supabaseAnonKey'],
+      message: wrongProjectMessage(value.supabaseUrl, value.supabaseAnonKey),
+    }),
   );
 
 const NAMES: Record<string, string> = {
