@@ -91,8 +91,51 @@ const serverSchema = baseSchema.extend({
   INTERNAL_API_SECRET: z.string().min(16),
 });
 
+/**
+ * Browser origins allowed to call this service.
+ *
+ * The phone app sends no Origin header and is unaffected by any of this. The
+ * web build is a browser client, so without an entry here its requests fail as
+ * "Failed to fetch" — a message that names neither CORS nor the setting.
+ *
+ * Empty by default: a service that talks to a browser should say which one.
+ */
+const webOrigins = z
+  .string()
+  .optional()
+  .transform((value) =>
+    value === undefined
+      ? []
+      : value
+          .split(',')
+          .map((o) => o.trim())
+          .filter((o) => o.length > 0),
+  )
+  .refine(
+    (origins) =>
+      origins.every((o) => {
+        try {
+          const url = new URL(o);
+          return (
+            (url.protocol === 'https:' || url.protocol === 'http:') &&
+            ['', '/'].includes(url.pathname) &&
+            url.search === '' &&
+            url.hash === ''
+          );
+        } catch {
+          return false;
+        }
+      }),
+    {
+      message:
+        'must be a comma-separated list of origins with nothing after the host — ' +
+        'https://app.reserv.ae, not https://app.reserv.ae/chat',
+    },
+  );
+
 /** The agent runtime: rails, queues, model calls. */
 const agentServiceSchema = serverSchema.extend({
+  WEB_ORIGINS: webOrigins,
   AGENT_SERVICE_PORT: z.coerce.number().int().positive().default(3030),
   ANTHROPIC_API_KEY: z.string().min(1),
   AI_MODEL_FAST: z.string().min(1),

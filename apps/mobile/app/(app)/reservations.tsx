@@ -55,9 +55,12 @@ export default function Reservations() {
       });
       if (!result.ok) throw new Error(result.reason);
       await saveCalendarEventId(booking.id, result.eventId);
+      return result.message;
     },
-    onSuccess: async () => {
-      setNotice('Added to your calendar.');
+    onSuccess: async (message) => {
+      // The web build can only hand over a file, so what happened is worth
+      // saying accurately rather than assuming an event was written.
+      setNotice(message);
       setError(null);
       await refresh();
     },

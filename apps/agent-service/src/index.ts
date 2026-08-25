@@ -1,4 +1,5 @@
 import Fastify, { type FastifyError } from 'fastify';
+import cors from '@fastify/cors';
 import { loadEnvFile } from './load-env';
 import { loadAgentServiceEnv, enabledRails } from '@reservai/config';
 import { initSentry, captureException } from './sentry';
@@ -65,6 +66,21 @@ app.setErrorHandler((error: FastifyError, request, reply) => {
 
   reply.status(status).send({ error: exposed ? error.message : 'Internal Server Error' });
 });
+
+// The phone app sends no Origin header, so this changes nothing for it. The
+// web build is a browser client and cannot reach a service that never answers
+// a preflight — but only the origins named in the environment get an answer.
+if (env.WEB_ORIGINS.length > 0) {
+  await app.register(cors, {
+    origin: env.WEB_ORIGINS,
+    // The session travels in an Authorization header, not a cookie, so the
+    // browser never needs to attach credentials to a cross-origin request.
+    credentials: false,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    maxAge: 86400,
+  });
+  app.log.info({ origins: env.WEB_ORIGINS }, 'Browser origins allowed');
+}
 
 await registerRateLimits(app);
 

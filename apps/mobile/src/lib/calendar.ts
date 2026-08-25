@@ -31,9 +31,16 @@ async function defaultCalendarId(): Promise<string | null> {
   return primary?.id ?? null;
 }
 
-export async function addToCalendar(
-  entry: CalendarEntry,
-): Promise<{ ok: true; eventId: string } | { ok: false; reason: string }> {
+/**
+ * `eventId` is null when the entry was handed over rather than written — the
+ * web build can only offer a file, and there is then no event of ours to
+ * delete later. `message` says which happened, so the screen does not have to
+ * guess.
+ */
+export type CalendarResult =
+  { ok: true; eventId: string | null; message: string } | { ok: false; reason: string };
+
+export async function addToCalendar(entry: CalendarEntry): Promise<CalendarResult> {
   const permission = await Calendar.requestCalendarPermissionsAsync();
   if (permission.status !== 'granted') {
     return { ok: false, reason: 'I need calendar access to add it.' };
@@ -53,7 +60,7 @@ export async function addToCalendar(
       // so the two do not arrive together.
       alarms: [{ relativeOffset: -60 }],
     });
-    return { ok: true, eventId };
+    return { ok: true, eventId, message: 'Added to your calendar.' };
   } catch (error) {
     return { ok: false, reason: error instanceof Error ? error.message : 'Could not add it.' };
   }
