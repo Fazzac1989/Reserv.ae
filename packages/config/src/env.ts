@@ -41,11 +41,27 @@ const supabaseUrl = z
  * project produces "Invalid API key" from Supabase, which says nothing about
  * why.
  */
+/**
+ * Decode a JWT payload segment.
+ *
+ * Node has Buffer and browsers have atob, and this runs in both — the client
+ * bundles read the same keys as the server does. Reaching for Buffer alone
+ * throws in a browser, and because the callers treat an undecodable key as one
+ * they cannot judge, that turns every check below into a silent pass in the
+ * one place a wrong key actually reaches a user.
+ */
+function decodeJwtSegment(segment: string): unknown {
+  const padded = segment.replace(/-/g, '+').replace(/_/g, '/');
+  const json =
+    typeof atob === 'function' ? atob(padded) : Buffer.from(padded, 'base64').toString('utf8');
+  return JSON.parse(json);
+}
+
 export function isLocalDemoKey(key: string): boolean {
   const payload = key.split('.')[1];
   if (payload === undefined) return false;
   try {
-    const decoded: unknown = JSON.parse(Buffer.from(payload, 'base64').toString('utf8'));
+    const decoded = decodeJwtSegment(payload);
     return (
       typeof decoded === 'object' &&
       decoded !== null &&
@@ -107,7 +123,7 @@ export function projectRefFromKey(key: string): string | null {
   const payload = key.split('.')[1];
   if (payload === undefined) return null;
   try {
-    const decoded: unknown = JSON.parse(Buffer.from(payload, 'base64').toString('utf8'));
+    const decoded = decodeJwtSegment(payload);
     if (typeof decoded !== 'object' || decoded === null) return null;
     const ref = (decoded as { ref?: unknown }).ref;
     return typeof ref === 'string' ? ref : null;

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { isHeaderSafeKey, keyMatchesProject, loadAgentServiceEnv, projectRefFromKey } from './env';
+import {
+  isHeaderSafeKey,
+  isLocalDemoKey,
+  keyMatchesProject,
+  loadAgentServiceEnv,
+  projectRefFromKey,
+} from './env';
 
 /**
  * WEB_ORIGINS decides which browsers may call the agent service, so a value
@@ -147,6 +153,58 @@ describe('a masked key copied from a dashboard', () => {
   it('fails before the project comparison, which cannot read a masked key', () => {
     expect(() => loadAgentServiceEnv({ ...base, SUPABASE_ANON_KEY: masked })).not.toThrow(
       /belongs to Supabase project/,
+    );
+  });
+});
+
+describe('where there is no Buffer', () => {
+  /**
+   * The client bundles run these same checks in a browser, which has atob and
+   * no Buffer. Reaching for Buffer there throws, and because an undecodable
+   * key is treated as one we cannot judge, every check turned into a silent
+   * pass — in the one place a wrong key reaches somebody trying to sign in.
+   */
+  function withoutBuffer<T>(fn: () => T): T {
+    const saved = globalThis.Buffer;
+    // @ts-expect-error removing it is the whole point of the test
+    delete globalThis.Buffer;
+    try {
+      return fn();
+    } finally {
+      globalThis.Buffer = saved;
+    }
+  }
+
+  // Built while Buffer still exists; the test is about reading them, not
+  // writing them.
+  const wrongProject = keyFor('xyz');
+  const rightProject = keyFor('abcdef');
+  const demoKey = keyFor('local', 'anon').replace(
+    Buffer.from(JSON.stringify({ iss: 'supabase', ref: 'local', role: 'anon' })).toString(
+      'base64url',
+    ),
+    Buffer.from(JSON.stringify({ iss: 'supabase-demo', ref: 'local', role: 'anon' })).toString(
+      'base64url',
+    ),
+  );
+
+  it('still reads the project out of a key', () => {
+    expect(withoutBuffer(() => projectRefFromKey(rightProject))).toBe('abcdef');
+  });
+
+  it('still catches a key from the wrong project', () => {
+    expect(withoutBuffer(() => keyMatchesProject('https://abc.supabase.co', wrongProject))).toBe(
+      false,
+    );
+  });
+
+  it('still recognises the CLI demo key', () => {
+    expect(withoutBuffer(() => isLocalDemoKey(demoKey))).toBe(true);
+  });
+
+  it('still accepts a key that does belong to the project', () => {
+    expect(withoutBuffer(() => keyMatchesProject('https://abcdef.supabase.co', rightProject))).toBe(
+      true,
     );
   });
 });
