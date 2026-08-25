@@ -7,11 +7,11 @@
   "rewrites": [
     {
       "source": "/admin",
-      "destination": "https://OPS-PROJECT.vercel.app/admin"
+      "destination": "https://reserv-ae.vercel.app/admin"
     },
     {
       "source": "/admin/:path*",
-      "destination": "https://OPS-PROJECT.vercel.app/admin/:path*"
+      "destination": "https://reserv-ae.vercel.app/admin/:path*"
     },
     {
       "source": "/(.*)",
