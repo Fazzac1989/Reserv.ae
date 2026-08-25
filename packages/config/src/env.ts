@@ -67,6 +67,25 @@ export function isLocalSupabaseUrl(url: string): boolean {
   }
 }
 
+/**
+ * Whether a key could actually be sent as a request header.
+ *
+ * Dashboards mask secrets with bullets, and selecting that text copies the
+ * bullets. The result looks plausible — right prefix, right length — and fails
+ * only in the browser, as "String contains non ISO-8859-1 code point", which
+ * describes the encoding rather than the mistake.
+ */
+export function isHeaderSafeKey(key: string): boolean {
+  // ! to ~ is printable ASCII without the space, which is all any Supabase
+  // key has ever contained.
+  return /^[!-~]+$/.test(key);
+}
+
+export const MASKED_KEY_MESSAGE =
+  'contains characters that cannot be sent in a request header — usually a ' +
+  'masked value copied as bullets (eyJhbGci••••). Use the dashboard copy ' +
+  'button rather than selecting the text.';
+
 /** The project a Supabase URL points at, from `https://REF.supabase.co`. */
 export function projectRefFromUrl(url: string): string | null {
   try {
@@ -263,6 +282,7 @@ function assertKeysMatchProject(env: {
 
   const problems = keys.flatMap(([name, value]) => {
     if (typeof value !== 'string') return [];
+    if (!isHeaderSafeKey(value)) return [`  - ${name}: ${MASKED_KEY_MESSAGE}`];
     if (isLocalDemoKey(value)) return [`  - ${name}: ${DEMO_KEY_MESSAGE}`];
     if (!keyMatchesProject(env.SUPABASE_URL, value)) {
       return [`  - ${name}: ${wrongProjectMessage(env.SUPABASE_URL, value)}`];

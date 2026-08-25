@@ -2,8 +2,10 @@ import { z } from 'zod';
 import {
   DEMO_KEY_MESSAGE,
   isLocalDemoKey,
+  isHeaderSafeKey,
   isLocalSupabaseUrl,
   keyMatchesProject,
+  MASKED_KEY_MESSAGE,
   wrongProjectMessage,
 } from '@reservai/config';
 
@@ -26,7 +28,12 @@ const schema = z
           'must be the project address only, with nothing after it — ' +
           'https://YOUR-REF.supabase.co, not .../rest/v1/',
       }),
-    supabaseAnonKey: z.string().min(1),
+    supabaseAnonKey: z
+      .string()
+      .min(1)
+      // A masked value copied as bullets looks right and fails only in the
+      // browser, long after the build that could have caught it.
+      .refine(isHeaderSafeKey, { message: MASKED_KEY_MESSAGE }),
   })
   // A demo key is correct against a local Supabase and wrong against a real
   // project, so the pair is what has to be checked rather than either value.

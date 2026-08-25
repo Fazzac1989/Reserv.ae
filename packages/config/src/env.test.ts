@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { keyMatchesProject, loadAgentServiceEnv, projectRefFromKey } from './env';
+import { isHeaderSafeKey, keyMatchesProject, loadAgentServiceEnv, projectRefFromKey } from './env';
 
 /**
  * WEB_ORIGINS decides which browsers may call the agent service, so a value
@@ -109,5 +109,44 @@ describe('keys from the wrong project', () => {
 
   it('ignores a URL that is not a Supabase project address', () => {
     expect(keyMatchesProject('http://127.0.0.1:54421', keyFor('xyz'))).toBe(true);
+  });
+});
+
+describe('a masked key copied from a dashboard', () => {
+  // What Vercel actually shipped: the visible prefix, then the mask.
+  const masked = 'eyJhbGci' + '•'.repeat(40);
+
+  it('recognises a real key as sendable', () => {
+    expect(isHeaderSafeKey(keyFor('abc'))).toBe(true);
+  });
+
+  it('refuses bullets', () => {
+    expect(isHeaderSafeKey(masked)).toBe(false);
+  });
+
+  it('refuses an ellipsis, the other way a dashboard shortens a value', () => {
+    expect(isHeaderSafeKey('eyJhbGci…IE0')).toBe(false);
+  });
+
+  it('refuses a zero-width space, which nothing on screen would show', () => {
+    expect(isHeaderSafeKey('eyJhbGci​IE0')).toBe(false);
+  });
+
+  it('refuses a stray space', () => {
+    expect(isHeaderSafeKey('eyJ hBGci')).toBe(false);
+  });
+
+  it('names the mistake rather than the encoding', () => {
+    // The browser says "String contains non ISO-8859-1 code point", which
+    // sends you to look at character sets instead of at the copy button.
+    expect(() => loadAgentServiceEnv({ ...base, SUPABASE_ANON_KEY: masked })).toThrow(
+      /masked value copied as bullets/,
+    );
+  });
+
+  it('fails before the project comparison, which cannot read a masked key', () => {
+    expect(() => loadAgentServiceEnv({ ...base, SUPABASE_ANON_KEY: masked })).not.toThrow(
+      /belongs to Supabase project/,
+    );
   });
 });

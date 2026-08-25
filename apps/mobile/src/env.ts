@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { keyMatchesProject, wrongProjectMessage } from '@reservai/config';
+import {
+  isHeaderSafeKey,
+  keyMatchesProject,
+  MASKED_KEY_MESSAGE,
+  wrongProjectMessage,
+} from '@reservai/config';
 
 /**
  * Client-side environment. Only EXPO_PUBLIC_* values reach the device bundle,
@@ -11,7 +16,12 @@ import { keyMatchesProject, wrongProjectMessage } from '@reservai/config';
 const schema = z
   .object({
     supabaseUrl: z.string().url(),
-    supabaseAnonKey: z.string().min(1),
+    supabaseAnonKey: z
+      .string()
+      .min(1)
+      // A masked value copied as bullets looks right and fails only in the
+      // browser, long after the build that could have caught it.
+      .refine(isHeaderSafeKey, { message: MASKED_KEY_MESSAGE }),
     agentServiceUrl: z.string().url(),
     /** Sign in with Apple is iOS-only and needs no client id of our own. */
     googleClientId: z.string().min(1).optional(),
