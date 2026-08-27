@@ -402,6 +402,12 @@ Replace the message body with:
 
 Click **Save**. `{{ .Token }}` is the part that matters; the rest is wording.
 
+Now do the same to the **Confirm signup** template, which is a separate one in
+the same list. Supabase picks between them by whether the address already has
+an account: staff you add by hand get Magic Link, and a customer signing up for
+the first time gets Confirm signup. Editing only one leaves half your people
+holding an email that the code box cannot accept.
+
 Then open **Authentication** > **Sign In / Providers** > **Email** and set
 **Email OTP Length** to **6**. Both apps ask for six digits and their code
 boxes accept no more, so a longer code cannot even be typed in. If yours is
@@ -525,8 +531,10 @@ the one you signed in with, exactly.
 **`fly deploy` fails.** Run `fly logs` to see why. Usually a missing secret from
 4d — check for a typo in one of the names.
 
-**The sign-in email arrives with a link instead of a six-digit code.** The
-Magic Link template still has Supabase's default wording. See 5c.
+**The sign-in email arrives with a link instead of a six-digit code.** One of
+the two templates still has Supabase's default wording. If it happens to
+someone signing in for the first time it is **Confirm signup**; to someone who
+has signed in before, **Magic Link**. See 5c — both need `{{ .Token }}`.
 
 **The emailed code is longer than the box allows.** Email OTP Length is not 6.
 See 5c. Changing it affects only codes sent afterwards, so ask for a new one.
