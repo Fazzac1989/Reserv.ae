@@ -80,6 +80,13 @@ const venueInput = z.object({
   house_note: z.string().max(500).nullable(),
   tags: z.array(z.string().min(1)).max(40),
   best_times: z.array(z.string().min(1)).max(20),
+  /**
+   * The app is built around these: a suggestion is a photograph with a name on
+   * it, and a confirmation is the venue's own picture with the time across it.
+   * Https only — the card renders these directly and a plain-http image is
+   * blocked on both platforms, silently.
+   */
+  photo_urls: z.array(z.string().url().startsWith('https://', 'must start with https://')).max(8),
   lat: z.coerce.number().min(-90).max(90).nullable(),
   lng: z.coerce.number().min(-180).max(180).nullable(),
 });
@@ -98,6 +105,7 @@ function readVenue(formData: FormData) {
     house_note: toNullableString(formData.get('house_note')),
     tags: toList(formData.get('tags')),
     best_times: toList(formData.get('best_times')),
+    photo_urls: toList(formData.get('photo_urls')),
     lat: rawLat,
     lng: rawLng,
   });

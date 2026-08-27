@@ -170,6 +170,21 @@ export function VenueForm({
         </Field>
 
         <Field className="sm:col-span-2">
+          <Label htmlFor="photo_urls">
+            Photographs
+            <span className="ml-2 font-normal text-muted-foreground">
+              image links, comma separated — the first is the one the app shows
+            </span>
+          </Label>
+          <Input
+            id="photo_urls"
+            name="photo_urls"
+            defaultValue={d.text('photo_urls', (venue?.photo_urls ?? []).join(', '))}
+            placeholder="https://…/dining-room.jpg, https://…/terrace.jpg"
+          />
+        </Field>
+
+        <Field className="sm:col-span-2">
           <Label htmlFor="house_note">
             House note
             <span className="ml-2 font-normal text-muted-foreground">

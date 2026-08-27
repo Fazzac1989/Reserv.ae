@@ -59,7 +59,7 @@ export async function registerLifecycleRoutes(
     const { data, error } = await userClient(env, user.accessToken)
       .from('bookings')
       .select(
-        'id, status, party_size, scheduled_for, service_name, special_requests, confirmed_at, cancelled_at, calendar_event_id, rating, rated_at, no_show, venues(name, zone, address, lat, lng)',
+        'id, status, party_size, scheduled_for, service_name, special_requests, created_at, confirmed_at, cancelled_at, calendar_event_id, rating, rated_at, no_show, venues(name, zone, address, lat, lng, photo_urls)',
       )
       .order('scheduled_for', { ascending: false })
       .limit(100);

@@ -177,6 +177,8 @@ export interface Reservation {
   scheduled_for: string;
   service_name: string | null;
   special_requests: string | null;
+  /** When the request was put to the venue — the other half of the proof. */
+  created_at: string;
   confirmed_at: string | null;
   cancelled_at: string | null;
   calendar_event_id: string | null;
@@ -189,6 +191,7 @@ export interface Reservation {
     address: string | null;
     lat: number | null;
     lng: number | null;
+    photo_urls: string[];
   } | null;
 }
 

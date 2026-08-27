@@ -22,11 +22,17 @@ import { Button } from '../../src/components/ui/button';
 import { Body, Display, Lead, Meta, Muted } from '../../src/components/ui/text';
 import { VenueCard } from '../../src/components/venue-card';
 import { VenueSheet } from '../../src/components/venue-sheet';
-import { ConfirmationCard, LiveStatus } from '../../src/components/booking-state';
+import { LiveStatus } from '../../src/components/booking-state';
+import { Confirmation } from '../../src/components/confirmation';
+import { statusCopy } from '../../src/components/reservation-card';
+import { addToCalendar } from '../../src/lib/calendar';
+import { openDirections } from '../../src/lib/directions';
 import {
   approveSuggestion,
   getCapabilities,
+  listReservations,
   requestSuggestions,
+  saveCalendarEventId,
   sendConciergeMessage,
   transcribeVoiceNote,
   type ConciergeReply,
@@ -49,12 +55,6 @@ interface Turn {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-}
-
-interface Confirmed {
-  venueName: string;
-  when: string;
-  partyLine: string;
 }
 
 const DEFAULT_LABELS: Record<string, string> = {
@@ -98,16 +98,39 @@ export default function Conversation() {
   } | null>(null);
   const [cards, setCards] = useState<SuggestionCard[]>([]);
   const [opened, setOpened] = useState<SuggestionCard | null>(null);
-  const [working, setWorking] = useState<string | null>(null);
-  const [confirmed, setConfirmed] = useState<Confirmed | null>(null);
+  /**
+   * The booking being waited on.
+   *
+   * Approving starts the work; it does not finish it. Nothing here says
+   * confirmed until the venue has actually said so, which is the difference
+   * between this product and a form that emails a restaurant.
+   */
+  const [watching, setWatching] = useState<string | null>(null);
 
   const capabilities = useQuery({ queryKey: ['capabilities'], queryFn: getCapabilities });
+
+  // Only while something is outstanding. A venue answering is the one event
+  // worth watching for, and it arrives on someone else's schedule.
+  const watched = useQuery({
+    queryKey: ['reservations'],
+    queryFn: listReservations,
+    enabled: watching !== null,
+    refetchInterval: watching === null ? false : 4000,
+  });
+
+  const booking =
+    watching === null
+      ? null
+      : ([...(watched.data?.upcoming ?? []), ...(watched.data?.past ?? [])].find(
+          (r) => r.id === watching,
+        ) ?? null);
+  const settled = booking !== null && booking.confirmed_at !== null;
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(recorder);
 
   useEffect(() => {
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 60);
-  }, [turns.length, cards.length, confirmed, working, pendingTranscript]);
+  }, [turns.length, cards.length, settled, watching, pendingTranscript]);
 
   const send = useMutation({
     mutationFn: (input: { text: string; audioRef?: string; confidence?: number | null }) =>
@@ -147,28 +170,32 @@ export default function Conversation() {
 
   const reserve = useMutation({
     mutationFn: (card: SuggestionCard) => approveSuggestion(card.id),
-    onMutate: (card) => {
+    onMutate: () => {
       setOpened(null);
       setCards([]);
-      setWorking(`Asking ${card.name}…`);
     },
-    onSuccess: (result, card) => {
-      setWorking(null);
-      const when = new Date(card.proposedStart);
-      setConfirmed({
-        venueName: card.name,
-        when: when.toLocaleString('en-GB', {
-          weekday: 'long',
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-        partyLine: result.message,
+    // The booking now exists and the venue has not answered. Watching begins;
+    // saying it is confirmed does not.
+    onSuccess: (result) => setWatching(result.bookingId),
+    onError: (e) => setError(e instanceof Error ? e.message : 'Could not put that through.'),
+  });
+
+  const calendar = useMutation({
+    mutationFn: async () => {
+      if (!booking) throw new Error('Nothing to add.');
+      const result = await addToCalendar({
+        title: `${booking.venues?.name ?? 'Reservation'} — table for ${booking.party_size}`,
+        startsAt: new Date(booking.scheduled_for),
+        endsAt: new Date(Date.parse(booking.scheduled_for) + 2 * 3600_000),
+        location: booking.venues?.address ?? null,
+        notes: booking.special_requests,
       });
+      if (!result.ok) throw new Error(result.reason);
+      await saveCalendarEventId(booking.id, result.eventId);
+      return result.message;
     },
-    onError: (e) => {
-      setWorking(null);
-      setError(e instanceof Error ? e.message : 'Could not put that through.');
-    },
+    onSuccess: (message) => setNote(message),
+    onError: (e) => setError(e instanceof Error ? e.message : 'Could not add it.'),
   });
 
   function submitText(text: string, audioRef?: string, confidence?: number | null) {
@@ -176,7 +203,7 @@ export default function Conversation() {
     if (!trimmed || send.isPending) return;
     setError(null);
     setNote(null);
-    setConfirmed(null);
+    setWatching(null);
     setTurns((t) => [...t, { id: `${Date.now()}`, role: 'user', content: trimmed }]);
     setDraft('');
     setPendingTranscript(null);
@@ -222,7 +249,7 @@ export default function Conversation() {
   const name = firstName(profile.data?.full_name ?? null);
   const voiceEnabled = capabilities.data?.voice_notes === true;
   const thinking = send.isPending || suggest.isPending || voice.isPending;
-  const empty = turns.length === 0 && !confirmed;
+  const empty = turns.length === 0 && watching === null;
   // Cards peek past the edge so it reads as a row that continues, not as one
   // card that happens to be narrow.
   const cardWidth = Math.min(Dimensions.get('window').width - 96, 300);
@@ -287,17 +314,38 @@ export default function Conversation() {
             </ScrollView>
           ) : null}
 
-          {working ? <LiveStatus label={working} /> : null}
-
-          {confirmed ? (
-            <ConfirmationCard
-              venueName={confirmed.venueName}
-              when={confirmed.when}
-              partyLine={confirmed.partyLine}
+          {/*
+            While the venue has not answered, the app says what is actually
+            happening — in the booking's own words, not a hopeful summary.
+          */}
+          {watching !== null && !settled ? (
+            <LiveStatus
+              label={
+                reserve.isPending || booking === null
+                  ? 'Putting that to them…'
+                  : statusCopy(booking).detail
+              }
             />
           ) : null}
 
-          {thinking && !working ? <LiveStatus label="One moment…" /> : null}
+          {settled && booking ? (
+            <Confirmation
+              reservation={booking}
+              onAddToCalendar={() => calendar.mutate()}
+              onDirections={
+                booking.venues?.address
+                  ? () =>
+                      void openDirections(
+                        booking.venues!.address!,
+                        booking.venues!.lat,
+                        booking.venues!.lng,
+                      )
+                  : undefined
+              }
+            />
+          ) : null}
+
+          {thinking && watching === null ? <LiveStatus label="One moment…" /> : null}
           {note ? <Muted>{note}</Muted> : null}
           {error ? <Body className="text-clay">{error}</Body> : null}
         </ScrollView>

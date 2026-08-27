@@ -110,6 +110,33 @@ VENUE SHEET                             CONFIRMATION
 └────────────────────────────┘            champagne dot, 1.4s pulse
 ```
 
+## The booking moment
+
+Anything can suggest a restaurant. Nothing else rings one on your behalf and
+comes back with a table, so the confirmation is the one screen built to be
+shown to somebody else — and the one place the design stops being quiet.
+
+It is the venue's own photograph, full-bleed, with the time across it in
+champagne and the name in Fraunces at 32. Underneath, the part that is actually
+remarkable: not that a table exists, but how long it took to get one.
+
+> Asked at 18:12. Answered 14 minutes later.
+
+Three rules hold it together:
+
+**It appears only when the venue has said yes.** Approving starts the work; it
+does not finish it. Until `confirmed_at` is set the screen shows what is
+genuinely happening, in the booking's own words. A card that said "Confirmed"
+the instant somebody tapped Reserve would be the one lie this product cannot
+afford, and it would be found out by the person standing at the door.
+
+**Everything on it is evidence.** The photograph is the venue's. The time is
+the one they gave. The turnaround is measured, not phrased. Remove any of it
+and what is left is a receipt.
+
+**It can leave the app.** Share hands over the whole sentence, because a
+screenshot that has to be explained is not the moment.
+
 ## Motion
 
 Three things move, and nothing else:
