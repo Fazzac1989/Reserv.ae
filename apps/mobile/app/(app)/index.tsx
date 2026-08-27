@@ -1,23 +1,73 @@
-import { Pressable, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import {
+  Dimensions,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  TextInput,
+  View,
+} from 'react-native';
 import { Link } from 'expo-router';
-import { ScreenScroll } from '../../src/components/ui/screen';
-import { Body, Caption, Display, Eyebrow } from '../../src/components/ui/text';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import {
+  AudioModule,
+  RecordingPresets,
+  setAudioModeAsync,
+  useAudioRecorder,
+  useAudioRecorderState,
+} from 'expo-audio';
+import { Screen } from '../../src/components/ui/screen';
+import { Button } from '../../src/components/ui/button';
+import { Body, Display, Lead, Meta, Muted } from '../../src/components/ui/text';
+import { VenueCard } from '../../src/components/venue-card';
+import { VenueSheet } from '../../src/components/venue-sheet';
+import { ConfirmationCard, LiveStatus } from '../../src/components/booking-state';
+import {
+  approveSuggestion,
+  getCapabilities,
+  requestSuggestions,
+  sendConciergeMessage,
+  transcribeVoiceNote,
+  type ConciergeReply,
+  type SuggestionCard,
+} from '../../src/lib/agent';
+import { uploadVoiceNote } from '../../src/lib/voice-note';
 import { useProfile } from '../../src/lib/profile';
-import { useQuery } from '@tanstack/react-query';
-import { listReservations } from '../../src/lib/agent';
+import { useSession } from '../../src/store/session';
 
 /**
- * Home before there is anything to show.
+ * The conversation is the app.
  *
- * The empty state carries the product's promise rather than apologising for
- * having no data: these are the things you will be able to say once the
- * concierge chat lands in Phase 4.
+ * One scrolling thread, one input, and a single word in the corner for the
+ * bookings already made. No tab bar, no dashboard, no cards linking to other
+ * cards — a concierge is someone you talk to, and every piece of navigation
+ * added here would be a piece of the illusion taken away.
  */
-const EXAMPLES = [
-  'Book me a haircut Saturday morning near the Marina',
-  'Anniversary dinner next Friday, somewhere special',
-  'Quiet table for two tonight, walking distance',
-];
+
+interface Turn {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+interface Confirmed {
+  venueName: string;
+  when: string;
+  partyLine: string;
+}
+
+const DEFAULT_LABELS: Record<string, string> = {
+  party_size: 'party size',
+  zones: 'area',
+  price_band_max: 'budget',
+};
+
+function assumptionNote(reply: ConciergeReply): string | null {
+  if (reply.defaulted.length === 0) return null;
+  const parts = reply.defaulted.map((f) => DEFAULT_LABELS[f] ?? f);
+  return `Assumed your usual ${parts.join(' and ')} — say if that is wrong.`;
+}
 
 function firstName(full: string | null): string | null {
   if (!full) return null;
@@ -31,75 +81,328 @@ function greeting(): string {
   return 'Good evening';
 }
 
-export default function Home() {
+export default function Conversation() {
+  const session = useSession();
   const profile = useProfile();
+  const scrollRef = useRef<ScrollView>(null);
+
+  const [turns, setTurns] = useState<Turn[]>([]);
+  const [draft, setDraft] = useState('');
+  const [conversationId, setConversationId] = useState<string | undefined>();
+  const [error, setError] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
+  const [pendingTranscript, setPendingTranscript] = useState<{
+    text: string;
+    audioRef: string;
+    confidence: number | null;
+  } | null>(null);
+  const [cards, setCards] = useState<SuggestionCard[]>([]);
+  const [opened, setOpened] = useState<SuggestionCard | null>(null);
+  const [working, setWorking] = useState<string | null>(null);
+  const [confirmed, setConfirmed] = useState<Confirmed | null>(null);
+
+  const capabilities = useQuery({ queryKey: ['capabilities'], queryFn: getCapabilities });
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const recorderState = useAudioRecorderState(recorder);
+
+  useEffect(() => {
+    setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 60);
+  }, [turns.length, cards.length, confirmed, working, pendingTranscript]);
+
+  const send = useMutation({
+    mutationFn: (input: { text: string; audioRef?: string; confidence?: number | null }) =>
+      sendConciergeMessage({
+        conversationId,
+        text: input.text,
+        ...(input.audioRef ? { audioRef: input.audioRef } : {}),
+        ...(typeof input.confidence === 'number' ? { transcriptConfidence: input.confidence } : {}),
+      }),
+    onSuccess: (reply) => {
+      setConversationId(reply.conversationId);
+      setTurns((t) => [
+        ...t,
+        { id: `${reply.requestId}-assistant`, role: 'assistant', content: reply.reply },
+      ]);
+      setNote(assumptionNote(reply));
+      if (reply.ready) suggest.mutate(reply.requestId);
+    },
+    onError: (e) => setError(e instanceof Error ? e.message : 'Something went wrong.'),
+  });
+
+  const suggest = useMutation({
+    mutationFn: (requestId: string) => requestSuggestions(requestId),
+    // Three at most. A concierge with an opinion offers a shortlist, not a
+    // directory.
+    onSuccess: (result) => {
+      setCards(result.suggestions.slice(0, 3));
+      if (result.suggestions.length === 0 && result.message) {
+        setTurns((t) => [
+          ...t,
+          { id: `${Date.now()}-none`, role: 'assistant', content: result.message! },
+        ]);
+      }
+    },
+    onError: (e) => setError(e instanceof Error ? e.message : 'Could not put options together.'),
+  });
+
+  const reserve = useMutation({
+    mutationFn: (card: SuggestionCard) => approveSuggestion(card.id),
+    onMutate: (card) => {
+      setOpened(null);
+      setCards([]);
+      setWorking(`Asking ${card.name}…`);
+    },
+    onSuccess: (result, card) => {
+      setWorking(null);
+      const when = new Date(card.proposedStart);
+      setConfirmed({
+        venueName: card.name,
+        when: when.toLocaleString('en-GB', {
+          weekday: 'long',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        partyLine: result.message,
+      });
+    },
+    onError: (e) => {
+      setWorking(null);
+      setError(e instanceof Error ? e.message : 'Could not put that through.');
+    },
+  });
+
+  function submitText(text: string, audioRef?: string, confidence?: number | null) {
+    const trimmed = text.trim();
+    if (!trimmed || send.isPending) return;
+    setError(null);
+    setNote(null);
+    setConfirmed(null);
+    setTurns((t) => [...t, { id: `${Date.now()}`, role: 'user', content: trimmed }]);
+    setDraft('');
+    setPendingTranscript(null);
+    setCards([]);
+    send.mutate({ text: trimmed, ...(audioRef ? { audioRef } : {}), confidence });
+  }
+
+  const voice = useMutation({
+    mutationFn: async () => {
+      if (!session) throw new Error('Sign in required.');
+      const uri = recorder.uri;
+      if (!uri) throw new Error('That recording came out empty.');
+      const { audioRef } = await uploadVoiceNote(uri, session.user.id);
+      const transcript = await transcribeVoiceNote(audioRef);
+      return { audioRef, ...transcript };
+    },
+    onSuccess: (result) =>
+      setPendingTranscript({
+        text: result.text,
+        audioRef: result.audioRef,
+        confidence: result.confidence,
+      }),
+    onError: (e) => setError(e instanceof Error ? e.message : 'Could not transcribe that.'),
+  });
+
+  async function toggleRecording() {
+    setError(null);
+    if (recorderState.isRecording) {
+      await recorder.stop();
+      voice.mutate();
+      return;
+    }
+    const permission = await AudioModule.requestRecordingPermissionsAsync();
+    if (!permission.granted) {
+      setError('I need microphone access to take a voice note.');
+      return;
+    }
+    await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
+    await recorder.prepareToRecordAsync();
+    recorder.record();
+  }
+
   const name = firstName(profile.data?.full_name ?? null);
-  const reservations = useQuery({ queryKey: ['reservations'], queryFn: listReservations });
-  const upcomingCount = reservations.data?.upcoming.length ?? 0;
+  const voiceEnabled = capabilities.data?.voice_notes === true;
+  const thinking = send.isPending || suggest.isPending || voice.isPending;
+  const empty = turns.length === 0 && !confirmed;
+  // Cards peek past the edge so it reads as a row that continues, not as one
+  // card that happens to be narrow.
+  const cardWidth = Math.min(Dimensions.get('window').width - 96, 300);
 
   return (
-    <ScreenScroll>
-      <View className="gap-3 pt-6">
-        <Eyebrow>reservAI</Eyebrow>
-        <Display>
-          {greeting()}
-          {name ? `, ${name}` : ''}
-        </Display>
-        <Body>Nothing booked yet. Tell me what you want and I will find it, then book it.</Body>
-      </View>
-
-      <View className="gap-3">
-        <Caption>Try something like</Caption>
-        {EXAMPLES.map((example) => (
-          <View
-            key={example}
-            className="rounded-2xl border border-paper-line bg-paper-raised px-5 py-4 dark:border-night-line dark:bg-night-raised"
-          >
-            <Body className="text-ink dark:text-paper">“{example}”</Body>
-          </View>
-        ))}
-        <Link href="/(app)/chat" asChild>
-          <Pressable
-            accessibilityRole="button"
-            className="mt-1 h-14 flex-row items-center justify-center rounded-2xl bg-ink px-6 dark:bg-paper"
-          >
-            <Body className="font-medium text-paper dark:text-ink">Ask for something</Body>
+    <Screen>
+      <View className="flex-row justify-end px-7 pb-1 pt-2">
+        <Link href="/bookings" asChild>
+          <Pressable accessibilityRole="link" className="min-h-[44px] justify-center px-1">
+            <Meta>Bookings</Meta>
           </Pressable>
         </Link>
       </View>
 
-      <View className="gap-3">
-        <Caption>Your reservations</Caption>
-        <Link href="/(app)/reservations" asChild>
-          <Pressable
-            accessibilityRole="button"
-            className="rounded-2xl border border-paper-line px-5 py-4 dark:border-night-line"
-          >
-            <Body className="font-medium text-ink dark:text-paper">
-              {upcomingCount === 0
-                ? 'Nothing booked yet'
-                : upcomingCount === 1
-                  ? 'One booking coming up'
-                  : `${upcomingCount} bookings coming up`}
-            </Body>
-            <Caption>
-              {upcomingCount === 0
-                ? 'Once I book something it lands here, with a calendar entry and a reminder.'
-                : 'Tap to see them, add to your calendar, or cancel.'}
-            </Caption>
-          </Pressable>
-        </Link>
-      </View>
-
-      <Link href="/(app)/profile" asChild>
-        <Pressable
-          accessibilityRole="button"
-          className="rounded-2xl border border-paper-line px-5 py-4 dark:border-night-line"
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={8}
+      >
+        <ScrollView
+          ref={scrollRef}
+          contentContainerClassName="gap-7 px-7 pb-8 pt-6"
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <Body className="font-medium text-ink dark:text-paper">Your profile</Body>
-          <Caption>Tastes, dietary needs, usual party size</Caption>
-        </Pressable>
-      </Link>
-    </ScreenScroll>
+          {empty ? (
+            <Display>
+              {greeting()}
+              {name ? `, ${name}` : ''}
+            </Display>
+          ) : null}
+
+          {turns.map((turn) =>
+            turn.role === 'user' ? (
+              <View key={turn.id} className="items-end">
+                <View className="max-w-[82%] rounded-card bg-porcelain-raised px-5 py-3.5 dark:bg-ink-raised">
+                  <Body>{turn.content}</Body>
+                </View>
+              </View>
+            ) : (
+              // The concierge is not a correspondent to be quoted. Its words
+              // are simply the page.
+              <Lead key={turn.id}>{turn.content}</Lead>
+            ),
+          )}
+
+          {cards.length > 0 ? (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerClassName="gap-3 pr-7"
+              className="-mx-7 px-7"
+            >
+              {cards.map((card) => (
+                <VenueCard
+                  key={card.id}
+                  card={card}
+                  width={cardWidth}
+                  onPress={() => setOpened(card)}
+                />
+              ))}
+            </ScrollView>
+          ) : null}
+
+          {working ? <LiveStatus label={working} /> : null}
+
+          {confirmed ? (
+            <ConfirmationCard
+              venueName={confirmed.venueName}
+              when={confirmed.when}
+              partyLine={confirmed.partyLine}
+            />
+          ) : null}
+
+          {thinking && !working ? <LiveStatus label="One moment…" /> : null}
+          {note ? <Muted>{note}</Muted> : null}
+          {error ? <Body className="text-clay">{error}</Body> : null}
+        </ScrollView>
+
+        {pendingTranscript ? (
+          <View className="gap-3.5 px-7 pb-5 pt-3">
+            <Meta>
+              I heard this
+              {typeof pendingTranscript.confidence === 'number' &&
+              pendingTranscript.confidence < 0.75
+                ? ' — do check it'
+                : ''}
+            </Meta>
+            <TextInput
+              value={pendingTranscript.text}
+              onChangeText={(text) => setPendingTranscript((p) => (p ? { ...p, text } : p))}
+              multiline
+              className="rounded-card border border-stone-line px-5 py-4 font-body text-lead text-ink dark:text-porcelain"
+            />
+            <View className="flex-row gap-2.5">
+              <Button
+                label="Send this"
+                className="flex-1"
+                onPress={() =>
+                  submitText(
+                    pendingTranscript.text,
+                    pendingTranscript.audioRef,
+                    pendingTranscript.confidence,
+                  )
+                }
+              />
+              <Button
+                label="Discard"
+                variant="quiet"
+                className="flex-1"
+                onPress={() => setPendingTranscript(null)}
+              />
+            </View>
+          </View>
+        ) : (
+          <View className="gap-3 px-7 pb-5 pt-2">
+            <View className="flex-row items-end gap-2.5">
+              <TextInput
+                value={draft}
+                onChangeText={setDraft}
+                placeholder="Ask for something…"
+                placeholderTextColor="#8A8D93"
+                multiline
+                editable={!thinking}
+                returnKeyType="send"
+                onSubmitEditing={() => submitText(draft)}
+                className="max-h-32 flex-1 rounded-input border border-stone-line px-5 py-3.5 font-body text-lead text-ink dark:text-porcelain"
+              />
+
+              {voiceEnabled ? (
+                <Pressable
+                  onPress={toggleRecording}
+                  disabled={thinking && !recorderState.isRecording}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    recorderState.isRecording ? 'Stop recording' : 'Record a voice note'
+                  }
+                  className={
+                    recorderState.isRecording
+                      ? 'h-12 w-12 items-center justify-center rounded-full bg-clay'
+                      : 'h-12 w-12 items-center justify-center rounded-full border border-stone-line'
+                  }
+                >
+                  <View
+                    className={
+                      recorderState.isRecording
+                        ? 'h-3 w-3 bg-porcelain'
+                        : 'h-3 w-3 rounded-full bg-stone'
+                    }
+                  />
+                </Pressable>
+              ) : null}
+
+              {/*
+                Appears only when there is something to send, so the resting
+                state is one line and nothing else.
+              */}
+              {draft.trim().length > 0 ? (
+                <Button
+                  label="Send"
+                  onPress={() => submitText(draft)}
+                  loading={send.isPending}
+                  className="h-12 px-5"
+                />
+              ) : null}
+            </View>
+
+            {empty ? <Muted>Quiet table for two tonight, walking distance</Muted> : null}
+
+            {recorderState.isRecording ? <Muted>Recording. Tap the square when done.</Muted> : null}
+          </View>
+        )}
+      </KeyboardAvoidingView>
+
+      <VenueSheet
+        card={opened}
+        onClose={() => setOpened(null)}
+        onReserve={(card) => reserve.mutate(card)}
+        reserving={reserve.isPending}
+      />
+    </Screen>
   );
 }

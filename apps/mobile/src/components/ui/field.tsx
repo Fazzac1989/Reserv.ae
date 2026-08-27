@@ -1,6 +1,6 @@
 import { TextInput, View, type TextInputProps } from 'react-native';
 import { cn } from '../../lib/cn';
-import { Caption } from './text';
+import { Meta, Muted } from './text';
 
 interface Props extends TextInputProps {
   label?: string;
@@ -10,18 +10,18 @@ interface Props extends TextInputProps {
 
 export function TextField({ label, hint, containerClassName, className, ...props }: Props) {
   return (
-    <View className={cn('gap-2', containerClassName)}>
-      {label ? <Caption>{label}</Caption> : null}
+    <View className={cn('gap-2.5', containerClassName)}>
+      {label ? <Meta>{label}</Meta> : null}
       <TextInput
-        placeholderTextColor="#a8a29e"
+        placeholderTextColor="#8A8D93"
         className={cn(
-          'rounded-2xl border border-paper-line bg-paper-raised px-4 py-4 text-base text-ink',
-          'dark:border-night-line dark:bg-night-raised dark:text-paper',
+          'rounded-input border border-stone-line px-5 py-4 font-body text-lead text-ink',
+          'dark:text-porcelain',
           className,
         )}
         {...props}
       />
-      {hint ? <Caption className="text-ink-faint">{hint}</Caption> : null}
+      {hint ? <Muted>{hint}</Muted> : null}
     </View>
   );
 }

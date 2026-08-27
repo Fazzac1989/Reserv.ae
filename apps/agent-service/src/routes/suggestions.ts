@@ -79,7 +79,7 @@ export async function registerSuggestionRoutes(
     const { data: venues, error: venuesError } = await asService
       .from('venues')
       .select(
-        'id, name, vertical, zone, price_band, tags, house_note, best_times, opening_hours, onboarding_status, booking_consent_obtained_at, venue_booking_channels(kind, is_enabled), venue_policies(min_lead_time_minutes, max_lead_time_days, min_party_size, max_party_size)',
+        'id, name, vertical, zone, price_band, tags, house_note, best_times, photo_urls, opening_hours, onboarding_status, booking_consent_obtained_at, venue_booking_channels(kind, is_enabled), venue_policies(min_lead_time_minutes, max_lead_time_days, min_party_size, max_party_size)',
       )
       .eq('onboarding_status', 'live');
     if (venuesError) throw venuesError;
@@ -254,6 +254,9 @@ export async function registerSuggestionRoutes(
           priceBand: venue?.price_band,
           tags: venue?.tags ?? [],
           houseNote: detail?.house_note ?? null,
+          // Photography is the only decoration the app allows, so the card
+          // needs it here rather than fetching venues a second time.
+          photoUrls: detail?.photo_urls ?? [],
           proposedStart: s.proposed_starts_at,
           proposedEnd: s.proposed_ends_at,
           rationale: s.rationale,

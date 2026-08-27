@@ -1,5 +1,5 @@
 import { Pressable, View } from 'react-native';
-import { Body, Caption } from './ui/text';
+import { Body, Muted } from './ui/text';
 
 /**
  * Notification controls.
@@ -52,15 +52,15 @@ function Toggle({ on, disabled }: { on: boolean; disabled: boolean }) {
     <View
       className={
         on && !disabled
-          ? 'h-7 w-12 justify-center rounded-full bg-ink px-0.5 dark:bg-paper'
-          : 'h-7 w-12 justify-center rounded-full bg-paper-line px-0.5 dark:bg-night-line'
+          ? 'h-7 w-12 justify-center rounded-full bg-ink px-0.5 dark:bg-porcelain'
+          : 'h-7 w-12 justify-center rounded-full bg-stone-line px-0.5 bg-stone-line'
       }
     >
       <View
         className={
           on && !disabled
-            ? 'h-6 w-6 self-end rounded-full bg-paper dark:bg-ink'
-            : 'h-6 w-6 self-start rounded-full bg-paper dark:bg-night-raised'
+            ? 'h-6 w-6 self-end rounded-full bg-porcelain dark:bg-ink'
+            : 'h-6 w-6 self-start rounded-full bg-porcelain dark:bg-ink-raised'
         }
       />
     </View>
@@ -78,7 +78,7 @@ export function NotificationPrefsControl({
 }) {
   return (
     <View className="gap-3">
-      <Caption>Notifications</Caption>
+      <Muted>Notifications</Muted>
 
       {CONTROLS.map((control) => {
         // Everything hangs off the master switch, and showing the others as
@@ -97,23 +97,23 @@ export function NotificationPrefsControl({
             accessibilityLabel={control.label}
             className={
               disabled
-                ? 'flex-row items-center gap-4 rounded-2xl border border-paper-line px-5 py-4 opacity-40 dark:border-night-line'
-                : 'flex-row items-center gap-4 rounded-2xl border border-paper-line px-5 py-4 dark:border-night-line'
+                ? 'flex-row items-center gap-4 rounded-card border border-stone-line px-5 py-4 opacity-40 border-stone-line'
+                : 'flex-row items-center gap-4 rounded-card border border-stone-line px-5 py-4 border-stone-line'
             }
           >
             <View className="flex-1 gap-0.5">
-              <Body className="font-medium text-ink dark:text-paper">{control.label}</Body>
-              <Caption>{control.detail}</Caption>
+              <Body className="font-body-medium text-ink dark:text-porcelain">{control.label}</Body>
+              <Muted>{control.detail}</Muted>
             </View>
             <Toggle on={value} disabled={disabled} />
           </Pressable>
         );
       })}
 
-      <Caption className="text-ink-faint">
+      <Muted>
         Reminders about bookings you made are on by default. Suggestions you did not ask for are not
         — that one is opt-in.
-      </Caption>
+      </Muted>
     </View>
   );
 }

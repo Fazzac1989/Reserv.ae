@@ -3,7 +3,7 @@ import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, View } fr
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Screen } from '../../src/components/ui/screen';
 import { TextField } from '../../src/components/ui/field';
-import { Body, Caption, Display } from '../../src/components/ui/text';
+import { Body, Muted, Display } from '../../src/components/ui/text';
 import { requestEmailCode, verifyEmailCode } from '../../src/lib/auth';
 
 const CODE_LENGTH = 6;
@@ -68,7 +68,9 @@ export default function Verify() {
         <View className="flex-1 items-center justify-center gap-4 px-7">
           <Body className="text-center">We lost track of which address to verify.</Body>
           <Pressable onPress={() => router.replace('/(auth)/sign-in')} accessibilityRole="button">
-            <Body className="font-medium text-ink underline dark:text-paper">Start again</Body>
+            <Body className="font-body-medium text-ink underline dark:text-porcelain">
+              Start again
+            </Body>
           </Pressable>
         </View>
       </Screen>
@@ -99,17 +101,17 @@ export default function Verify() {
               maxLength={CODE_LENGTH}
               editable={!busy}
               autoFocus
-              className="text-center text-2xl tracking-[12px]"
+              className="text-center text-title tracking-[12px]"
             />
 
             {busy ? <ActivityIndicator /> : null}
 
             {error ? (
-              <Caption className="text-danger" accessibilityLiveRegion="polite">
+              <Muted className="text-clay" accessibilityLiveRegion="polite">
                 {error}
-              </Caption>
+              </Muted>
             ) : null}
-            {notice && !error ? <Caption accessibilityLiveRegion="polite">{notice}</Caption> : null}
+            {notice && !error ? <Muted accessibilityLiveRegion="polite">{notice}</Muted> : null}
 
             <Pressable
               onPress={onResend}
@@ -118,7 +120,7 @@ export default function Verify() {
               accessibilityState={{ disabled: cooldown > 0 || busy }}
               className="py-2"
             >
-              <Caption>{cooldown > 0 ? `Resend in ${cooldown}s` : 'Send another code'}</Caption>
+              <Muted>{cooldown > 0 ? `Resend in ${cooldown}s` : 'Send another code'}</Muted>
             </Pressable>
           </View>
 
@@ -127,7 +129,7 @@ export default function Verify() {
             accessibilityRole="button"
             className="py-2"
           >
-            <Caption>Use a different email</Caption>
+            <Muted>Use a different email</Muted>
           </Pressable>
         </View>
       </KeyboardAvoidingView>

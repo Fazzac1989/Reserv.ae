@@ -5,7 +5,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import { Screen } from '../../src/components/ui/screen';
 import { Button } from '../../src/components/ui/button';
 import { TextField } from '../../src/components/ui/field';
-import { Body, Caption, Display, Eyebrow } from '../../src/components/ui/text';
+import { Body, Muted, Display, Meta } from '../../src/components/ui/text';
 import {
   isAppleAvailable,
   isGoogleEnabled,
@@ -61,7 +61,7 @@ export default function SignIn() {
       >
         <View className="flex-1 justify-center gap-10 px-7">
           <View className="gap-3">
-            <Eyebrow>reservAI</Eyebrow>
+            <Meta>reservAI</Meta>
             <Display>Your secretary for Dubai</Display>
             <Body>It suggests, then it books.</Body>
           </View>
@@ -83,14 +83,12 @@ export default function SignIn() {
 
             <Button label="Continue" onPress={onSendCode} disabled={!emailValid} loading={busy} />
 
-            <Caption className="text-ink-faint">
-              We will email you a six-digit code. No password to remember.
-            </Caption>
+            <Muted>We will email you a six-digit code. No password to remember.</Muted>
 
             {error ? (
-              <Caption className="text-danger" accessibilityLiveRegion="polite">
+              <Muted className="text-clay" accessibilityLiveRegion="polite">
                 {error}
-              </Caption>
+              </Muted>
             ) : null}
           </View>
 
@@ -101,16 +99,16 @@ export default function SignIn() {
           {appleAvailable || isGoogleEnabled() ? (
             <View className="gap-3">
               <View className="flex-row items-center gap-3">
-                <View className="h-px flex-1 bg-paper-line dark:bg-night-line" />
-                <Caption className="text-ink-faint">or</Caption>
-                <View className="h-px flex-1 bg-paper-line dark:bg-night-line" />
+                <View className="h-px flex-1 bg-stone-line" />
+                <Muted>or</Muted>
+                <View className="h-px flex-1 bg-stone-line" />
               </View>
 
               {appleAvailable ? (
                 <AppleAuthentication.AppleAuthenticationButton
                   buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
                   buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-                  cornerRadius={16}
+                  cornerRadius={14}
                   style={{ height: 56 }}
                   onPress={() => void onProvider(signInWithApple)}
                 />
@@ -121,9 +119,11 @@ export default function SignIn() {
                   onPress={() => void onProvider(signInWithGoogle)}
                   disabled={busy}
                   accessibilityRole="button"
-                  className="h-14 items-center justify-center rounded-2xl border border-paper-line dark:border-night-line"
+                  className="h-14 items-center justify-center rounded-card border border-stone-line"
                 >
-                  <Body className="font-medium text-ink dark:text-paper">Continue with Google</Body>
+                  <Body className="font-body-medium text-ink dark:text-porcelain">
+                    Continue with Google
+                  </Body>
                 </Pressable>
               ) : null}
             </View>

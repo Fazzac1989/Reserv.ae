@@ -4,8 +4,8 @@
     {
       "name": "mobile-web",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["serve", "-s", "apps/mobile/dist-web", "-l", "4173"],
-      "port": 4173
+      "runtimeArgs": ["serve", "-s", "apps/mobile/dist-web", "-l", "4319"],
+      "port": 4319
     }
   ]
 }

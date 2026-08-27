@@ -5,7 +5,7 @@ import { ScreenScroll } from '../../src/components/ui/screen';
 import { Button } from '../../src/components/ui/button';
 import { Chip } from '../../src/components/ui/chip';
 import { TextField } from '../../src/components/ui/field';
-import { Body, Caption, Display, Eyebrow } from '../../src/components/ui/text';
+import { Body, Muted, Display, Meta } from '../../src/components/ui/text';
 import {
   ALLERGIES,
   CUISINES,
@@ -140,7 +140,7 @@ export default function ProfileScreen() {
   return (
     <ScreenScroll>
       <View className="gap-3 pt-6">
-        <Eyebrow>Your profile</Eyebrow>
+        <Meta>Your profile</Meta>
         <Display>What I know about you</Display>
         <Body>I use this every time I suggest somewhere or speak to a venue.</Body>
       </View>
@@ -154,7 +154,7 @@ export default function ProfileScreen() {
       />
 
       <View className="gap-3">
-        <Caption>Where you start from</Caption>
+        <Muted>Where you start from</Muted>
         <View className="flex-row flex-wrap gap-2">
           {ZONES.map((zone) => (
             <Chip
@@ -168,7 +168,7 @@ export default function ProfileScreen() {
       </View>
 
       <View className="gap-3">
-        <Caption>Also happy to travel to</Caption>
+        <Muted>Also happy to travel to</Muted>
         <View className="flex-row flex-wrap gap-2">
           {ZONES.map((zone) => (
             <Chip
@@ -182,7 +182,7 @@ export default function ProfileScreen() {
       </View>
 
       <View className="gap-3">
-        <Caption>Happy to eat</Caption>
+        <Muted>Happy to eat</Muted>
         <View className="flex-row flex-wrap gap-2">
           {CUISINES.map((cuisine) => (
             <Chip
@@ -199,7 +199,7 @@ export default function ProfileScreen() {
       </View>
 
       <View className="gap-3">
-        <Caption>Rather not</Caption>
+        <Muted>Rather not</Muted>
         <View className="flex-row flex-wrap gap-2">
           {CUISINES.filter((c) => !loved.includes(c)).map((cuisine) => (
             <Chip
@@ -214,7 +214,7 @@ export default function ProfileScreen() {
       </View>
 
       <View className="gap-3">
-        <Caption>Usual spend</Caption>
+        <Muted>Usual spend</Muted>
         <View className="flex-row flex-wrap gap-2">
           {PRICE_BANDS.map((band) => (
             <Chip
@@ -226,12 +226,12 @@ export default function ProfileScreen() {
           ))}
         </View>
         {bands.length === 0 ? (
-          <Caption className="text-danger">Pick at least one spend band.</Caption>
+          <Muted className="text-clay">Pick at least one spend band.</Muted>
         ) : null}
       </View>
 
       <View className="gap-3">
-        <Caption>Usually a table for</Caption>
+        <Muted>Usually a table for</Muted>
         <View className="flex-row flex-wrap gap-2">
           {PARTY_SIZES.map((size) => (
             <Chip
@@ -245,7 +245,7 @@ export default function ProfileScreen() {
       </View>
 
       <View className="gap-3">
-        <Caption>Dietary</Caption>
+        <Muted>Dietary</Muted>
         <View className="flex-row flex-wrap gap-2">
           {DIETARY.map((item) => (
             <Chip
@@ -259,7 +259,7 @@ export default function ProfileScreen() {
       </View>
 
       <View className="gap-3">
-        <Caption>Allergies</Caption>
+        <Muted>Allergies</Muted>
         <View className="flex-row flex-wrap gap-2">
           {ALLERGIES.map((item) => (
             <Chip
@@ -283,11 +283,11 @@ export default function ProfileScreen() {
       />
 
       {error ? (
-        <Caption className="text-danger">
+        <Muted className="text-clay">
           {error instanceof Error ? error.message : 'Could not save that.'}
-        </Caption>
+        </Muted>
       ) : null}
-      {saved ? <Caption>Saved.</Caption> : null}
+      {saved ? <Muted>Saved.</Muted> : null}
 
       <View className="gap-3">
         <Button
@@ -296,13 +296,13 @@ export default function ProfileScreen() {
           disabled={!dirty || bands.length === 0}
           loading={pending}
         />
-        <Button label="Back" variant="secondary" onPress={() => router.back()} />
+        <Button label="Back" variant="primary" onPress={() => router.back()} />
         <Pressable
           accessibilityRole="button"
           onPress={() => void signOut()}
           className="items-center py-3"
         >
-          <Caption>Sign out</Caption>
+          <Muted>Sign out</Muted>
         </Pressable>
       </View>
     </ScreenScroll>

@@ -1,28 +1,39 @@
-import { Platform, Text as RNText, type TextProps } from 'react-native';
+import { Text as RNText, type TextProps } from 'react-native';
 import { cn } from '../../lib/cn';
 
 /**
- * The platform serif for display type. It carries the "quiet luxury" register
- * without shipping a font file, and it is already on the device, so nothing
- * blocks first paint.
+ * The five sizes in DESIGN.md, and nothing between them.
+ *
+ * Display is Fraunces and body is Inter; the split is what carries the
+ * register, so neither face is used for the other's job. Weight never goes
+ * past 500 — a heavy serif reads as a headline in a magazine, not as a name
+ * spoken quietly.
  */
-const SERIF = Platform.select({ ios: 'Georgia', android: 'serif', default: 'serif' });
 
-export function Display({ className, style, ...props }: TextProps) {
+export function Display({ className, ...props }: TextProps) {
   return (
     <RNText
-      style={[{ fontFamily: SERIF }, style]}
-      className={cn('text-display text-ink dark:text-paper', className)}
+      className={cn('font-display text-display text-ink dark:text-porcelain', className)}
       {...props}
     />
   );
 }
 
-export function Title({ className, style, ...props }: TextProps) {
+/** Venue names, and the headline on a confirmation. */
+export function Title({ className, ...props }: TextProps) {
   return (
     <RNText
-      style={[{ fontFamily: SERIF }, style]}
-      className={cn('text-title text-ink dark:text-paper', className)}
+      className={cn('font-display text-title text-ink dark:text-porcelain', className)}
+      {...props}
+    />
+  );
+}
+
+/** The concierge speaking. */
+export function Lead({ className, ...props }: TextProps) {
+  return (
+    <RNText
+      className={cn('font-body text-lead text-ink dark:text-porcelain', className)}
       {...props}
     />
   );
@@ -31,29 +42,25 @@ export function Title({ className, style, ...props }: TextProps) {
 export function Body({ className, ...props }: TextProps) {
   return (
     <RNText
-      className={cn('text-base leading-6 text-ink-soft dark:text-paper/70', className)}
+      className={cn('font-body text-body text-ink dark:text-porcelain', className)}
       {...props}
     />
   );
 }
 
-export function Caption({ className, ...props }: TextProps) {
-  return (
-    <RNText
-      className={cn('text-sm leading-5 text-ink-muted dark:text-ink-faint', className)}
-      {...props}
-    />
-  );
+/** Anything secondary: rationale, helper text, the quieter half of a pair. */
+export function Muted({ className, ...props }: TextProps) {
+  return <RNText className={cn('font-body text-body text-stone', className)} {...props} />;
 }
 
-export function Eyebrow({ className, ...props }: TextProps) {
+/**
+ * Timestamps, neighbourhoods, booking references.
+ *
+ * Uppercase and letterspaced so a small size still reads as deliberate rather
+ * than as body text that got away.
+ */
+export function Meta({ className, ...props }: TextProps) {
   return (
-    <RNText
-      className={cn(
-        'text-[11px] uppercase tracking-[3px] text-ink-muted dark:text-ink-faint',
-        className,
-      )}
-      {...props}
-    />
+    <RNText className={cn('font-body text-meta uppercase text-stone', className)} {...props} />
   );
 }

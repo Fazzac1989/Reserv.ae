@@ -6,7 +6,7 @@ import { Button } from '../../src/components/ui/button';
 import { Chip } from '../../src/components/ui/chip';
 import { TextField } from '../../src/components/ui/field';
 import { StepProgress } from '../../src/components/ui/progress';
-import { Body, Caption, Display, Eyebrow } from '../../src/components/ui/text';
+import { Body, Muted, Display, Meta } from '../../src/components/ui/text';
 import {
   ALLERGIES,
   CUISINES,
@@ -91,30 +91,30 @@ export default function Onboarding() {
                   onLongPress={() => setZones((current) => toggle(current, zone.value))}
                   className={
                     isHome
-                      ? 'rounded-2xl border border-ink bg-ink px-5 py-4 dark:border-paper dark:bg-paper'
-                      : 'rounded-2xl border border-paper-line px-5 py-4 dark:border-night-line'
+                      ? 'rounded-card bg-ink px-5 py-4 dark:bg-porcelain'
+                      : 'rounded-card border border-stone-line px-5 py-4'
                   }
                 >
                   <Body
                     className={
                       isHome
-                        ? 'font-medium text-paper dark:text-ink'
-                        : 'font-medium text-ink dark:text-paper'
+                        ? 'font-body-medium text-porcelain dark:text-ink'
+                        : 'font-body-medium text-ink dark:text-porcelain'
                     }
                   >
                     {zone.label}
                   </Body>
-                  <Caption className={isHome ? 'text-paper/70 dark:text-ink/70' : undefined}>
+                  <Muted className={isHome ? 'text-porcelain/70 dark:text-ink/70' : undefined}>
                     {zone.blurb}
                     {!isHome && isAlso ? ' · happy to travel here' : ''}
-                  </Caption>
+                  </Muted>
                 </Pressable>
               );
             })}
-            <Caption className="text-ink-faint">
+            <Muted>
               Tap to set where you start from. Press and hold to add or remove somewhere you would
               also travel to.
-            </Caption>
+            </Muted>
           </View>
         ),
       },
@@ -126,7 +126,7 @@ export default function Onboarding() {
         render: () => (
           <View className="gap-6">
             <View className="gap-3">
-              <Caption>Happy to eat</Caption>
+              <Muted>Happy to eat</Muted>
               <View className="flex-row flex-wrap gap-2">
                 {CUISINES.map((cuisine) => (
                   <Chip
@@ -143,7 +143,7 @@ export default function Onboarding() {
             </View>
 
             <View className="gap-3">
-              <Caption>Rather not</Caption>
+              <Muted>Rather not</Muted>
               <View className="flex-row flex-wrap gap-2">
                 {CUISINES.filter((c) => !loved.includes(c)).map((cuisine) => (
                   <Chip
@@ -178,29 +178,29 @@ export default function Onboarding() {
                     onPress={() => setBands((c) => toggle(c, band.value))}
                     className={
                       selected
-                        ? 'rounded-2xl border border-ink bg-ink px-5 py-4 dark:border-paper dark:bg-paper'
-                        : 'rounded-2xl border border-paper-line px-5 py-4 dark:border-night-line'
+                        ? 'rounded-card bg-ink px-5 py-4 dark:bg-porcelain'
+                        : 'rounded-card border border-stone-line px-5 py-4'
                     }
                   >
                     <Body
                       className={
                         selected
-                          ? 'font-medium text-paper dark:text-ink'
-                          : 'font-medium text-ink dark:text-paper'
+                          ? 'font-body-medium text-porcelain dark:text-ink'
+                          : 'font-body-medium text-ink dark:text-porcelain'
                       }
                     >
                       {band.label}
                     </Body>
-                    <Caption className={selected ? 'text-paper/70 dark:text-ink/70' : undefined}>
+                    <Muted className={selected ? 'text-porcelain/70 dark:text-ink/70' : undefined}>
                       {band.blurb}
-                    </Caption>
+                    </Muted>
                   </Pressable>
                 );
               })}
             </View>
 
             <View className="gap-3">
-              <Caption>Usually a table for</Caption>
+              <Muted>Usually a table for</Muted>
               <View className="flex-row flex-wrap gap-2">
                 {PARTY_SIZES.map((size) => (
                   <Chip
@@ -223,7 +223,7 @@ export default function Onboarding() {
         render: () => (
           <View className="gap-6">
             <View className="gap-3">
-              <Caption>Preferences</Caption>
+              <Muted>Preferences</Muted>
               <View className="flex-row flex-wrap gap-2">
                 {DIETARY.map((item) => (
                   <Chip
@@ -237,7 +237,7 @@ export default function Onboarding() {
             </View>
 
             <View className="gap-3">
-              <Caption>Allergies</Caption>
+              <Muted>Allergies</Muted>
               <View className="flex-row flex-wrap gap-2">
                 {ALLERGIES.map((item) => (
                   <Chip
@@ -250,9 +250,7 @@ export default function Onboarding() {
               </View>
             </View>
 
-            <Caption className="text-ink-faint">
-              If yours is not here, tell me in chat and I will remember it.
-            </Caption>
+            <Muted>If yours is not here, tell me in chat and I will remember it.</Muted>
           </View>
         ),
       },
@@ -307,7 +305,7 @@ export default function Onboarding() {
           showsVerticalScrollIndicator={false}
         >
           <View className="gap-3">
-            <Eyebrow>{current.eyebrow}</Eyebrow>
+            <Meta>{current.eyebrow}</Meta>
             <Display>{current.title}</Display>
             <Body>{current.blurb}</Body>
           </View>
@@ -315,13 +313,13 @@ export default function Onboarding() {
           {current.render()}
         </ScrollView>
 
-        <View className="gap-3 border-t border-paper-line px-7 pb-4 pt-4 dark:border-night-line">
+        <View className="gap-3 border-t border-stone-line px-7 pb-4 pt-4 border-stone-line">
           {complete.isError ? (
-            <Caption className="text-danger">
+            <Muted className="text-clay">
               {complete.error instanceof Error
                 ? complete.error.message
                 : 'Could not save that. Try again.'}
-            </Caption>
+            </Muted>
           ) : null}
 
           <Button
@@ -332,7 +330,7 @@ export default function Onboarding() {
           />
 
           {step > 0 ? (
-            <Button label="Back" variant="ghost" onPress={() => setStep((s) => s - 1)} />
+            <Button label="Back" variant="quiet" onPress={() => setStep((s) => s - 1)} />
           ) : null}
         </View>
       </KeyboardAvoidingView>

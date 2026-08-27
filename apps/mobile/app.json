@@ -15,7 +15,7 @@
       "package": "ae.reservai.app",
       "edgeToEdgeEnabled": true
     },
-    "plugins": ["expo-router", "expo-audio"],
+    "plugins": ["expo-router", "expo-audio", "expo-font"],
     "experiments": {
       "typedRoutes": true
     },

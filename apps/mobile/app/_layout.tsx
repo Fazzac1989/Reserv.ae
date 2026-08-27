@@ -2,17 +2,24 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { useColorScheme, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useFonts } from 'expo-font';
+import { Fraunces_400Regular, Fraunces_500Medium } from '@expo-google-fonts/fraunces';
+import { Inter_400Regular, Inter_500Medium } from '@expo-google-fonts/inter';
 import { initSessionListener, useSession, useSessionLoading } from '../src/store/session';
 import { useProfile } from '../src/lib/profile';
 import '../global.css';
 
+/**
+ * Nothing but the ground colour.
+ *
+ * A spinner on a cold start says the app is working; an empty page of the
+ * right colour says it has already arrived. The wait is short and the second
+ * reading is the one this product wants.
+ */
 function Splash() {
-  return (
-    <View className="flex-1 items-center justify-center bg-paper dark:bg-night">
-      <ActivityIndicator />
-    </View>
-  );
+  return <View className="flex-1 bg-porcelain dark:bg-ink" />;
 }
 
 /**
@@ -24,6 +31,7 @@ function Splash() {
  * finished it months ago is worse.
  */
 function AuthGate() {
+  const scheme = useColorScheme();
   const session = useSession();
   const sessionLoading = useSessionLoading();
   const profile = useProfile();
@@ -57,7 +65,17 @@ function AuthGate() {
 
   if (resolving) return <Splash />;
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  // The navigator paints its own default grey behind every screen, which shows
+  // in the gap during a transition and behind anything translucent. Giving it
+  // the page colour means there is only ever one ground.
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: scheme === 'dark' ? '#14161A' : '#F7F5F1' },
+      }}
+    />
+  );
 }
 
 export default function RootLayout() {
@@ -75,12 +93,26 @@ export default function RootLayout() {
       }),
   );
 
+  // The serif is the register. Rendering the app in a system fallback and
+  // swapping a moment later would show the wrong product first, so the ground
+  // colour holds until both faces are ready.
+  const [fontsReady] = useFonts({
+    Fraunces_400Regular,
+    Fraunces_500Medium,
+    Inter_400Regular,
+    Inter_500Medium,
+  });
+
   useEffect(() => initSessionListener(), []);
 
+  if (!fontsReady) return <Splash />;
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <StatusBar style="auto" />
-      <AuthGate />
-    </QueryClientProvider>
+    <SafeAreaProvider>
+      <QueryClientProvider client={queryClient}>
+        <StatusBar style="auto" />
+        <AuthGate />
+      </QueryClientProvider>
+    </SafeAreaProvider>
   );
 }

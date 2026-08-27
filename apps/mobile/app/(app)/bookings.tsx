@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, View } from 'react-native';
-import { useRouter } from 'expo-router';
+import { Pressable, View } from 'react-native';
+import { Link, useRouter } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ScreenScroll } from '../../src/components/ui/screen';
-import { Body, Caption, Display, Eyebrow } from '../../src/components/ui/text';
+import { Body, Display, Meta, Muted } from '../../src/components/ui/text';
+import { LiveStatus } from '../../src/components/booking-state';
 import { ReservationCard } from '../../src/components/reservation-card';
 import {
   cancelBooking,
@@ -14,7 +15,13 @@ import {
 } from '../../src/lib/agent';
 import { addToCalendar, removeFromCalendar } from '../../src/lib/calendar';
 
-export default function Reservations() {
+/**
+ * A calm list. Upcoming first, past greyed back to stone.
+ *
+ * No tab bar in v1, so this is reached by one word in the corner of the
+ * conversation and left by one word here.
+ */
+export default function Bookings() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [notice, setNotice] = useState<string | null>(null);
@@ -81,47 +88,47 @@ export default function Reservations() {
   const busy = cancel.isPending || calendar.isPending || rate.isPending;
   const upcoming = reservations.data?.upcoming ?? [];
   const past = reservations.data?.past ?? [];
+  const nothing = !reservations.isLoading && upcoming.length === 0 && past.length === 0;
 
   return (
     <ScreenScroll>
-      <View className="gap-3 pt-6">
-        <Eyebrow>Your reservations</Eyebrow>
-        <Display>What is booked</Display>
+      <View className="gap-6">
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          className="min-h-[44px] justify-center"
+        >
+          <Meta>Back</Meta>
+        </Pressable>
+        <Display>Bookings</Display>
       </View>
 
-      {reservations.isLoading ? (
-        <View className="items-center py-16">
-          <ActivityIndicator />
-        </View>
-      ) : null}
+      {reservations.isLoading ? <LiveStatus label="Fetching your bookings…" /> : null}
 
       {reservations.isError ? (
-        <Caption className="text-danger">
+        <Body className="text-clay">
           {reservations.error instanceof Error
             ? reservations.error.message
-            : 'Could not load your reservations.'}
-        </Caption>
+            : 'Could not load your bookings.'}
+        </Body>
       ) : null}
 
-      {notice ? <Caption>{notice}</Caption> : null}
-      {error ? <Caption className="text-danger">{error}</Caption> : null}
+      {notice ? <Muted>{notice}</Muted> : null}
+      {error ? <Body className="text-clay">{error}</Body> : null}
 
-      {!reservations.isLoading && upcoming.length === 0 && past.length === 0 ? (
-        <View className="items-center gap-3 rounded-2xl border border-dashed border-paper-line px-6 py-12 dark:border-night-line">
-          <Body className="text-center">Nothing booked yet.</Body>
-          <Pressable
-            onPress={() => router.push('/(app)/chat')}
-            accessibilityRole="button"
-            className="h-12 items-center justify-center rounded-xl bg-ink px-6 dark:bg-paper"
-          >
-            <Body className="font-medium text-paper dark:text-ink">Ask for something</Body>
-          </Pressable>
+      {nothing ? (
+        <View className="gap-5">
+          <Muted>Nothing booked yet.</Muted>
+          <Link href="/" asChild>
+            <Pressable accessibilityRole="link" className="min-h-[44px] justify-center">
+              <Body>Ask for something</Body>
+            </Pressable>
+          </Link>
         </View>
       ) : null}
 
       {upcoming.length > 0 ? (
-        <View className="gap-3">
-          <Caption>Coming up</Caption>
+        <View>
           {upcoming.map((reservation) => (
             <ReservationCard
               key={reservation.id}
@@ -136,24 +143,29 @@ export default function Reservations() {
       ) : null}
 
       {past.length > 0 ? (
-        <View className="gap-3">
-          <Caption>Been and gone</Caption>
-          {past.map((reservation) => (
-            <ReservationCard
-              key={reservation.id}
-              reservation={reservation}
-              busy={busy}
-              onCancel={() => cancel.mutate(reservation)}
-              onAddToCalendar={() => calendar.mutate(reservation)}
-              onRate={(rating) => rate.mutate({ booking: reservation, rating })}
-            />
-          ))}
+        <View className="gap-4">
+          <Meta>Earlier</Meta>
+          <View>
+            {past.map((reservation) => (
+              <ReservationCard
+                key={reservation.id}
+                reservation={reservation}
+                past
+                busy={busy}
+                onCancel={() => cancel.mutate(reservation)}
+                onAddToCalendar={() => calendar.mutate(reservation)}
+                onRate={(rating) => rate.mutate({ booking: reservation, rating })}
+              />
+            ))}
+          </View>
         </View>
       ) : null}
 
-      <Pressable onPress={() => router.back()} accessibilityRole="button" className="py-2">
-        <Caption>Back</Caption>
-      </Pressable>
+      <Link href="/profile" asChild>
+        <Pressable accessibilityRole="link" className="min-h-[44px] justify-center">
+          <Meta>Profile</Meta>
+        </Pressable>
+      </Link>
     </ScreenScroll>
   );
 }

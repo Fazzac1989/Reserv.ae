@@ -1,7 +1,13 @@
 import { ActivityIndicator, Pressable, Text, type PressableProps } from 'react-native';
 import { cn } from '../../lib/cn';
 
-type Variant = 'primary' | 'secondary' | 'ghost';
+/**
+ * `commit` is the champagne one, and the name is the point: it is the only
+ * variant allowed to wear the accent, so a stray use is visible in the diff
+ * rather than only on the screen. Reserve a table, confirm a time. Nothing
+ * else.
+ */
+type Variant = 'commit' | 'primary' | 'quiet';
 
 interface Props extends Omit<PressableProps, 'children'> {
   label: string;
@@ -11,15 +17,16 @@ interface Props extends Omit<PressableProps, 'children'> {
 }
 
 const CONTAINER: Record<Variant, string> = {
-  primary: 'bg-ink dark:bg-paper',
-  secondary: 'border border-paper-line dark:border-night-line',
-  ghost: '',
+  commit: 'bg-champagne',
+  primary: 'bg-ink dark:bg-porcelain',
+  quiet: '',
 };
 
 const LABEL: Record<Variant, string> = {
-  primary: 'text-paper dark:text-ink',
-  secondary: 'text-ink dark:text-paper',
-  ghost: 'text-ink-muted dark:text-ink-faint',
+  // Ink on champagne, always. The accent is never a background for light text.
+  commit: 'text-ink',
+  primary: 'text-porcelain dark:text-ink',
+  quiet: 'text-stone',
 };
 
 export function Button({
@@ -38,7 +45,7 @@ export function Button({
       accessibilityState={{ disabled: Boolean(inactive), busy: loading }}
       disabled={inactive}
       className={cn(
-        'h-14 flex-row items-center justify-center rounded-2xl px-6',
+        'h-14 flex-row items-center justify-center rounded-card px-6',
         CONTAINER[variant],
         // Dimming rather than greying keeps the shape stable, so the button
         // does not appear to change size as it becomes available.
@@ -48,9 +55,9 @@ export function Button({
       {...props}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? '#faf9f7' : '#78716c'} />
+        <ActivityIndicator color={variant === 'primary' ? '#F7F5F1' : '#14161A'} />
       ) : (
-        <Text className={cn('text-base font-medium', LABEL[variant])}>{label}</Text>
+        <Text className={cn('font-body-medium text-lead', LABEL[variant])}>{label}</Text>
       )}
     </Pressable>
   );

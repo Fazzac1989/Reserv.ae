@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { Pressable, View } from 'react-native';
-import { Body, Caption, Title } from './ui/text';
+import { Body, Meta, Muted, Title } from './ui/text';
+import { Rule } from './ui/screen';
 import type { Reservation } from '../lib/agent';
 
 /**
- * A reservation, as the user sees it.
+ * A booking, as the user sees it.
  *
  * The status line is the important part. Only `confirmed` and `reminded` mean
  * the venue has actually agreed — everything before that is us still working,
- * and the card says so in plain words rather than showing a green tick and
- * hoping.
+ * and the row says so in plain words rather than showing a tick and hoping.
+ *
+ * At rest a row is four lines and nothing else. The things one does to a
+ * booking — calendar, rating, cancelling — are all rarer than reading it, so
+ * they wait behind a tap instead of crowding every row with controls.
  */
 
 interface StatusCopy {
@@ -63,10 +67,10 @@ export function statusCopy(reservation: Reservation): StatusCopy {
 }
 
 const TONE_CLASS: Record<StatusCopy['tone'], string> = {
-  settled: 'text-ink dark:text-paper',
-  working: 'text-bronze',
-  attention: 'text-danger',
-  closed: 'text-ink-faint',
+  settled: 'text-moss',
+  working: 'text-stone',
+  attention: 'text-clay',
+  closed: 'text-stone',
 };
 
 export function ReservationCard({
@@ -75,13 +79,16 @@ export function ReservationCard({
   onAddToCalendar,
   onRate,
   busy,
+  past = false,
 }: {
   reservation: Reservation;
   onCancel: () => void;
   onAddToCalendar: () => void;
   onRate: (rating: number) => void;
   busy: boolean;
+  past?: boolean;
 }) {
+  const [open, setOpen] = useState(false);
   const [confirmingCancel, setConfirmingCancel] = useState(false);
   const status = statusCopy(reservation);
   const when = new Date(reservation.scheduled_for);
@@ -90,110 +97,121 @@ export function ReservationCard({
   const cancellable = !['cancelled', 'failed', 'completed'].includes(reservation.status) && !isOver;
 
   return (
-    <View className="gap-3 rounded-2xl border border-paper-line bg-paper-raised p-5 dark:border-night-line dark:bg-night-raised">
-      <View className="gap-1">
-        <Title>{reservation.venues?.name ?? 'Venue'}</Title>
-        <Caption>
-          {when.toLocaleString('en-GB', {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            hour: '2-digit',
-            minute: '2-digit',
-          })}{' '}
-          · {reservation.party_size === 1 ? 'just you' : `${reservation.party_size} people`}
-        </Caption>
-      </View>
+    <View className="gap-4 py-5">
+      <Pressable
+        onPress={() => setOpen((v) => !v)}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        accessibilityLabel={`${reservation.venues?.name ?? 'Venue'}, ${status.label}`}
+        className="gap-1.5"
+      >
+        <Meta>
+          {when.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
+        </Meta>
+        <Title className={past ? 'text-stone' : undefined}>
+          {reservation.venues?.name ?? 'Venue'}
+        </Title>
+        <Body className="text-stone">
+          {when.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} ·{' '}
+          {reservation.party_size === 1 ? 'just you' : `table for ${reservation.party_size}`}
+        </Body>
+        {/*
+          A confirmed future booking needs no label — it is simply what a
+          booking is. Everything else is a state worth naming.
+        */}
+        {isSettled && !isOver ? null : (
+          <Meta className={`mt-0.5 ${TONE_CLASS[status.tone]}`}>{status.label}</Meta>
+        )}
+      </Pressable>
 
-      <View className="gap-0.5">
-        <Body className={`font-medium ${TONE_CLASS[status.tone]}`}>{status.label}</Body>
-        {status.detail ? <Caption>{status.detail}</Caption> : null}
-      </View>
+      {open ? (
+        <View className="gap-4">
+          {status.detail ? <Muted>{status.detail}</Muted> : null}
 
-      {reservation.special_requests ? (
-        <View className="rounded-xl bg-paper-sunken px-3 py-2 dark:bg-night">
-          <Caption>Passed to the venue: {reservation.special_requests}</Caption>
-        </View>
-      ) : null}
+          {reservation.special_requests ? (
+            <Muted>Passed to the venue: {reservation.special_requests}</Muted>
+          ) : null}
 
-      {/* Only offer a calendar entry for something that is genuinely happening. */}
-      {isSettled && !isOver ? (
-        <Pressable
-          onPress={onAddToCalendar}
-          disabled={busy}
-          accessibilityRole="button"
-          className="h-11 items-center justify-center rounded-xl border border-paper-line dark:border-night-line"
-        >
-          <Body className="font-medium text-ink dark:text-paper">
-            {reservation.calendar_event_id ? 'In your calendar' : 'Add to calendar'}
-          </Body>
-        </Pressable>
-      ) : null}
+          {/* Only offer a calendar entry for something genuinely happening. */}
+          {isSettled && !isOver ? (
+            <Pressable
+              onPress={onAddToCalendar}
+              disabled={busy}
+              accessibilityRole="button"
+              className="min-h-[44px] justify-center"
+            >
+              <Body>{reservation.calendar_event_id ? 'In your calendar' : 'Add to calendar'}</Body>
+            </Pressable>
+          ) : null}
 
-      {/*
-        The rating prompt. Only for something that actually happened, and only
-        once — a second ask is nagging, not learning.
-      */}
-      {isOver && isSettled && reservation.rated_at === null ? (
-        <View className="gap-2 border-t border-paper-line pt-3 dark:border-night-line">
-          <Caption>How was it?</Caption>
-          <View className="flex-row gap-2">
-            {[1, 2, 3, 4, 5].map((score) => (
-              <Pressable
-                key={score}
-                onPress={() => onRate(score)}
-                disabled={busy}
-                accessibilityRole="button"
-                accessibilityLabel={`${score} out of 5`}
-                className="h-11 flex-1 items-center justify-center rounded-xl border border-paper-line dark:border-night-line"
-              >
-                <Body className="text-ink dark:text-paper">{score}</Body>
-              </Pressable>
-            ))}
-          </View>
-        </View>
-      ) : null}
-
-      {reservation.rated_at !== null ? (
-        <Caption className="text-ink-faint">You rated this {reservation.rating}/5.</Caption>
-      ) : null}
-
-      {cancellable ? (
-        confirmingCancel ? (
-          <View className="gap-2 border-t border-paper-line pt-3 dark:border-night-line">
-            <Caption>
-              {isSettled
-                ? 'I will let the venue know. Cancellation terms may apply.'
-                : 'Nothing has been asked of the venue yet.'}
-            </Caption>
-            <View className="flex-row gap-2">
-              <Pressable
-                onPress={onCancel}
-                disabled={busy}
-                accessibilityRole="button"
-                className="h-11 flex-1 items-center justify-center rounded-xl bg-danger"
-              >
-                <Body className="font-medium text-paper">Yes, cancel it</Body>
-              </Pressable>
-              <Pressable
-                onPress={() => setConfirmingCancel(false)}
-                accessibilityRole="button"
-                className="h-11 flex-1 items-center justify-center rounded-xl border border-paper-line dark:border-night-line"
-              >
-                <Body className="text-ink dark:text-paper">Keep it</Body>
-              </Pressable>
+          {/*
+            Only for something that actually happened, and only once — a second
+            ask is nagging, not learning.
+          */}
+          {isOver && isSettled && reservation.rated_at === null ? (
+            <View className="gap-2.5">
+              <Meta>How was it</Meta>
+              <View className="flex-row gap-2">
+                {[1, 2, 3, 4, 5].map((score) => (
+                  <Pressable
+                    key={score}
+                    onPress={() => onRate(score)}
+                    disabled={busy}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${score} out of 5`}
+                    className="min-h-[44px] flex-1 items-center justify-center rounded-card border border-stone-line"
+                  >
+                    <Body>{score}</Body>
+                  </Pressable>
+                ))}
+              </View>
             </View>
-          </View>
-        ) : (
-          <Pressable
-            onPress={() => setConfirmingCancel(true)}
-            accessibilityRole="button"
-            className="items-center py-1"
-          >
-            <Caption>Cancel this booking</Caption>
-          </Pressable>
-        )
+          ) : null}
+
+          {reservation.rated_at !== null ? (
+            <Muted>You rated this {reservation.rating}/5.</Muted>
+          ) : null}
+
+          {cancellable ? (
+            confirmingCancel ? (
+              <View className="gap-3">
+                <Muted>
+                  {isSettled
+                    ? 'I will let the venue know. Cancellation terms may apply.'
+                    : 'Nothing has been asked of the venue yet.'}
+                </Muted>
+                <View className="flex-row gap-5">
+                  <Pressable
+                    onPress={onCancel}
+                    disabled={busy}
+                    accessibilityRole="button"
+                    className="min-h-[44px] justify-center"
+                  >
+                    <Body className="text-clay">Cancel booking</Body>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => setConfirmingCancel(false)}
+                    accessibilityRole="button"
+                    className="min-h-[44px] justify-center"
+                  >
+                    <Body>Keep it</Body>
+                  </Pressable>
+                </View>
+              </View>
+            ) : (
+              <Pressable
+                onPress={() => setConfirmingCancel(true)}
+                accessibilityRole="button"
+                className="min-h-[44px] justify-center"
+              >
+                <Muted>Cancel this booking</Muted>
+              </Pressable>
+            )
+          ) : null}
+        </View>
       ) : null}
+
+      <Rule />
     </View>
   );
 }

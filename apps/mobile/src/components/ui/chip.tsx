@@ -10,16 +10,17 @@ interface Props {
 }
 
 /**
- * The workhorse of onboarding. Selection is shown by a filled surface rather
- * than a tick, so a screenful of chips reads as a pattern at a glance.
+ * The workhorse of onboarding, and the time pills on a venue sheet.
+ *
+ * Selection is a filled surface rather than a tick, so a screenful reads as a
+ * pattern at a glance. Deliberately not champagne: choosing a cuisine is not a
+ * commitment, and the accent has to still mean something by the time a real
+ * booking is on offer.
  */
 export function Chip({ label, selected, onPress, tone = 'default' }: Props) {
-  const selectedClass =
-    tone === 'negative'
-      ? 'border-danger bg-danger/10'
-      : 'border-ink bg-ink dark:border-paper dark:bg-paper';
+  const selectedClass = tone === 'negative' ? 'bg-clay/15' : 'bg-ink dark:bg-porcelain';
 
-  const selectedLabel = tone === 'negative' ? 'text-danger' : 'text-paper dark:text-ink';
+  const selectedLabel = tone === 'negative' ? 'text-clay' : 'text-porcelain dark:text-ink';
 
   return (
     <Pressable
@@ -27,14 +28,14 @@ export function Chip({ label, selected, onPress, tone = 'default' }: Props) {
       accessibilityRole="checkbox"
       accessibilityState={{ checked: selected }}
       accessibilityLabel={label}
+      // 44px minimum touch target, met by the padding rather than a fixed
+      // height, so a long label still wraps sensibly.
       className={cn(
-        'rounded-full border px-4 py-2.5',
-        selected ? selectedClass : 'border-paper-line dark:border-night-line',
+        'min-h-[44px] justify-center rounded-input px-4 py-2.5',
+        selected ? selectedClass : 'border border-stone-line',
       )}
     >
-      <Text
-        className={cn('text-[15px]', selected ? selectedLabel : 'text-ink-soft dark:text-paper/70')}
-      >
+      <Text className={cn('font-body text-body', selected ? selectedLabel : 'text-stone')}>
         {label}
       </Text>
     </Pressable>

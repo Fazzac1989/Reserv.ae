@@ -118,6 +118,8 @@ export interface SuggestionCard {
   priceBand: number;
   tags: string[];
   houseNote: string | null;
+  /** Empty where a venue has no photograph; the card falls back to a plain surface. */
+  photoUrls: string[];
   proposedStart: string;
   proposedEnd: string;
   rationale: string;
