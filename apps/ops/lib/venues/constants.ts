@@ -7,10 +7,21 @@ import type { Database } from '@reservai/db';
  * client, which must never be pulled into a client bundle.
  */
 export type OnboardingStatus = Database['public']['Enums']['venue_onboarding_status'];
-export type Vertical = Database['public']['Enums']['vertical'];
-export type Zone = Database['public']['Enums']['zone'];
 export type RailKind = Database['public']['Enums']['rail_kind'];
 export type BookingPlatform = Database['public']['Enums']['booking_platform'];
+
+/**
+ * Categories and places are rows now, not enum members, so these are slugs and
+ * the list of them comes from the database. Ops can add a category without a
+ * deployment, which is the whole reason they stopped being enums.
+ */
+export type Vertical = string;
+export type Zone = string;
+
+export interface Choice {
+  readonly slug: string;
+  readonly label: string;
+}
 
 export const ONBOARDING_STATUSES = [
   'lead',
@@ -21,8 +32,14 @@ export const ONBOARDING_STATUSES = [
   'lost',
 ] as const satisfies readonly OnboardingStatus[];
 
-export const VERTICALS = ['restaurant', 'salon', 'barber'] as const satisfies readonly Vertical[];
-export const ZONES = ['dubai_marina', 'jbr', 'bluewaters'] as const satisfies readonly Zone[];
+/**
+ * What the pilot can actually book, as opposed to what the directory may list.
+ *
+ * A hotel can be recorded, described and photographed; no rail reaches one, so
+ * nothing should offer to book it. The console shows every category and this
+ * list is what the assistant is told about.
+ */
+export const BOOKABLE_VERTICALS = ['restaurant', 'salon', 'barber'] as const;
 export const RAIL_KINDS = [
   'api',
   'whatsapp',

@@ -10,33 +10,52 @@ import { z } from 'zod/v4';
  * null is always recoverable where a confident wrong guess is not.
  */
 
-export const VERTICALS = ['restaurant', 'salon', 'barber'] as const;
-export const ZONES = ['dubai_marina', 'jbr', 'bluewaters'] as const;
+/**
+ * What can actually be booked today.
+ *
+ * The directory knows about hotels and golf clubs; no rail can reach one, so
+ * offering the model the wider list would only let it accept a request nothing
+ * downstream can act on. This widens when a rail does.
+ */
+export const BOOKABLE_VERTICALS = ['restaurant', 'salon', 'barber'] as const;
 
-export const conciergeOutputSchema = z.object({
-  /** What the user sees. One or two sentences. */
-  reply: z.string().min(1).max(600),
+/**
+ * The model picks from a closed list, always.
+ *
+ * Places come from the database rather than a constant here, so a neighbourhood
+ * added by ops is one Riva can understand the same day — but it is still a
+ * list, because a free-text zone is a zone that matches no venue and fails
+ * silently at the filter.
+ */
+export function buildConciergeOutputSchema(zones: readonly [string, ...string[]]) {
+  return z.object({
+    /** What the user sees. One or two sentences. */
+    reply: z.string().min(1).max(600),
 
-  /**
-   * The single clarifying question, when one is genuinely needed. Null means
-   * the agent had enough to proceed.
-   */
-  clarifying_question: z.string().max(300).nullable(),
+    /**
+     * The single clarifying question, when one is genuinely needed. Null means
+     * the agent had enough to proceed.
+     */
+    clarifying_question: z.string().max(300).nullable(),
 
-  intent: z.object({
-    vertical: z.enum(VERTICALS).nullable(),
-    zones: z.array(z.enum(ZONES)),
-    /** ISO-8601. Both present or both null — a half window is not a window. */
-    window_start: z.string().nullable(),
-    window_end: z.string().nullable(),
-    party_size: z.number().int().min(1).max(20).nullable(),
-    price_band_max: z.number().int().min(1).max(4).nullable(),
-    occasion: z.string().max(120).nullable(),
-    constraints: z.array(z.string().min(1).max(160)),
-  }),
-});
+    intent: z.object({
+      vertical: z.enum(BOOKABLE_VERTICALS).nullable(),
+      zones: z.array(z.enum(zones)),
+      /** ISO-8601. Both present or both null — a half window is not a window. */
+      window_start: z.string().nullable(),
+      window_end: z.string().nullable(),
+      party_size: z.number().int().min(1).max(20).nullable(),
+      price_band_max: z.number().int().min(1).max(4).nullable(),
+      occasion: z.string().max(120).nullable(),
+      constraints: z.array(z.string().min(1).max(160)),
+    }),
+  });
+}
 
-export type ConciergeOutput = z.infer<typeof conciergeOutputSchema>;
+/** The shape every build shares, for the types the rest of the code uses. */
+const referenceSchema = buildConciergeOutputSchema(['dubai_marina']);
+
+export type ConciergeOutput = z.infer<typeof referenceSchema>;
 export type ConciergeIntent = ConciergeOutput['intent'];
 
 /** Fields with no fallback anywhere else. Everything else comes from the profile. */

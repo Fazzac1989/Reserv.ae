@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import { requireOps } from '../../../../lib/auth';
-import { getVenue } from '../../../../lib/venues/queries';
+import { getVenue, listChoices } from '../../../../lib/venues/queries';
 import { updateVenue } from '../../../../lib/venues/actions';
 import { labelFor } from '../../../../lib/venues/constants';
 import { VenueForm } from '../../../../components/venues/venue-form';
@@ -45,7 +45,7 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
   await requireOps();
   const { id } = await params;
 
-  const detail = await getVenue(id);
+  const [detail, choices] = await Promise.all([getVenue(id), listChoices()]);
   if (!detail) notFound();
 
   const { venue, channels, policy, contacts, events } = detail;
@@ -108,6 +108,8 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
           venue={venue}
           action={updateVenue.bind(null, venue.id)}
           submitLabel="Save changes"
+          categories={choices.categories}
+          places={choices.places}
         />
       </Section>
 

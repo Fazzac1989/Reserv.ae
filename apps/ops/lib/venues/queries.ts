@@ -1,6 +1,12 @@
 import type { Database } from '@reservai/db';
 import { createClient } from '../supabase/server';
-import { ONBOARDING_STATUSES, type OnboardingStatus, type Vertical, type Zone } from './constants';
+import {
+  ONBOARDING_STATUSES,
+  type Choice,
+  type OnboardingStatus,
+  type Vertical,
+  type Zone,
+} from './constants';
 
 export type Venue = Database['public']['Tables']['venues']['Row'];
 export type VenueChannel = Database['public']['Tables']['venue_booking_channels']['Row'];
@@ -126,4 +132,27 @@ export async function getVenue(id: string): Promise<VenueDetail | null> {
     contacts: contacts.data ?? [],
     events: events.data ?? [],
   };
+}
+
+/**
+ * Every category and place, for the forms and filters.
+ *
+ * Read on each render rather than cached: the console is the thing that adds
+ * them, and a dropdown that does not show what you just created is worse than
+ * a query.
+ */
+export async function listChoices(): Promise<{ categories: Choice[]; places: Choice[] }> {
+  const supabase = await createClient();
+
+  const [categories, places] = await Promise.all([
+    supabase.from('categories').select('slug, label').order('sort_order'),
+    // Neighbourhoods only. A venue sits in one; a country is not somewhere you
+    // can be told to walk to.
+    supabase.from('places').select('slug, label').eq('kind', 'neighbourhood').order('sort_order'),
+  ]);
+
+  if (categories.error) throw categories.error;
+  if (places.error) throw places.error;
+
+  return { categories: categories.data ?? [], places: places.data ?? [] };
 }

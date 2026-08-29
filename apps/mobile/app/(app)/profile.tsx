@@ -25,9 +25,8 @@ import {
   NotificationPrefsControl,
   type NotificationPrefs,
 } from '../../src/components/notification-prefs';
-import type { Database } from '@reservai/db';
 
-type Zone = Database['public']['Enums']['zone'];
+type Zone = string;
 
 function toggle<T>(list: T[], value: T): T[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];

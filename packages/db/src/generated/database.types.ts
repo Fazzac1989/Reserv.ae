@@ -251,6 +251,33 @@ export type Database = {
           },
         ]
       }
+      categories: {
+        Row: {
+          created_at: string
+          is_bookable: boolean
+          kind: string
+          label: string
+          slug: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          is_bookable?: boolean
+          kind: string
+          label: string
+          slug: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          is_bookable?: boolean
+          kind?: string
+          label?: string
+          slug?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           channel: string
@@ -484,6 +511,44 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "venues"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      places: {
+        Row: {
+          created_at: string
+          kind: string
+          label: string
+          parent_slug: string | null
+          slug: string
+          sort_order: number
+          timezone: string
+        }
+        Insert: {
+          created_at?: string
+          kind: string
+          label: string
+          parent_slug?: string | null
+          slug: string
+          sort_order?: number
+          timezone?: string
+        }
+        Update: {
+          created_at?: string
+          kind?: string
+          label?: string
+          parent_slug?: string | null
+          slug?: string
+          sort_order?: number
+          timezone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "places_parent_slug_fkey"
+            columns: ["parent_slug"]
+            isOneToOne: false
+            referencedRelation: "places"
+            referencedColumns: ["slug"]
           },
         ]
       }
@@ -784,15 +849,15 @@ export type Database = {
           default_party_size: number
           dietary: string[]
           favourite_venue_ids: string[]
-          home_zone: Database["public"]["Enums"]["zone"] | null
+          home_zone: string | null
           notes: string | null
-          preferred_zones: Database["public"]["Enums"]["zone"][]
+          preferred_zones: string[]
           price_band_max: number
           price_band_min: number
           standing_providers: Json
           updated_at: string
           user_id: string
-          work_zone: Database["public"]["Enums"]["zone"] | null
+          work_zone: string | null
         }
         Insert: {
           allergies?: string[]
@@ -802,15 +867,15 @@ export type Database = {
           default_party_size?: number
           dietary?: string[]
           favourite_venue_ids?: string[]
-          home_zone?: Database["public"]["Enums"]["zone"] | null
+          home_zone?: string | null
           notes?: string | null
-          preferred_zones?: Database["public"]["Enums"]["zone"][]
+          preferred_zones?: string[]
           price_band_max?: number
           price_band_min?: number
           standing_providers?: Json
           updated_at?: string
           user_id: string
-          work_zone?: Database["public"]["Enums"]["zone"] | null
+          work_zone?: string | null
         }
         Update: {
           allergies?: string[]
@@ -820,23 +885,37 @@ export type Database = {
           default_party_size?: number
           dietary?: string[]
           favourite_venue_ids?: string[]
-          home_zone?: Database["public"]["Enums"]["zone"] | null
+          home_zone?: string | null
           notes?: string | null
-          preferred_zones?: Database["public"]["Enums"]["zone"][]
+          preferred_zones?: string[]
           price_band_max?: number
           price_band_min?: number
           standing_providers?: Json
           updated_at?: string
           user_id?: string
-          work_zone?: Database["public"]["Enums"]["zone"] | null
+          work_zone?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "user_preferences_home_zone_fkey"
+            columns: ["home_zone"]
+            isOneToOne: false
+            referencedRelation: "places"
+            referencedColumns: ["slug"]
+          },
           {
             foreignKeyName: "user_preferences_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_preferences_work_zone_fkey"
+            columns: ["work_zone"]
+            isOneToOne: false
+            referencedRelation: "places"
+            referencedColumns: ["slug"]
           },
         ]
       }
@@ -1166,8 +1245,8 @@ export type Database = {
           price_band: number
           tags: string[]
           updated_at: string
-          vertical: Database["public"]["Enums"]["vertical"]
-          zone: Database["public"]["Enums"]["zone"]
+          vertical: string
+          zone: string
         }
         Insert: {
           address?: string | null
@@ -1187,8 +1266,8 @@ export type Database = {
           price_band: number
           tags?: string[]
           updated_at?: string
-          vertical: Database["public"]["Enums"]["vertical"]
-          zone: Database["public"]["Enums"]["zone"]
+          vertical: string
+          zone: string
         }
         Update: {
           address?: string | null
@@ -1208,10 +1287,25 @@ export type Database = {
           price_band?: number
           tags?: string[]
           updated_at?: string
-          vertical?: Database["public"]["Enums"]["vertical"]
-          zone?: Database["public"]["Enums"]["zone"]
+          vertical?: string
+          zone?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "venues_vertical_fkey"
+            columns: ["vertical"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "venues_zone_fkey"
+            columns: ["zone"]
+            isOneToOne: false
+            referencedRelation: "places"
+            referencedColumns: ["slug"]
+          },
+        ]
       }
       webhook_events: {
         Row: {
@@ -1338,7 +1432,7 @@ export type Database = {
           user_id: string
           venue_id: string
           venue_name: string
-          vertical: Database["public"]["Enums"]["vertical"]
+          vertical: string
           visits: number
           worst_rating: number
         }[]
@@ -1389,7 +1483,7 @@ export type Database = {
           median_gap_days: number
           venue_id: string
           venue_name: string
-          vertical: Database["public"]["Enums"]["vertical"]
+          vertical: string
           visits: number
           worst_rating: number
         }[]
@@ -1497,8 +1591,6 @@ export type Database = {
         | "live"
         | "paused"
         | "lost"
-      vertical: "restaurant" | "salon" | "barber"
-      zone: "dubai_marina" | "jbr" | "bluewaters"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1714,8 +1806,6 @@ export const Constants = {
         "paused",
         "lost",
       ],
-      vertical: ["restaurant", "salon", "barber"],
-      zone: ["dubai_marina", "jbr", "bluewaters"],
     },
   },
 } as const

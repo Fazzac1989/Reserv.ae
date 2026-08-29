@@ -2,7 +2,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { AGENTS } from '../agents';
 import type { ModelProvider } from '../provider';
 import { CONCIERGE_SYSTEM, renderContext, type ConciergeContext } from './prompt';
-import { conciergeOutputSchema } from './schema';
+import { buildConciergeOutputSchema } from './schema';
 import { normaliseTurn, type NormalisedTurn } from './normalise';
 
 export interface ConciergeTurnInput {
@@ -10,6 +10,12 @@ export interface ConciergeTurnInput {
   /** Prior turns, oldest first. The current message is not included. */
   readonly history: readonly { role: 'user' | 'assistant'; content: string }[];
   readonly message: string;
+  /**
+   * The places the model may name, from the directory. A closed list, because
+   * a zone nobody has a venue in matches nothing and fails at the filter with
+   * no explanation.
+   */
+  readonly allowedZones: readonly [string, ...string[]];
   readonly correlationId: string;
 }
 
@@ -52,7 +58,7 @@ export async function runConciergeTurn(
       messages,
       correlationId: input.correlationId,
     },
-    conciergeOutputSchema,
+    buildConciergeOutputSchema(input.allowedZones),
   );
 
   return {

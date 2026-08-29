@@ -1,12 +1,15 @@
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
 import { requireOps } from '../../../lib/auth';
-import { countByStatus, listVenues, type VenueFilters } from '../../../lib/venues/queries';
+import {
+  countByStatus,
+  listChoices,
+  listVenues,
+  type VenueFilters,
+} from '../../../lib/venues/queries';
 import {
   ONBOARDING_STATUSES,
   PIPELINE,
-  VERTICALS,
-  ZONES,
   labelFor,
   type OnboardingStatus,
   type Vertical,
@@ -38,10 +41,18 @@ export default async function VenuesPage({
 
   // Anything unrecognised is dropped rather than passed to the query, so a
   // hand-edited URL cannot produce a Postgres error page.
+  const choices = await listChoices();
+
   const filters: VenueFilters = {
     q: params.q?.trim() || undefined,
-    zone: oneOf<Zone>(params.zone, ZONES),
-    vertical: oneOf<Vertical>(params.vertical, VERTICALS),
+    zone: oneOf<Zone>(
+      params.zone,
+      choices.places.map((p) => p.slug),
+    ),
+    vertical: oneOf<Vertical>(
+      params.vertical,
+      choices.categories.map((c) => c.slug),
+    ),
     status: oneOf<OnboardingStatus>(params.status, ONBOARDING_STATUSES),
     needsChannel: params.needsChannel === '1',
   };
@@ -80,7 +91,7 @@ export default async function VenuesPage({
         ))}
       </section>
 
-      <VenueFiltersBar />
+      <VenueFiltersBar categories={choices.categories} places={choices.places} />
 
       {venues.length === 0 ? (
         <p className="rounded-lg border border-dashed p-10 text-center text-sm text-muted-foreground">

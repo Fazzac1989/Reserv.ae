@@ -2,12 +2,14 @@ import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { requireOps } from '../../../../lib/auth';
 import { createVenue } from '../../../../lib/venues/actions';
+import { listChoices } from '../../../../lib/venues/queries';
 import { VenueForm } from '../../../../components/venues/venue-form';
 
 export const dynamic = 'force-dynamic';
 
 export default async function NewVenuePage() {
   await requireOps();
+  const { categories, places } = await listChoices();
 
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-6 px-6 py-10">
@@ -26,7 +28,12 @@ export default async function NewVenuePage() {
         </p>
       </div>
 
-      <VenueForm action={createVenue} submitLabel="Create venue" />
+      <VenueForm
+        action={createVenue}
+        submitLabel="Create venue"
+        categories={categories}
+        places={places}
+      />
     </main>
   );
 }

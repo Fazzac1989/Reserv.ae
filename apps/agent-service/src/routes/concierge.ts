@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type { AgentServiceEnv } from '@reservai/config';
 import { ClaudeProvider, ModelOutputError, runConciergeTurn } from '@reservai/ai';
 import { requireUser } from '../auth';
+import { bookableZones } from '../directory';
 import { resolveStandingEntity } from '../memory';
 import { MODEL_LIMIT } from '../rate-limit';
 import { serviceClient, userClient } from '../supabase';
@@ -110,6 +111,7 @@ export async function registerConciergeRoutes(
     let turn;
     try {
       turn = await runConciergeTurn(provider, {
+        allowedZones: await bookableZones(env),
         context: {
           now: new Date().toISOString(),
           timezone: profile?.timezone ?? 'Asia/Dubai',

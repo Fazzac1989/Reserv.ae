@@ -1,6 +1,9 @@
-import type { Database } from '@reservai/db';
-
-type Zone = Database['public']['Enums']['zone'];
+/**
+ * A place slug. The directory holds more of these than onboarding offers —
+ * the list below is curated on purpose, because a neighbourhood without a
+ * reason to pick it is a row nobody reads.
+ */
+type Zone = string;
 
 /**
  * Onboarding vocabulary.

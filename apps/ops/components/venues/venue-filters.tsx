@@ -3,21 +3,31 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
 import { Search, X } from 'lucide-react';
-import { ONBOARDING_STATUSES, VERTICALS, ZONES, labelFor } from '../../lib/venues/constants';
+import { ONBOARDING_STATUSES, type Choice, labelFor } from '../../lib/venues/constants';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
-
-const SELECTS = [
-  { name: 'status', label: 'Any status', options: ONBOARDING_STATUSES },
-  { name: 'vertical', label: 'Any vertical', options: VERTICALS },
-  { name: 'zone', label: 'Any zone', options: ZONES },
-] as const;
 
 /**
  * Filters live in the URL, so a filtered view is shareable and the back button
  * behaves. Text search is debounced; the selects apply immediately.
  */
-export function VenueFiltersBar() {
+export function VenueFiltersBar({
+  categories,
+  places,
+}: {
+  categories: readonly Choice[];
+  places: readonly Choice[];
+}) {
+  const selects = [
+    {
+      name: 'status',
+      label: 'Any status',
+      options: ONBOARDING_STATUSES.map((s) => ({ slug: s, label: labelFor(s) })),
+    },
+    { name: 'vertical', label: 'Any category', options: categories },
+    { name: 'zone', label: 'Anywhere', options: places },
+  ];
+
   const router = useRouter();
   const params = useSearchParams();
   const [pending, startTransition] = useTransition();
@@ -66,7 +76,7 @@ export function VenueFiltersBar() {
         />
       </div>
 
-      {SELECTS.map((select) => (
+      {selects.map((select) => (
         <select
           key={select.name}
           aria-label={select.label}
@@ -76,8 +86,8 @@ export function VenueFiltersBar() {
         >
           <option value="">{select.label}</option>
           {select.options.map((option) => (
-            <option key={option} value={option}>
-              {labelFor(option)}
+            <option key={option.slug} value={option.slug}>
+              {option.label}
             </option>
           ))}
         </select>

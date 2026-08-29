@@ -4,7 +4,7 @@ import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import type { ActionResult } from '../../lib/venues/actions';
 import type { Venue } from '../../lib/venues/queries';
-import { VERTICALS, ZONES } from '../../lib/venues/constants';
+import type { Choice } from '../../lib/venues/constants';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -37,10 +37,15 @@ export function VenueForm({
   venue,
   action,
   submitLabel,
+  categories,
+  places,
 }: {
   venue?: Venue;
   action: (prev: ActionResult | null, formData: FormData) => Promise<ActionResult>;
   submitLabel: string;
+  /** From the database, so a category added today is selectable today. */
+  categories: readonly Choice[];
+  places: readonly Choice[];
 }) {
   const [state, formAction] = useActionState(action, null);
   const d = formDefaults(state);
@@ -64,12 +69,12 @@ export function VenueForm({
           <select
             id="vertical"
             name="vertical"
-            defaultValue={d.text('vertical', venue?.vertical ?? 'restaurant')}
+            defaultValue={d.text('vertical', venue?.vertical ?? categories[0]?.slug)}
             className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
           >
-            {VERTICALS.map((v) => (
-              <option key={v} value={v}>
-                {v}
+            {categories.map((c) => (
+              <option key={c.slug} value={c.slug}>
+                {c.label}
               </option>
             ))}
           </select>
@@ -80,12 +85,12 @@ export function VenueForm({
           <select
             id="zone"
             name="zone"
-            defaultValue={d.text('zone', venue?.zone ?? 'dubai_marina')}
+            defaultValue={d.text('zone', venue?.zone ?? places[0]?.slug)}
             className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
           >
-            {ZONES.map((z) => (
-              <option key={z} value={z}>
-                {z.replace(/_/g, ' ')}
+            {places.map((p) => (
+              <option key={p.slug} value={p.slug}>
+                {p.label}
               </option>
             ))}
           </select>

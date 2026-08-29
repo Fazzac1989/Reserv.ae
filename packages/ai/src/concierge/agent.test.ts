@@ -70,6 +70,7 @@ describe('runConciergeTurn', () => {
       context: CONTEXT,
       history: [],
       message: 'haircut saturday morning near jbr, beard too',
+      allowedZones: ['dubai_marina', 'jbr', 'bluewaters'],
       correlationId: 'conv-1',
     });
 
@@ -86,6 +87,7 @@ describe('runConciergeTurn', () => {
       context: CONTEXT,
       history: [],
       message: 'a table tonight',
+      allowedZones: ['dubai_marina', 'jbr', 'bluewaters'],
       correlationId: 'conv-1',
     });
 
@@ -105,6 +107,7 @@ describe('runConciergeTurn', () => {
         { role: 'assistant', content: 'When were you thinking?' },
       ],
       message: 'friday about eight',
+      allowedZones: ['dubai_marina', 'jbr', 'bluewaters'],
       correlationId: 'conv-1',
     });
 
@@ -124,6 +127,7 @@ describe('runConciergeTurn', () => {
       context: CONTEXT,
       history,
       message: 'and now this',
+      allowedZones: ['dubai_marina', 'jbr', 'bluewaters'],
       correlationId: 'conv-1',
     });
 
@@ -139,6 +143,7 @@ describe('runConciergeTurn', () => {
       context: CONTEXT,
       history: [],
       message: 'haircut saturday morning',
+      allowedZones: ['dubai_marina', 'jbr', 'bluewaters'],
       correlationId: 'conv-1',
     });
 
@@ -169,6 +174,7 @@ describe('runConciergeTurn', () => {
         context: CONTEXT,
         history: [],
         message: 'anything',
+        allowedZones: ['dubai_marina', 'jbr', 'bluewaters'],
         correlationId: 'conv-1',
       }),
     ).rejects.toBeInstanceOf(ModelOutputError);

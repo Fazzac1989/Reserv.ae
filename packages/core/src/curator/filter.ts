@@ -1,4 +1,4 @@
-import type { OpeningHours, Vertical, Zone } from '../schemas/common';
+import type { OpeningHours } from '../schemas/common';
 
 /**
  * Deterministic candidate filtering.
@@ -15,8 +15,10 @@ import type { OpeningHours, Vertical, Zone } from '../schemas/common';
 export interface CandidateVenue {
   readonly id: string;
   readonly name: string;
-  readonly vertical: Vertical;
-  readonly zone: Zone;
+  /** A category slug. Compared, never matched against a fixed list. */
+  readonly vertical: string;
+  /** A place slug. */
+  readonly zone: string;
   readonly price_band: number;
   readonly tags: readonly string[];
   readonly opening_hours: readonly OpeningHours[];
@@ -33,8 +35,8 @@ export interface CandidateVenue {
 }
 
 export interface CuratorRequest {
-  readonly vertical: Vertical;
-  readonly zones: readonly Zone[];
+  readonly vertical: string;
+  readonly zones: readonly string[];
   readonly window: { readonly starts_at: string; readonly ends_at: string };
   readonly partySize: number;
   readonly priceBandMax: number;
