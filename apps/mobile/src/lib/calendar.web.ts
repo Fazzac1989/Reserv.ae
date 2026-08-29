@@ -32,7 +32,7 @@ function icsFor(entry: CalendarEntry, uid: string): string {
   const lines = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//reservAI//EN',
+    'PRODID:-//Reserv//EN',
     'CALSCALE:GREGORIAN',
     'BEGIN:VEVENT',
     `UID:${uid}`,

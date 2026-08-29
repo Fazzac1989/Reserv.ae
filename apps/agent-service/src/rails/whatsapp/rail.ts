@@ -1,5 +1,6 @@
 import type { AttemptContext, AttemptResult, BookingRail } from '@reservai/core';
 import type { AgentServiceEnv } from '@reservai/config';
+import { BRAND } from '@reservai/config';
 import { draftVenueMessage, type ModelProvider } from '@reservai/ai';
 import { serviceClient } from '../../supabase';
 import { WhatsAppSendError, type WhatsAppProvider } from './provider';
@@ -75,7 +76,7 @@ export class WhatsAppRail implements BookingRail {
           whenText,
           serviceName: context.booking.service_name,
           specialRequests: context.booking.special_requests,
-          businessName: 'reservAI',
+          businessName: BRAND.name,
         },
         // Everything about the client that must not reach a venue.
         forbiddenTerms: [surname, user?.email ?? '', user?.phone_e164 ?? ''].filter(

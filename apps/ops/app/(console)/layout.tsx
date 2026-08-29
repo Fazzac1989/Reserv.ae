@@ -18,7 +18,7 @@ export default async function ConsoleLayout({ children }: { children: React.Reac
       <header className="border-b">
         <div className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-3">
           <Link href="/" className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            reservAI
+            Reserv
           </Link>
           <nav className="flex items-center gap-4">
             {NAV.map((item) => (

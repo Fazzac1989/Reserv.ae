@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'reservAI Ops',
+  title: 'Reserv Ops',
   description: 'Booking queue, venue CRM and rail monitoring.',
 };
 

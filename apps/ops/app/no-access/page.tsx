@@ -9,7 +9,7 @@ export default function NoAccessPage() {
   return (
     <main className="flex min-h-screen items-center justify-center px-6">
       <div className="max-w-md">
-        <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">reservAI</p>
+        <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Reserv</p>
         <h1 className="mt-2 text-2xl font-medium tracking-tight">No console access</h1>
         <p className="mt-4 text-sm leading-6 text-neutral-600 dark:text-neutral-400">
           Your account is signed in but does not hold the ops role. An admin can grant it, or

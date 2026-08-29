@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { AgentServiceEnv } from '@reservai/config';
+import { BRAND } from '@reservai/config';
 import { requireUser } from '../auth';
 import { serviceClient, userClient } from '../supabase';
 import { ServiceError } from '../errors';
@@ -104,7 +105,7 @@ export async function registerPricingRoutes(app: FastifyInstance, { env }: Optio
       return reply.send({
         enabled: false,
         status: 'none',
-        message: 'reservAI is free during the pilot.',
+        message: `${BRAND.name} is free during the pilot.`,
       });
     }
 
@@ -128,7 +129,7 @@ export async function registerPricingRoutes(app: FastifyInstance, { env }: Optio
     if (!env.FLAG_STRIPE_SUBSCRIPTIONS || !env.STRIPE_SECRET_KEY) {
       throw new ServiceError(
         503,
-        'Subscriptions are not switched on. reservAI is free during the pilot.',
+        `Subscriptions are not switched on. ${BRAND.name} is free during the pilot.`,
       );
     }
 

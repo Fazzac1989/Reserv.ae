@@ -4,7 +4,7 @@ import { Platform } from 'react-native';
 /**
  * The device calendar.
  *
- * Written to the user's own default calendar rather than a reservAI one: a
+ * Written to the user's own default calendar rather than a Reserv one: a
  * dinner belongs in the calendar they already look at, not in a separate list
  * they have to remember to check.
  */

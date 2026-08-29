@@ -61,7 +61,7 @@ export default function SignIn() {
       >
         <View className="flex-1 justify-center gap-10 px-7">
           <View className="gap-3">
-            <Meta>reservAI</Meta>
+            <Meta>Reserv</Meta>
             <Display>Your secretary for Dubai</Display>
             <Body>It suggests, then it books.</Body>
           </View>

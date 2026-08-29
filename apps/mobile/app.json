@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "reservAI",
+    "name": "Reserv",
     "slug": "reservai",
     "version": "0.1.0",
     "scheme": "reservai",
@@ -27,8 +27,8 @@
     "web": {
       "bundler": "metro",
       "output": "single",
-      "name": "reservAI",
-      "shortName": "reservAI"
+      "name": "Reserv",
+      "shortName": "Reserv"
     }
   }
 }

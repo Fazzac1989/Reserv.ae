@@ -19,7 +19,7 @@ export default async function SignInPage({
   return (
     <main className="flex min-h-screen items-center justify-center px-6">
       <div className="w-full max-w-sm">
-        <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">reservAI</p>
+        <p className="text-xs uppercase tracking-[0.2em] text-neutral-500">Reserv</p>
         <h1 className="mt-2 text-2xl font-medium tracking-tight">Ops console</h1>
         <SignInForm next={safeNext} />
       </div>
