@@ -108,6 +108,19 @@ anything. Postgres enums are awkward to extend safely; the sound move is a
 `categories` reference table and a migration that widens the columns, done once
 and carefully, rather than six features each working around it.
 
+**Done, at the database.** `20260828120000_categories_and_places.sql` replaces
+both enums with reference tables — 21 categories, 12 places nested
+neighbourhood to city to country — and every migration reapplies from scratch
+with all 15 seeded venues intact. A hotel in Downtown now inserts; a venue in
+Narnia does not.
+
+**Not done in the application.** Fourteen files still speak the narrower
+vocabulary through zod, and one of them is the model's own output schema, which
+has to stay a closed list or Riva will invent slugs. The right split is a
+pattern check at storage and a closed list — built from what is actually
+bookable — at the model boundary. Nothing is broken meanwhile: every value the
+app knows is still valid.
+
 **Second finding: there is no supply.** One venue, marked demo, no photographs.
 "Connect the existing supplier database to Riva" reads differently once you know
 the database has a single row in it. Recommendation quality cannot be judged,

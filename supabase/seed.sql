@@ -75,8 +75,8 @@ insert into public.venues (
 select
   v.id,
   v.name,
-  v.vertical::public.vertical,
-  v.zone::public.zone,
+  v.vertical,
+  v.zone,
   'Demo address, ' || replace(initcap(replace(v.zone, '_', ' ')), 'Jbr', 'JBR') || ', Dubai',
   v.price_band,
   v.tags,

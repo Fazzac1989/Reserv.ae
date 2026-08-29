@@ -132,10 +132,12 @@ grant select on public.places to authenticated, anon;
 -- Move the columns across
 -- --------------------------------------------------------------------------
 
--- The two functions return the enum type, so they have to go before it can be
--- dropped. Both are recreated below, unchanged apart from the column type.
+-- Three functions name the enum in a returns-table column, so all three go
+-- before it can be dropped. Each is recreated below, unchanged apart from
+-- that one column type.
 drop function if exists public.user_venue_history(uuid);
 drop function if exists public.user_taste_signals(uuid);
+drop function if exists public.proactive_candidates(timestamptz);
 
 alter table public.venues
   alter column vertical type text using vertical::text,
@@ -149,6 +151,12 @@ alter table public.user_preferences
   alter column home_zone type text using home_zone::text,
   alter column work_zone type text using work_zone::text,
   alter column preferred_zones type text[] using preferred_zones::text[];
+
+-- Changing a column's type leaves its default behind, still written in the old
+-- one. The empty array has to be restated as text[] or the enum cannot be
+-- dropped and the default cannot be evaluated.
+alter table public.user_preferences
+  alter column preferred_zones set default '{}'::text[];
 
 alter table public.user_preferences
   add constraint user_preferences_home_zone_fkey
@@ -190,7 +198,7 @@ drop type if exists public.vertical;
 drop type if exists public.zone;
 
 -- --------------------------------------------------------------------------
--- The two functions, restored
+-- The three functions, restored
 --
 -- Copied verbatim from 20260822001900_memory.sql. The only change is the
 -- return type of `vertical`, which no longer has an enum to be.
@@ -293,3 +301,71 @@ $$;
 
 revoke execute on function public.user_taste_signals(uuid) from public, anon;
 grant execute on function public.user_taste_signals(uuid) to authenticated, service_role;
+
+/**
+ * Everyone who might be due a nudge, with the history to decide.
+ *
+ * Deliberately generous: this narrows the sweep to users with a repeat visit
+ * somewhere and notifications switched on, and the real judgement — whether a
+ * nudge would be welcome or annoying — happens in code where it can be tested.
+ */
+create or replace function public.proactive_candidates(p_now timestamptz)
+returns table (
+  user_id uuid,
+  venue_id uuid,
+  venue_name text,
+  vertical text,
+  visits integer,
+  last_visit timestamptz,
+  median_gap_days numeric,
+  avg_rating numeric,
+  worst_rating smallint,
+  days_since_visit numeric,
+  last_nudge_at timestamptz,
+  nudges_last_30d integer,
+  has_upcoming boolean
+)
+language sql
+stable
+security definer
+set search_path = public, pg_catalog
+as $$
+  with per_user as (
+    select u.id as user_id
+    from public.users u
+    where coalesce((u.notification_prefs ->> 'push_enabled')::boolean, true)
+      and coalesce((u.notification_prefs ->> 'proactive_suggestions')::boolean, false)
+  ),
+  history as (
+    select p.user_id, h.*
+    from per_user p
+    cross join lateral public.user_venue_history(p.user_id) h
+    where h.visits >= 2
+  )
+  select
+    h.user_id,
+    h.venue_id,
+    h.venue_name,
+    h.vertical,
+    h.visits,
+    h.last_visit,
+    h.median_gap_days,
+    h.avg_rating,
+    h.worst_rating,
+    round(extract(epoch from (p_now - h.last_visit)) / 86400, 1),
+    (select max(n.sent_at) from public.proactive_nudges n
+      where n.user_id = h.user_id),
+    (select count(*)::integer from public.proactive_nudges n
+      where n.user_id = h.user_id and n.sent_at > p_now - interval '30 days'),
+    exists (
+      select 1 from public.bookings b
+      where b.user_id = h.user_id
+        and b.venue_id = h.venue_id
+        and b.scheduled_for > p_now
+        and b.status not in ('cancelled', 'failed')
+    )
+  from history h;
+$$;
+
+revoke execute on function public.proactive_candidates(timestamptz) from public, anon, authenticated;
+grant execute on function public.proactive_candidates(timestamptz) to service_role;
