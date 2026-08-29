@@ -4,6 +4,7 @@ import type { AgentServiceEnv } from '@reservai/config';
 import { BOOKING_EVENTS, nextChannel, type VenueBookingChannel } from '@reservai/core';
 import { enabledRails } from '@reservai/config';
 import { requireUser } from '../auth';
+import { learnFromDecision } from '../learn';
 import { serviceClient, userClient } from '../supabase';
 import { applyTransition } from '../bookings/transition';
 import { ServiceError } from '../errors';
@@ -129,8 +130,8 @@ export async function registerBookingRoutes(app: FastifyInstance, { env }: Optio
       .update({ outcome: 'accepted', decided_at: new Date().toISOString() })
       .eq('id', suggestion.id);
 
-    // The others were considered and turned down; recording that is what makes
-    // preference learning possible in Phase 10.
+    // The others were considered and turned down. That is the only signal
+    // this product gets that nobody self-reported.
     await asService
       .from('suggestions')
       .update({ outcome: 'rejected', decided_at: new Date().toISOString() })
@@ -142,6 +143,9 @@ export async function registerBookingRoutes(app: FastifyInstance, { env }: Optio
       .from('requests')
       .update({ status: 'converted' })
       .eq('id', suggestion.request_id);
+
+    // After the booking exists, and unable to affect it either way.
+    await learnFromDecision(env, user.id, suggestion.request_id, suggestion.id);
 
     // Pick the rail. Only the manual rail exists in the pilot's first
     // end-to-end path, so this creates work for a human rather than pretending

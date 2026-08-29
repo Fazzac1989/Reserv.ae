@@ -552,6 +552,63 @@ export type Database = {
           },
         ]
       }
+      preference_signals: {
+        Row: {
+          agreements: number
+          attribute: string
+          first_seen_at: string
+          id: string
+          last_seen_at: string
+          observations: number
+          rejected_at: string | null
+          source: string
+          subject: string | null
+          user_id: string
+          value: string
+        }
+        Insert: {
+          agreements?: number
+          attribute: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          observations?: number
+          rejected_at?: string | null
+          source: string
+          subject?: string | null
+          user_id: string
+          value: string
+        }
+        Update: {
+          agreements?: number
+          attribute?: string
+          first_seen_at?: string
+          id?: string
+          last_seen_at?: string
+          observations?: number
+          rejected_at?: string | null
+          source?: string
+          subject?: string | null
+          user_id?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "preference_signals_subject_fkey"
+            columns: ["subject"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "preference_signals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pricing_signals: {
         Row: {
           answer: string
@@ -669,6 +726,50 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "push_tokens_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      relationships: {
+        Row: {
+          allergies: string[]
+          created_at: string
+          dietary: string[]
+          id: string
+          name: string
+          notes: string | null
+          relation: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allergies?: string[]
+          created_at?: string
+          dietary?: string[]
+          id?: string
+          name: string
+          notes?: string | null
+          relation: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allergies?: string[]
+          created_at?: string
+          dietary?: string[]
+          id?: string
+          name?: string
+          notes?: string | null
+          relation?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "relationships_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -1446,6 +1547,17 @@ export type Database = {
           p_reason?: string
         }
         Returns: string
+      }
+      record_preference_signal: {
+        Args: {
+          p_agreed?: boolean
+          p_attribute: string
+          p_source: string
+          p_subject: string
+          p_user_id: string
+          p_value: string
+        }
+        Returns: undefined
       }
       retention_cohorts: {
         Args: never
