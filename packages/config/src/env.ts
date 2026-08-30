@@ -225,6 +225,21 @@ const agentServiceSchema = serverSchema.extend({
   WEB_ORIGINS: webOrigins,
   AGENT_SERVICE_PORT: z.coerce.number().int().positive().default(3030),
   ANTHROPIC_API_KEY: z.string().min(1),
+  /**
+   * 32 bytes of hex, for the refresh tokens that let Riva read a calendar.
+   *
+   * Optional only so the service still starts before anyone has connected an
+   * account. The moment a connection exists it is required, and the OAuth
+   * routes refuse to run without it rather than storing a token in the clear.
+   */
+  TOKEN_ENCRYPTION_KEY: z
+    .string()
+    .regex(/^[0-9a-f]{64}$/i, 'must be 64 hex characters — generate with: openssl rand -hex 32')
+    .optional(),
+  GOOGLE_OAUTH_CLIENT_ID: z.string().optional(),
+  GOOGLE_OAUTH_CLIENT_SECRET: z.string().optional(),
+  /** Where Google sends the user back. Must match the console exactly. */
+  GOOGLE_OAUTH_REDIRECT_URI: z.string().url().optional(),
   AI_MODEL_FAST: z.string().min(1),
   AI_MODEL_STRONG: z.string().min(1),
   AI_TRANSCRIPTION_PROVIDER: z.string().optional(),

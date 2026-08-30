@@ -10,14 +10,14 @@ The brief asks to be challenged. Sections 10 to 15 do that.
 
 ## 1. Existing architecture
 
-| Layer    | What it is                                                       |
-| -------- | ---------------------------------------------------------------- |
-| Monorepo | pnpm 11 workspaces + Turborepo                                    |
-| Consumer | Expo 54 / expo-router / NativeWind — native and a web export      |
-| Admin    | Next 15 App Router, shadcn/ui, at `reserv.ae/admin`                |
-| Runtime  | Fastify 5 on Fly.io, one machine, an every-minute sweep           |
-| Data     | Supabase Postgres, RLS throughout, append-only `events_log`        |
-| AI       | Anthropic SDK, structured output, five named agents                |
+| Layer    | What it is                                                   |
+| -------- | ------------------------------------------------------------ |
+| Monorepo | pnpm 11 workspaces + Turborepo                               |
+| Consumer | Expo 54 / expo-router / NativeWind — native and a web export |
+| Admin    | Next 15 App Router, shadcn/ui, at `reserv.ae/admin`          |
+| Runtime  | Fastify 5 on Fly.io, one machine, an every-minute sweep      |
+| Data     | Supabase Postgres, RLS throughout, append-only `events_log`  |
+| AI       | Anthropic SDK, structured output, five named agents          |
 
 27 tables, 23 migrations, ~22,000 lines. Auth is email OTP on both apps.
 
