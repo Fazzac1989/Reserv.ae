@@ -151,8 +151,13 @@ export async function listChoices(): Promise<{ categories: Choice[]; places: Cho
     supabase.from('places').select('slug, label').eq('kind', 'neighbourhood').order('sort_order'),
   ]);
 
-  if (categories.error) throw categories.error;
-  if (places.error) throw places.error;
+  // Deliberately not thrown. These fill dropdowns; the page's actual job is
+  // listing venues, and taking the whole console down because a vocabulary
+  // could not be read is out of proportion to what is missing. An empty list
+  // shows as an empty select, which is visibly wrong without being fatal.
+  if (categories.error || places.error) {
+    console.error('Could not read the reference tables', categories.error ?? places.error);
+  }
 
   return { categories: categories.data ?? [], places: places.data ?? [] };
 }

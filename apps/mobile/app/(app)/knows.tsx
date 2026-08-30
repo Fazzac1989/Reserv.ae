@@ -150,7 +150,11 @@ export default function WhatRivaKnows() {
           options. Saying so plainly beats an encouraging placeholder that
           implies the feature is broken.
         */}
-        {!inferences.isLoading && (inferences.data ?? []).length === 0 ? (
+        {inferences.isError ? (
+          <Muted>I could not read this just now. Try again in a moment.</Muted>
+        ) : null}
+
+        {!inferences.isLoading && !inferences.isError && all.length === 0 ? (
           <Muted>
             Nothing yet. I learn from what you pick over what you pass on, so this fills in once you
             have booked a few things.
