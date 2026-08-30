@@ -161,11 +161,18 @@ export default function Bookings() {
         </View>
       ) : null}
 
-      <Link href="/profile" asChild>
-        <Pressable accessibilityRole="link" className="min-h-[44px] justify-center">
-          <Meta>Profile</Meta>
-        </Pressable>
-      </Link>
+      <View className="gap-1">
+        <Link href="/knows" asChild>
+          <Pressable accessibilityRole="link" className="min-h-[44px] justify-center">
+            <Meta>What Riva knows</Meta>
+          </Pressable>
+        </Link>
+        <Link href="/profile" asChild>
+          <Pressable accessibilityRole="link" className="min-h-[44px] justify-center">
+            <Meta>Profile</Meta>
+          </Pressable>
+        </Link>
+      </View>
     </ScreenScroll>
   );
 }

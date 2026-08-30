@@ -556,6 +556,7 @@ export type Database = {
         Row: {
           agreements: number
           attribute: string
+          confirmed_at: string | null
           first_seen_at: string
           id: string
           last_seen_at: string
@@ -569,6 +570,7 @@ export type Database = {
         Insert: {
           agreements?: number
           attribute: string
+          confirmed_at?: string | null
           first_seen_at?: string
           id?: string
           last_seen_at?: string
@@ -582,6 +584,7 @@ export type Database = {
         Update: {
           agreements?: number
           attribute?: string
+          confirmed_at?: string | null
           first_seen_at?: string
           id?: string
           last_seen_at?: string

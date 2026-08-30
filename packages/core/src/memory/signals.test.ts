@@ -6,6 +6,8 @@ import {
   confidenceWord,
   MIN_OBSERVATIONS,
   STALE_AFTER_DAYS,
+  leaningOf,
+  toInference,
   worthShowing,
   type PreferenceSignal,
 } from './signals';
@@ -25,6 +27,7 @@ function signal(overrides: Partial<PreferenceSignal> = {}): PreferenceSignal {
     agreements: 9,
     lastSeenAt: daysAgo(1),
     rejectedAt: null,
+    confirmedAt: null,
     ...overrides,
   };
 }
@@ -144,5 +147,76 @@ describe('confidenceWord', () => {
     expect(confidenceWord(0.95)).toBe('Confident');
     expect(confidenceWord(CONFIDENT_ENOUGH)).toBe('Fairly sure');
     expect(confidenceWord(0.2)).toBe('Still learning');
+  });
+});
+
+describe('a signal the user has confirmed', () => {
+  it('is certain, whatever the sample size', () => {
+    // They have told us. Hedging a stated preference is how an assistant makes
+    // somebody say the same thing twice.
+    const confirmed = signal({ observations: 3, agreements: 3, confirmedAt: daysAgo(1) });
+    expect(confidenceOf(confirmed, NOW)).toBe(1);
+  });
+
+  it('does not fade with age', () => {
+    const old = signal({ confirmedAt: daysAgo(2), lastSeenAt: daysAgo(STALE_AFTER_DAYS + 30) });
+    expect(confidenceOf(old, NOW)).toBe(1);
+  });
+
+  it('is still overridden by a later correction', () => {
+    const both = signal({ confirmedAt: daysAgo(30), rejectedAt: daysAgo(1) });
+    expect(confidenceOf(both, NOW)).toBe(0);
+  });
+
+  it('shows even below the observation floor', () => {
+    const stated = signal({ observations: 1, agreements: 1, confirmedAt: daysAgo(1) });
+    expect(worthShowing([stated], NOW)).toHaveLength(1);
+  });
+
+  it('reads as something they said, not something we worked out', () => {
+    expect(confidenceWord(1)).toBe('Confirmed by you');
+  });
+});
+
+describe('which way the evidence points', () => {
+  it('reads a mostly-declined signal as evidence against, not as uncertainty', () => {
+    // Italian offered twenty times and taken four. Reporting that as "not sure
+    // you like Italian" describes the arithmetic; what happened is a
+    // preference, pointing the other way.
+    const inference = toInference(signal({ observations: 20, agreements: 4 }), NOW);
+    expect(inference.leaning).toBe('against');
+    expect(inference.confidence).toBeGreaterThan(0.5);
+  });
+
+  it('still wants clear evidence before acting on a negative', () => {
+    // Four in twenty is worth showing and worth correcting. Quietly refusing
+    // to offer Italian again is a bigger claim, and wants better than 80%.
+    expect(actionable([signal({ observations: 20, agreements: 4 })], NOW)).toEqual([]);
+    expect(actionable([signal({ observations: 20, agreements: 1 })], NOW)).toHaveLength(1);
+  });
+
+  it('treats one in four and three in four as equally informative', () => {
+    const liked = toInference(signal({ observations: 20, agreements: 15 }), NOW);
+    const avoided = toInference(signal({ observations: 20, agreements: 5 }), NOW);
+    expect(liked.confidence).toBe(avoided.confidence);
+    expect(liked.leaning).toBe('toward');
+    expect(avoided.leaning).toBe('against');
+  });
+
+  it('finds an even split genuinely uninformative', () => {
+    // The only result that says nothing at all.
+    expect(confidenceOf(signal({ observations: 40, agreements: 20 }), NOW)).toBe(0);
+  });
+
+  it('leans toward on a tie rather than against', () => {
+    // A borderline case should not read as an accusation.
+    expect(leaningOf(signal({ observations: 10, agreements: 5 }))).toBe('toward');
+  });
+
+  it('acts on a strong negative', () => {
+    // Riva should stop offering this, which means it has to survive the filter
+    // that decides what is worth acting on.
+    const avoided = signal({ observations: 30, agreements: 3 });
+    expect(actionable([avoided], NOW).map((s) => s.leaning)).toEqual(['against']);
   });
 });
