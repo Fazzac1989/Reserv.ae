@@ -552,6 +552,102 @@ export type Database = {
           },
         ]
       }
+      plan_items: {
+        Row: {
+          booking_id: string | null
+          category: string | null
+          created_at: string
+          id: string
+          plan_id: string
+          position: number
+          title: string
+        }
+        Insert: {
+          booking_id?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          plan_id: string
+          position?: number
+          title: string
+        }
+        Update: {
+          booking_id?: string | null
+          category?: string | null
+          created_at?: string
+          id?: string
+          plan_id?: string
+          position?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_items_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_items_category_fkey"
+            columns: ["category"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "plan_items_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          ends_on: string | null
+          id: string
+          note: string | null
+          starts_on: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          ends_on?: string | null
+          id?: string
+          note?: string | null
+          starts_on?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          ends_on?: string | null
+          id?: string
+          note?: string | null
+          starts_on?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plans_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       preference_signals: {
         Row: {
           agreements: number

@@ -72,7 +72,13 @@ function AuthGate() {
     <Stack
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: scheme === 'dark' ? '#14161A' : '#F7F5F1' },
+        // The tab navigator nested below measures itself against this
+        // container, so it is given a definite height to fill rather than
+        // being left to infer one.
+        contentStyle: {
+          flex: 1,
+          backgroundColor: scheme === 'dark' ? '#14161A' : '#F7F5F1',
+        },
       }}
     />
   );
