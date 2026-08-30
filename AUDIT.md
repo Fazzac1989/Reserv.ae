@@ -1,5 +1,9 @@
 # Reserv — audit against the Lifestyle Assistant brief
 
+> Superseded in part by [ARCHITECTURE.md](ARCHITECTURE.md), which answers the
+> later Personal Operator brief and carries the current phase plan. This file
+> remains the record of what was here before that work started.
+
 Written before any code was changed. 21,000 lines, 19 migrations, three apps,
 four packages. What follows is what is actually here, what the brief asks for,
 and the distance between them.
