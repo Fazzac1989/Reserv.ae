@@ -125,8 +125,8 @@ export default function Plans() {
 
       {nothing ? (
         <Muted>
-          Nothing arranged yet. Ask Riva for something and it will appear here — a plan is for when
-          one occasion needs several bookings.
+          Nothing arranged yet. Ask Suhail for something and it will appear here — a plan is for
+          when one occasion needs several bookings.
         </Muted>
       ) : null}
 
@@ -246,11 +246,11 @@ export default function Plans() {
       )}
 
       <Pressable
-        onPress={() => router.push('/riva')}
+        onPress={() => router.push('/suhail')}
         accessibilityRole="button"
         className="min-h-[44px] justify-center"
       >
-        <Muted>Ask Riva for something</Muted>
+        <Muted>Ask Suhail for something</Muted>
       </Pressable>
     </ScreenScroll>
   );

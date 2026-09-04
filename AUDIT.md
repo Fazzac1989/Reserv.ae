@@ -63,8 +63,8 @@ brief wants is present; the surface area is small.
 | ----------- | ----------------------------------------------------------- | ---------------------------------------------------------- |
 | Preferences | One flat table: cuisines, price band, zones, dietary, party | Explicit + inferred + behavioural + contextual, scored     |
 | Memory      | `standing_providers`, visit history                         | Episodic, semantic, behavioural, relationship, situational |
-| Personality | Unnamed "concierge for reservAI"                            | Riva, named, configurable, context-aware                   |
-| Proactivity | Nudge rules written, flag off, no surface                   | Daily Brief, Riva Suggests, contextual prompts             |
+| Personality | Unnamed "concierge for reservAI"                            | Suhail, named, configurable, context-aware                 |
+| Proactivity | Nudge rules written, flag off, no surface                   | Daily Brief, Suhail Suggests, contextual prompts           |
 | Calendar    | `expo-calendar` writes one event to the device              | Read, summarise, find gaps, reschedule                     |
 | Onboarding  | Four-step wizard, saves preferences                         | Conversational, progressive, "I'll learn the rest"         |
 
@@ -79,7 +79,7 @@ brief wants is present; the surface area is small.
 - **Flights, hotels, travel.** No supplier types, no APIs, no quote workflow.
 - **Permissions centre.** Nothing scoped per capability.
 - **Activity log for the user.** `events_log` exists but is ops-facing.
-- **Riva orb.** No visual identity for the assistant.
+- **Suhail orb.** No visual identity for the assistant.
 - **Call assistant.** `booker_voice` is defined and unbuilt.
 
 ### SHOULD IMPROVE
@@ -120,13 +120,13 @@ Narnia does not.
 
 **Not done in the application.** Fourteen files still speak the narrower
 vocabulary through zod, and one of them is the model's own output schema, which
-has to stay a closed list or Riva will invent slugs. The right split is a
+has to stay a closed list or Suhail will invent slugs. The right split is a
 pattern check at storage and a closed list — built from what is actually
 bookable — at the model boundary. Nothing is broken meanwhile: every value the
 app knows is still valid.
 
 **Second finding: there is no supply.** One venue, marked demo, no photographs.
-"Connect the existing supplier database to Riva" reads differently once you know
+"Connect the existing supplier database to Suhail" reads differently once you know
 the database has a single row in it. Recommendation quality cannot be judged,
 Discover has nothing to show, and the design's only decoration is absent.
 
@@ -137,7 +137,7 @@ Yesterday's design brief and this one disagree on the shape of the app.
 > **Yesterday:** "Chat-first, single surface. The conversation IS the app."
 > "No tab bar in v1." "Bookings — reachable by a single top-right word."
 
-> **Today:** "Recommended primary navigation: Home, Ask Riva, Plans, Discover,
+> **Today:** "Recommended primary navigation: Home, Ask Suhail, Plans, Discover,
 > You." "Potential bottom navigation." "Home should become a personal command
 > centre."
 
@@ -149,13 +149,13 @@ the answer changes what Home _is_: the whole app, or one of five places.
 
 Assuming the five-destination shape:
 
-| Destination  | What moves there                                                | State             |
-| ------------ | --------------------------------------------------------------- | ----------------- |
-| **Home**     | Greeting, today's timeline, Riva Suggests, the input            | NEW               |
-| **Ask Riva** | Today's conversation screen, unchanged in substance             | EXISTING          |
-| **Plans**    | Bookings become plan items; a Plan wraps them                   | NEW               |
-| **Discover** | Curated venue browsing                                          | NEW, needs supply |
-| **You**      | Profile, What Riva Knows, Permissions, Activity, Connected apps | PARTIAL           |
+| Destination    | What moves there                                                  | State             |
+| -------------- | ----------------------------------------------------------------- | ----------------- |
+| **Home**       | Greeting, today's timeline, Suhail Suggests, the input            | NEW               |
+| **Ask Suhail** | Today's conversation screen, unchanged in substance               | EXISTING          |
+| **Plans**      | Bookings become plan items; a Plan wraps them                     | NEW               |
+| **Discover**   | Curated venue browsing                                            | NEW, needs supply |
+| **You**        | Profile, What Suhail Knows, Permissions, Activity, Connected apps | PARTIAL           |
 
 The admin console is untouched by all of this and stays where it is.
 
@@ -166,14 +166,14 @@ order, the honest sequence is:
 
 1. **Widen the domain model.** Categories instead of two enums. Everything else
    waits on this.
-2. **Riva as configuration.** `assistantName`, `brandName`, `brandTagline` in
+2. **Suhail as configuration.** `assistantName`, `brandName`, `brandTagline` in
    `packages/config`, threaded through prompts and copy. Cheap, and it changes
    how the product feels immediately.
 3. **Rewrite the concierge prompt** against the voice the brief specifies.
 4. **The memory foundation.** `preference_signals` with source and confidence,
    `relationships`, `user_memories`. Write to it from the flows that already
    exist — a booking made, a suggestion rejected, a rating given.
-5. **What Riva Knows.** Read the above back, editable. This is the trust
+5. **What Suhail Knows.** Read the above back, editable. This is the trust
    feature and it is worth building early, while the data is small.
 6. **Navigation and Home**, once the shape is decided.
 7. **Plans**, wrapping bookings.

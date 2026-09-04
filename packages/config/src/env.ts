@@ -226,7 +226,7 @@ const agentServiceSchema = serverSchema.extend({
   AGENT_SERVICE_PORT: z.coerce.number().int().positive().default(3030),
   ANTHROPIC_API_KEY: z.string().min(1),
   /**
-   * 32 bytes of hex, for the refresh tokens that let Riva read a calendar.
+   * 32 bytes of hex, for the refresh tokens that let Suhail read a calendar.
    *
    * Optional only so the service still starts before anyone has connected an
    * account. The moment a connection exists it is required, and the OAuth

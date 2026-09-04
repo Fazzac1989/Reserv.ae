@@ -95,7 +95,7 @@ export function toInference(signal: PreferenceSignal, now: Date): Inference {
 }
 
 /**
- * What Riva may act on without being asked.
+ * What Suhail may act on without being asked.
  *
  * Sorted by confidence so a caller taking the top few gets the ones it is most
  * entitled to. Anything the user has corrected is gone entirely — a rejected
@@ -125,7 +125,7 @@ export function worthShowing(signals: readonly PreferenceSignal[], now: Date): I
     .sort((a, b) => b.confidence - a.confidence);
 }
 
-/** How sure Riva is, said the way a person would say it. */
+/** How sure Suhail is, said the way a person would say it. */
 export function confidenceWord(confidence: number): string {
   // Distinct from the screen's own "You told me" heading, which is about the
   // preferences typed during onboarding rather than an inference confirmed.

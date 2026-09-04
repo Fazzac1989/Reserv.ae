@@ -58,7 +58,7 @@ export default function Discover() {
     <ScreenScroll>
       <View className="gap-4 pt-4">
         <Display>Discover</Display>
-        <Lead className="text-stone">Places Riva can actually get you into.</Lead>
+        <Lead className="text-stone">Places Suhail can actually get you into.</Lead>
       </View>
 
       {listings.isLoading ? <LiveStatus label="Looking…" /> : null}
@@ -74,15 +74,17 @@ export default function Discover() {
       */}
       {!listings.isLoading && venues.length === 0 ? (
         <Muted>
-          Nothing here yet. Riva only lists places that have agreed to take bookings, so this fills
-          up as they do.
+          Nothing here yet. Suhail only lists places that have agreed to take bookings, so this
+          fills up as they do.
         </Muted>
       ) : null}
 
       {venues.map((venue) => (
         <Pressable
           key={venue.id}
-          onPress={() => router.push({ pathname: '/riva', params: { ask: `Book ${venue.name}` } })}
+          onPress={() =>
+            router.push({ pathname: '/suhail', params: { ask: `Book ${venue.name}` } })
+          }
           accessibilityRole="button"
           className="gap-1.5 py-4"
         >

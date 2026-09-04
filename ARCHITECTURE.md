@@ -251,7 +251,7 @@ run inside an Expo web export, and `prefers-reduced-motion` has to turn it off
 cleanly. Three.js for this would be a 600KB dependency to draw a circle.
 
 **Do not add the tab bar's sixth destination.** The brief lists Home, and the
-existing app now has Home, Riva, Plans, Discover, You. Every new domain should
+existing app now has Home, Suhail, Plans, Discover, You. Every new domain should
 land inside those five, or the "less interface as it grows more powerful"
 principle in the brief loses to the pressure to expose each new capability.
 
@@ -274,7 +274,7 @@ be evaluated, and every later phase is guesswork. This is not engineering work,
 which is exactly why it keeps being deferred.
 
 **1 — Calendar.**
-The lightest OAuth of the lot, and the single biggest jump in what Riva can
+The lightest OAuth of the lot, and the single biggest jump in what Suhail can
 say. "You have a meeting until 7:30" changes every dinner suggestion. Read-only
 first, then create, then move.
 

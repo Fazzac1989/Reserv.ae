@@ -13,7 +13,7 @@ import { statusCopy } from '../../src/components/reservation-card';
  * The first thing, and deliberately not a dashboard.
  *
  * Four things at most: who you are, somewhere to say what you want, what is
- * happening today, and — only when there is genuinely something — what Riva
+ * happening today, and — only when there is genuinely something — what Suhail
  * thinks you might want next. Everything else in this product is one tap away
  * and does not need a tile here advertising it.
  *
@@ -79,11 +79,11 @@ export default function Home() {
   function ask() {
     const text = draft.trim();
     if (text.length === 0) {
-      router.push('/riva');
+      router.push('/suhail');
       return;
     }
     // Handed over rather than answered here. One conversation, one place.
-    router.push({ pathname: '/riva', params: { ask: text } });
+    router.push({ pathname: '/suhail', params: { ask: text } });
     setDraft('');
   }
 

@@ -14,7 +14,7 @@ export const BRAND = Object.freeze({
   name: 'Reserv',
   tagline: 'Life, handled.',
   /** The assistant the user actually talks to. */
-  assistant: 'Riva',
+  assistant: 'Suhail',
   /** What the assistant is, said once, for prompts and onboarding. */
   assistantRole: 'personal AI lifestyle assistant',
   /** Where the pilot operates. Used for phrasing, not for filtering. */

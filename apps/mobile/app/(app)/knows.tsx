@@ -20,7 +20,7 @@ import {
 import { usePreferences } from '../../src/lib/profile';
 
 /**
- * Everything Riva believes about someone, in one place they can argue with.
+ * Everything Suhail believes about someone, in one place they can argue with.
  *
  * This is the trust feature. An assistant that quietly accumulates conclusions
  * is one people stop telling things to, and the only defence is to show the
@@ -82,7 +82,7 @@ function Row({
   );
 }
 
-export default function WhatRivaKnows() {
+export default function WhatSuhailKnows() {
   const router = useRouter();
   const preferences = usePreferences();
   const inferences = useInferences();
@@ -116,8 +116,8 @@ export default function WhatRivaKnows() {
         >
           <Meta>Back</Meta>
         </Pressable>
-        <Display>What Riva knows</Display>
-        <Lead>Everything here can be corrected. Riva stops assuming it the moment you do.</Lead>
+        <Display>What Suhail knows</Display>
+        <Lead>Everything here can be corrected. Suhail stops assuming it the moment you do.</Lead>
       </View>
 
       <View className="gap-4">

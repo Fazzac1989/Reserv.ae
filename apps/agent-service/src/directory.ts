@@ -6,7 +6,7 @@ import { serviceClient } from './supabase';
  *
  * Neighbourhoods only: a request for "Dubai" is not something the venue filter
  * can narrow on, and a country is not a place anyone books dinner in. Ops adds
- * a neighbourhood and Riva understands it on the next cache expiry, which is
+ * a neighbourhood and Suhail understands it on the next cache expiry, which is
  * the point of having moved these out of an enum.
  *
  * Cached because it is read on every message and changes about once a month.

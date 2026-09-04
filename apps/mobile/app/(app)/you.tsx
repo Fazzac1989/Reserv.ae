@@ -7,10 +7,10 @@ import { useProfile } from '../../src/lib/profile';
 import { signOut } from '../../src/lib/auth';
 
 /**
- * Everything about the person, and everything Riva is allowed to do.
+ * Everything about the person, and everything Suhail is allowed to do.
  *
  * A hub rather than a settings screen: the two things worth reaching quickly
- * are what Riva believes and what it may act on, and both are trust features
+ * are what Suhail believes and what it may act on, and both are trust features
  * rather than preferences.
  */
 

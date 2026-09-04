@@ -21,7 +21,7 @@ import { registerForPush } from '../../src/lib/notifications';
 
 const DESTINATIONS = [
   { name: 'index', label: 'Home' },
-  { name: 'riva', label: 'Riva' },
+  { name: 'suhail', label: 'Suhail' },
   { name: 'plans', label: 'Plans' },
   { name: 'discover', label: 'Discover' },
   { name: 'you', label: 'You' },

@@ -1,7 +1,7 @@
 import { createCipheriv, createDecipheriv, randomBytes, timingSafeEqual } from 'node:crypto';
 
 /**
- * Encrypting the tokens that let Riva read somebody's calendar.
+ * Encrypting the tokens that let Suhail read somebody's calendar.
  *
  * A refresh token is a standing grant. It does not expire on its own, it
  * cannot be rotated without the user noticing, and anyone holding one can read

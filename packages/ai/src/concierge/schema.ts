@@ -23,7 +23,7 @@ export const BOOKABLE_VERTICALS = ['restaurant', 'salon', 'barber'] as const;
  * The model picks from a closed list, always.
  *
  * Places come from the database rather than a constant here, so a neighbourhood
- * added by ops is one Riva can understand the same day — but it is still a
+ * added by ops is one Suhail can understand the same day — but it is still a
  * list, because a free-text zone is a zone that matches no venue and fails
  * silently at the filter.
  */

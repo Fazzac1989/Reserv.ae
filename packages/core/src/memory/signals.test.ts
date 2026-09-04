@@ -214,7 +214,7 @@ describe('which way the evidence points', () => {
   });
 
   it('acts on a strong negative', () => {
-    // Riva should stop offering this, which means it has to survive the filter
+    // Suhail should stop offering this, which means it has to survive the filter
     // that decides what is worth acting on.
     const avoided = signal({ observations: 30, agreements: 3 });
     expect(actionable([avoided], NOW).map((s) => s.leaning)).toEqual(['against']);

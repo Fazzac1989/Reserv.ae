@@ -3,7 +3,7 @@ import { worthShowing, type Inference, type PreferenceSignal } from '@reservai/c
 import { supabase } from './supabase';
 
 /**
- * What Riva has worked out, read straight from the database.
+ * What Suhail has worked out, read straight from the database.
  *
  * Not through the agent service: this is the user's own data and row-level
  * security already says so. Routing it through a service that would only add
@@ -92,7 +92,7 @@ export function useInferences() {
 }
 
 /**
- * Correcting Riva.
+ * Correcting Suhail.
  *
  * A rejected signal is kept rather than deleted, so the same conclusion is not
  * drawn again next month from the same behaviour. Being corrected and then

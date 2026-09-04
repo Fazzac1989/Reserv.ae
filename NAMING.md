@@ -1,6 +1,6 @@
 # Naming the assistant
 
-Riva collides with NVIDIA Riva, a speech-AI platform whose own marketing says
+Suhail collides with NVIDIA Suhail, a speech-AI platform whose own marketing says
 "intelligent virtual assistants". Today the markets differ — theirs is
 developer infrastructure, ours is a consumer app. They converge the moment
 Reserv ships voice, which is Phase 5 of its own plan.
@@ -9,7 +9,7 @@ This is the shortlist for replacing it, and the case for not bothering.
 
 ---
 
-## The case for keeping Riva
+## The case for keeping Suhail
 
 Worth stating first, because a rename that was not needed is pure cost.
 
@@ -18,7 +18,7 @@ plausibly be confused at the point of purchase. If a trademark search comes
 back clean in the relevant classes, keeping it is defensible.
 
 What a search cannot tell you is how it feels in three years, when Reserv has a
-voice assistant and every search for "Riva voice" returns a GPU company. That
+voice assistant and every search for "Suhail voice" returns a GPU company. That
 is the actual cost, and it is a judgement rather than a legal question.
 
 **The name is days old.** `BRAND` in `packages/config` means changing it is a

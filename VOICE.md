@@ -190,7 +190,7 @@ so the marginal cost of a booking is small and predictable — this is the right
 economics for supplier calls.
 
 It is the wrong economics for an always-listening user-facing assistant, which
-is why this spec covers outbound supplier calls only. Riva stays on text.
+is why this spec covers outbound supplier calls only. Suhail stays on text.
 
 Check current rates before committing; they change.
 
