@@ -2,6 +2,7 @@ import { Dimensions, ImageBackground, Pressable, ScrollView, View } from 'react-
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Body, Display, Lead, Meta, Muted, Title } from '../../src/components/ui/text';
 import { LiveStatus } from '../../src/components/booking-state';
 import { supabase } from '../../src/lib/supabase';
@@ -70,17 +71,23 @@ function Card({
       {photo ? (
         <ImageBackground
           source={{ uri: photo }}
-          style={{ height }}
+          // Ink underneath, so the moment before a photograph arrives reads as
+          // a dark card rather than as a broken one.
+          style={{ height, backgroundColor: '#14161A' }}
           className="justify-end"
           resizeMode="cover"
         >
           {/*
-            The scrim earns the serif its contrast. Three stops rather than two
-            so it does not band on a wide-gamut screen.
+            One gradient rather than three stacked boxes. Stacked opacities
+            leave a visible edge wherever one ends, which a dark photograph
+            hides and a bright one does not — and which every photograph shows
+            in the moment before it loads.
           */}
-          <View className="absolute inset-x-0 bottom-0 h-2/3 bg-ink/20" />
-          <View className="absolute inset-x-0 bottom-0 h-1/2 bg-ink/45" />
-          <View className="absolute inset-x-0 bottom-0 h-1/3 bg-ink/70" />
+          <LinearGradient
+            colors={['transparent', 'rgba(20,22,26,0.35)', 'rgba(20,22,26,0.88)']}
+            locations={[0.35, 0.68, 1]}
+            style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '75%' }}
+          />
           <View className="p-6">
             <Title className="text-porcelain">{listing.name}</Title>
             <Meta className="mt-1.5 text-porcelain/70">{meta}</Meta>
@@ -135,8 +142,19 @@ export default function Discover() {
   const labels = listings.data?.labels ?? {};
   const kindOf = listings.data?.kindOf ?? {};
 
-  const lead = venues[0];
-  const rest = venues.slice(1);
+  /**
+   * The opener, chosen rather than taken.
+   *
+   * Sorting by price band put a barber's chair at the top of a screen whose
+   * job is to make somebody want dinner. A table, with a photograph, is the
+   * right thing to land on — and if there is no such thing, the screen opens
+   * on shelves instead of on an apology.
+   */
+  const lead =
+    venues.find((v) => kindOf[v.vertical] === 'dining' && v.photo_urls?.[0]) ??
+    venues.find((v) => v.photo_urls?.[0]) ??
+    venues[0];
+  const rest = venues.filter((v) => v.id !== lead?.id);
 
   function open(listing: Listing) {
     router.push({ pathname: '/suhail', params: { ask: `Tell me about ${listing.name}` } });
