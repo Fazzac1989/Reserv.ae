@@ -78,14 +78,14 @@ export function Confirmation({
   const headline = (
     <>
       {/*
-        Champagne, and one of only three places it appears. A table that has
-        actually been given is the thing the accent was reserved for.
+        Full contrast on the photograph's scrim. A table that has actually been
+        given is what the brightest thing on the screen is reserved for.
       */}
-      <Meta className="text-champagne">
+      <Meta className={photo ? 'text-paper' : 'text-ink dark:text-paper'}>
         Confirmed · {clock(reservation.scheduled_for)} {dayWord(reservation.scheduled_for)}
       </Meta>
-      <Display className={photo ? 'mt-2 text-porcelain' : 'mt-2'}>{name}</Display>
-      <Body className={photo ? 'mt-1 text-porcelain/75' : 'mt-1 text-stone'}>
+      <Display className={photo ? 'mt-2 text-paper' : 'mt-2'}>{name}</Display>
+      <Body className={photo ? 'mt-1 text-paper/75' : 'mt-1 text-grey'}>
         {reservation.party_size === 1 ? 'A table for you' : `Table for ${reservation.party_size}`}
       </Body>
     </>
@@ -97,7 +97,7 @@ export function Confirmation({
         opacity: settle,
         transform: [{ scale: settle.interpolate({ inputRange: [0, 1], outputRange: [0.97, 1] }) }],
       }}
-      className="overflow-hidden rounded-card border border-stone-line"
+      className="overflow-hidden rounded-card border border-grey-line"
       accessibilityRole="summary"
       accessibilityLabel={`Confirmed at ${clock(reservation.scheduled_for)} ${dayWord(reservation.scheduled_for)}, ${name}`}
     >
@@ -109,10 +109,10 @@ export function Confirmation({
           <View className="p-7">{headline}</View>
         </ImageBackground>
       ) : (
-        <View className="bg-porcelain-raised p-7 dark:bg-ink-raised">{headline}</View>
+        <View className="bg-paper-raised p-7 dark:bg-ink-raised">{headline}</View>
       )}
 
-      <View className="gap-5 bg-porcelain-raised p-7 dark:bg-ink-raised">
+      <View className="gap-5 bg-paper-raised p-7 dark:bg-ink-raised">
         {/*
           The proof. Not that a table exists, but that something went and got
           it — which is the whole of what this app claims to do.

@@ -19,7 +19,7 @@ import '../global.css';
  * reading is the one this product wants.
  */
 function Splash() {
-  return <View className="flex-1 bg-porcelain dark:bg-ink" />;
+  return <View className="flex-1 bg-paper dark:bg-ink" />;
 }
 
 /**
@@ -77,7 +77,7 @@ function AuthGate() {
         // being left to infer one.
         contentStyle: {
           flex: 1,
-          backgroundColor: scheme === 'dark' ? '#14161A' : '#F7F5F1',
+          backgroundColor: scheme === 'dark' ? '#0B0B0C' : '#F6F6F7',
         },
       }}
     />

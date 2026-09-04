@@ -35,8 +35,8 @@ export function VenueCard({
 
   const body = (
     <View className="flex-1 justify-end p-5">
-      <Title className={photo ? 'text-porcelain' : undefined}>{card.name}</Title>
-      <Meta className={photo ? 'mt-1.5 text-porcelain/70' : 'mt-1.5'}>{metaLine(card)}</Meta>
+      <Title className={photo ? 'text-paper' : undefined}>{card.name}</Title>
+      <Meta className={photo ? 'mt-1.5 text-paper/70' : 'mt-1.5'}>{metaLine(card)}</Meta>
     </View>
   );
 
@@ -60,7 +60,7 @@ export function VenueCard({
           {body}
         </ImageBackground>
       ) : (
-        <View className="flex-1 border border-stone-line bg-porcelain-raised dark:bg-ink-raised">
+        <View className="flex-1 border border-grey-line bg-paper-raised dark:bg-ink-raised">
           {body}
         </View>
       )}

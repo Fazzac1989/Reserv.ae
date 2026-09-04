@@ -9,13 +9,13 @@ import { cn } from '../../lib/cn';
  * The colour is on a plain View rather than on the safe-area component.
  * React Native's own SafeAreaView drops `className` entirely — it is not one
  * of the components NativeWind wraps — which leaves the screen with no ground
- * at all and porcelain text sitting on the navigator's default grey. The
+ * at all and paper text sitting on the navigator's default grey. The
  * insets come from safe-area-context, which is the maintained one and works on
  * every platform rather than iOS alone.
  */
 export function Screen({ className, children, ...props }: ViewProps) {
   return (
-    <View className="flex-1 bg-porcelain dark:bg-ink">
+    <View className="flex-1 bg-paper dark:bg-ink">
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         <View className={cn('flex-1', className)} {...props}>
           {children}
@@ -27,7 +27,7 @@ export function Screen({ className, children, ...props }: ViewProps) {
 
 export function ScreenScroll({ className, children }: ViewProps) {
   return (
-    <View className="flex-1 bg-porcelain dark:bg-ink">
+    <View className="flex-1 bg-paper dark:bg-ink">
       <SafeAreaView style={{ flex: 1 }} edges={['top', 'bottom']}>
         <ScrollView
           // Whitespace is the material. 28 either side, and a long tail at the
@@ -45,5 +45,5 @@ export function ScreenScroll({ className, children }: ViewProps) {
 
 /** A hairline. Used wherever a border would otherwise be drawn. */
 export function Rule({ className }: { className?: string }) {
-  return <View className={cn('h-px w-full bg-stone-line', className)} />;
+  return <View className={cn('h-px w-full bg-grey-line', className)} />;
 }

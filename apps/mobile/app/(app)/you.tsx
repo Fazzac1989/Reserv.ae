@@ -43,7 +43,7 @@ export default function You() {
             <Link href={section.href} asChild>
               <Pressable accessibilityRole="link" className="gap-1 py-5">
                 <Title>{section.title}</Title>
-                <Body className="text-stone">{section.blurb}</Body>
+                <Body className="text-grey">{section.blurb}</Body>
               </Pressable>
             </Link>
             {i < SECTIONS.length - 1 ? <Rule /> : null}

@@ -86,7 +86,7 @@ export default function SignIn() {
             <Muted>We will email you a six-digit code. No password to remember.</Muted>
 
             {error ? (
-              <Muted className="text-clay" accessibilityLiveRegion="polite">
+              <Muted className="text-alert" accessibilityLiveRegion="polite">
                 {error}
               </Muted>
             ) : null}
@@ -99,9 +99,9 @@ export default function SignIn() {
           {appleAvailable || isGoogleEnabled() ? (
             <View className="gap-3">
               <View className="flex-row items-center gap-3">
-                <View className="h-px flex-1 bg-stone-line" />
+                <View className="h-px flex-1 bg-grey-line" />
                 <Muted>or</Muted>
-                <View className="h-px flex-1 bg-stone-line" />
+                <View className="h-px flex-1 bg-grey-line" />
               </View>
 
               {appleAvailable ? (
@@ -119,9 +119,9 @@ export default function SignIn() {
                   onPress={() => void onProvider(signInWithGoogle)}
                   disabled={busy}
                   accessibilityRole="button"
-                  className="h-14 items-center justify-center rounded-card border border-stone-line"
+                  className="h-14 items-center justify-center rounded-card border border-grey-line"
                 >
-                  <Body className="font-body-medium text-ink dark:text-porcelain">
+                  <Body className="font-body-medium text-ink dark:text-paper">
                     Continue with Google
                   </Body>
                 </Pressable>

@@ -116,12 +116,12 @@ export default function Plans() {
     <ScreenScroll>
       <View className="gap-4 pt-4">
         <Display>Plans</Display>
-        <Lead className="text-stone">Everything arranged, and what it is for.</Lead>
+        <Lead className="text-grey">Everything arranged, and what it is for.</Lead>
       </View>
 
       {plans.isLoading || loose.isLoading ? <LiveStatus label="Looking…" /> : null}
       {notice ? <Muted>{notice}</Muted> : null}
-      {error ? <Body className="text-clay">{error}</Body> : null}
+      {error ? <Body className="text-alert">{error}</Body> : null}
 
       {nothing ? (
         <Muted>
@@ -141,7 +141,7 @@ export default function Plans() {
             <Muted>Nothing in it yet.</Muted>
           ) : (
             plan.plan_items.map((item) => (
-              <Body key={item.id} className="text-stone">
+              <Body key={item.id} className="text-grey">
                 {item.title}
               </Body>
             ))

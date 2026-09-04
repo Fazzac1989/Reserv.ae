@@ -58,15 +58,15 @@ export function VenueSheet({
     >
       <Pressable className="flex-1 bg-ink/50" onPress={onClose} accessibilityLabel="Close" />
 
-      <View className="max-h-[88%] overflow-hidden rounded-t-[28px] bg-porcelain dark:bg-ink">
+      <View className="max-h-[88%] overflow-hidden rounded-t-[28px] bg-paper dark:bg-ink">
         <ScrollView showsVerticalScrollIndicator={false}>
           {photo ? (
             <ImageBackground source={{ uri: photo }} className="h-72" resizeMode="cover">
               <View className="absolute inset-x-0 bottom-0 h-1/2 bg-ink/25" />
               <View className="absolute inset-x-0 bottom-0 h-1/3 bg-ink/50" />
               <View className="flex-1 justify-end p-7">
-                <Title className="text-porcelain">{card.name}</Title>
-                <Meta className="mt-1.5 text-porcelain/70">{metaLine(card)}</Meta>
+                <Title className="text-paper">{card.name}</Title>
+                <Meta className="mt-1.5 text-paper/70">{metaLine(card)}</Meta>
               </View>
             </ImageBackground>
           ) : (
@@ -104,8 +104,8 @@ export function VenueSheet({
             <Rule />
 
             {/*
-              The champagne moment. The label names the time so the tap is
-              never ambiguous about what is being committed to.
+              The moment of commitment, and the only solid surface on the sheet.
+              The label names the time so the tap is never ambiguous.
             */}
             <Button
               variant="commit"

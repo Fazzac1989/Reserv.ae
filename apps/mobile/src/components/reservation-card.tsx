@@ -67,10 +67,10 @@ export function statusCopy(reservation: Reservation): StatusCopy {
 }
 
 const TONE_CLASS: Record<StatusCopy['tone'], string> = {
-  settled: 'text-moss',
-  working: 'text-stone',
-  attention: 'text-clay',
-  closed: 'text-stone',
+  settled: 'text-ink',
+  working: 'text-grey',
+  attention: 'text-alert',
+  closed: 'text-grey',
 };
 
 export function ReservationCard({
@@ -108,10 +108,10 @@ export function ReservationCard({
         <Meta>
           {when.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}
         </Meta>
-        <Title className={past ? 'text-stone' : undefined}>
+        <Title className={past ? 'text-grey' : undefined}>
           {reservation.venues?.name ?? 'Venue'}
         </Title>
-        <Body className="text-stone">
+        <Body className="text-grey">
           {when.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} ·{' '}
           {reservation.party_size === 1 ? 'just you' : `table for ${reservation.party_size}`}
         </Body>
@@ -159,7 +159,7 @@ export function ReservationCard({
                     disabled={busy}
                     accessibilityRole="button"
                     accessibilityLabel={`${score} out of 5`}
-                    className="min-h-[44px] flex-1 items-center justify-center rounded-card border border-stone-line"
+                    className="min-h-[44px] flex-1 items-center justify-center rounded-card border border-grey-line"
                   >
                     <Body>{score}</Body>
                   </Pressable>
@@ -187,7 +187,7 @@ export function ReservationCard({
                     accessibilityRole="button"
                     className="min-h-[44px] justify-center"
                   >
-                    <Body className="text-clay">Cancel booking</Body>
+                    <Body className="text-alert">Cancel booking</Body>
                   </Pressable>
                   <Pressable
                     onPress={() => setConfirmingCancel(false)}

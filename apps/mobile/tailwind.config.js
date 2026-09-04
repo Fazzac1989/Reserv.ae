@@ -8,32 +8,34 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // See DESIGN.md. Six values, and champagne is spoken for.
+        /**
+         * Black, white and grey. See DESIGN.md.
+         *
+         * The earlier palette was warm — a cream ground and a champagne
+         * accent — and warmth reads as dated next to the products this is
+         * measured against. These are neutral: no blue in the black, no yellow
+         * in the white, so a photograph is the only colour on the screen.
+         */
         ink: {
-          DEFAULT: '#14161A',
-          // A shade up from the base, for the one surface that lifts off it.
-          raised: '#1C1F24',
+          DEFAULT: '#0B0B0C',
+          // The one surface that lifts off the base. A hair, not a step.
+          raised: '#171719',
         },
-        porcelain: {
-          DEFAULT: '#F7F5F1',
+        paper: {
+          DEFAULT: '#F6F6F7',
           raised: '#FFFFFF',
         },
-        /**
-         * The moment of commitment, and nowhere else: the reserve action, the
-         * live working indicator, the rule on the confirmation card.
-         */
-        champagne: {
-          DEFAULT: '#C9B58F',
-          // The same accent darkened to hold AA at text sizes on porcelain.
-          text: '#B3A079',
-        },
-        stone: {
-          DEFAULT: '#8A8D93',
+        grey: {
+          DEFAULT: '#8A8A8E',
           // Hairlines. Anywhere a border would otherwise be drawn.
-          line: 'rgba(138, 141, 147, 0.12)',
+          line: 'rgba(138, 138, 142, 0.16)',
         },
-        moss: '#5C6B5E',
-        clay: '#A65D57',
+        /**
+         * The only chromatic colour in the application, and it means something
+         * went wrong. Success is not a colour here — it is full contrast, which
+         * is scarcer than any hue in a palette made of three greys.
+         */
+        alert: '#C2453D',
       },
       fontFamily: {
         display: ['Fraunces_400Regular'],
@@ -43,8 +45,8 @@ module.exports = {
       },
       fontSize: {
         // 32 / 22 / 17 / 15 / 12, with room to breathe.
-        display: ['32px', { lineHeight: '40px', letterSpacing: '-0.2px' }],
-        title: ['22px', { lineHeight: '30px', letterSpacing: '-0.1px' }],
+        display: ['32px', { lineHeight: '40px', letterSpacing: '-0.4px' }],
+        title: ['22px', { lineHeight: '30px', letterSpacing: '-0.2px' }],
         lead: ['17px', { lineHeight: '26px' }],
         body: ['15px', { lineHeight: '23px' }],
         meta: ['12px', { lineHeight: '16px', letterSpacing: '1.4px' }],

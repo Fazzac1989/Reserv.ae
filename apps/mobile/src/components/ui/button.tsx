@@ -2,10 +2,13 @@ import { ActivityIndicator, Pressable, Text, type PressableProps } from 'react-n
 import { cn } from '../../lib/cn';
 
 /**
- * `commit` is the champagne one, and the name is the point: it is the only
- * variant allowed to wear the accent, so a stray use is visible in the diff
- * rather than only on the screen. Reserve a table, confirm a time. Nothing
- * else.
+ * `commit` is the one that goes to full contrast, and the name is the point:
+ * a stray use is visible in the diff rather than only on the screen. Reserve a
+ * table, confirm a time. Nothing else.
+ *
+ * In a palette of three greys, contrast is the scarce thing — scarcer than any
+ * hue would be — so it is what the moment of commitment is spent on. Every
+ * other control is a hairline or a word.
  */
 type Variant = 'commit' | 'primary' | 'quiet';
 
@@ -17,16 +20,17 @@ interface Props extends Omit<PressableProps, 'children'> {
 }
 
 const CONTAINER: Record<Variant, string> = {
-  commit: 'bg-champagne',
-  primary: 'bg-ink dark:bg-porcelain',
+  // Solid, and the only solid thing on the screen when it appears.
+  commit: 'bg-ink dark:bg-paper',
+  // Outlined. Present, deliberately quieter than the commitment above it.
+  primary: 'border border-grey-line',
   quiet: '',
 };
 
 const LABEL: Record<Variant, string> = {
-  // Ink on champagne, always. The accent is never a background for light text.
-  commit: 'text-ink',
-  primary: 'text-porcelain dark:text-ink',
-  quiet: 'text-stone',
+  commit: 'text-paper dark:text-ink',
+  primary: 'text-ink dark:text-paper',
+  quiet: 'text-grey',
 };
 
 export function Button({
@@ -55,7 +59,7 @@ export function Button({
       {...props}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? '#F7F5F1' : '#14161A'} />
+        <ActivityIndicator color={variant === 'commit' ? '#8A8A8E' : '#8A8A8E'} />
       ) : (
         <Text className={cn('font-body-medium text-lead', LABEL[variant])}>{label}</Text>
       )}

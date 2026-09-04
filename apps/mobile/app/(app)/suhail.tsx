@@ -291,7 +291,7 @@ export default function Conversation() {
           {turns.map((turn) =>
             turn.role === 'user' ? (
               <View key={turn.id} className="items-end">
-                <View className="max-w-[82%] rounded-card bg-porcelain-raised px-5 py-3.5 dark:bg-ink-raised">
+                <View className="max-w-[82%] rounded-card bg-paper-raised px-5 py-3.5 dark:bg-ink-raised">
                   <Body>{turn.content}</Body>
                 </View>
               </View>
@@ -353,7 +353,7 @@ export default function Conversation() {
 
           {thinking && watching === null ? <LiveStatus label="One moment…" /> : null}
           {note ? <Muted>{note}</Muted> : null}
-          {error ? <Body className="text-clay">{error}</Body> : null}
+          {error ? <Body className="text-alert">{error}</Body> : null}
         </ScrollView>
 
         {pendingTranscript ? (
@@ -369,7 +369,7 @@ export default function Conversation() {
               value={pendingTranscript.text}
               onChangeText={(text) => setPendingTranscript((p) => (p ? { ...p, text } : p))}
               multiline
-              className="rounded-card border border-stone-line px-5 py-4 font-body text-lead text-ink dark:text-porcelain"
+              className="rounded-card border border-grey-line px-5 py-4 font-body text-lead text-ink dark:text-paper"
             />
             <View className="flex-row gap-2.5">
               <Button
@@ -398,12 +398,12 @@ export default function Conversation() {
                 value={draft}
                 onChangeText={setDraft}
                 placeholder="Ask for something…"
-                placeholderTextColor="#8A8D93"
+                placeholderTextColor="#8A8A8E"
                 multiline
                 editable={!thinking}
                 returnKeyType="send"
                 onSubmitEditing={() => submitText(draft)}
-                className="max-h-32 flex-1 rounded-input border border-stone-line px-5 py-3.5 font-body text-lead text-ink dark:text-porcelain"
+                className="max-h-32 flex-1 rounded-input border border-grey-line px-5 py-3.5 font-body text-lead text-ink dark:text-paper"
               />
 
               {voiceEnabled ? (
@@ -416,15 +416,15 @@ export default function Conversation() {
                   }
                   className={
                     recorderState.isRecording
-                      ? 'h-12 w-12 items-center justify-center rounded-full bg-clay'
-                      : 'h-12 w-12 items-center justify-center rounded-full border border-stone-line'
+                      ? 'h-12 w-12 items-center justify-center rounded-full bg-alert'
+                      : 'h-12 w-12 items-center justify-center rounded-full border border-grey-line'
                   }
                 >
                   <View
                     className={
                       recorderState.isRecording
-                        ? 'h-3 w-3 bg-porcelain'
-                        : 'h-3 w-3 rounded-full bg-stone'
+                        ? 'h-3 w-3 bg-paper'
+                        : 'h-3 w-3 rounded-full bg-grey'
                     }
                   />
                 </Pressable>

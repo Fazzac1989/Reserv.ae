@@ -52,15 +52,15 @@ function Toggle({ on, disabled }: { on: boolean; disabled: boolean }) {
     <View
       className={
         on && !disabled
-          ? 'h-7 w-12 justify-center rounded-full bg-ink px-0.5 dark:bg-porcelain'
-          : 'h-7 w-12 justify-center rounded-full bg-stone-line px-0.5 bg-stone-line'
+          ? 'h-7 w-12 justify-center rounded-full bg-ink px-0.5 dark:bg-paper'
+          : 'h-7 w-12 justify-center rounded-full bg-grey-line px-0.5 bg-grey-line'
       }
     >
       <View
         className={
           on && !disabled
-            ? 'h-6 w-6 self-end rounded-full bg-porcelain dark:bg-ink'
-            : 'h-6 w-6 self-start rounded-full bg-porcelain dark:bg-ink-raised'
+            ? 'h-6 w-6 self-end rounded-full bg-paper dark:bg-ink'
+            : 'h-6 w-6 self-start rounded-full bg-paper dark:bg-ink-raised'
         }
       />
     </View>
@@ -97,12 +97,12 @@ export function NotificationPrefsControl({
             accessibilityLabel={control.label}
             className={
               disabled
-                ? 'flex-row items-center gap-4 rounded-card border border-stone-line px-5 py-4 opacity-40 border-stone-line'
-                : 'flex-row items-center gap-4 rounded-card border border-stone-line px-5 py-4 border-stone-line'
+                ? 'flex-row items-center gap-4 rounded-card border border-grey-line px-5 py-4 opacity-40 border-grey-line'
+                : 'flex-row items-center gap-4 rounded-card border border-grey-line px-5 py-4 border-grey-line'
             }
           >
             <View className="flex-1 gap-0.5">
-              <Body className="font-body-medium text-ink dark:text-porcelain">{control.label}</Body>
+              <Body className="font-body-medium text-ink dark:text-paper">{control.label}</Body>
               <Muted>{control.detail}</Muted>
             </View>
             <Toggle on={value} disabled={disabled} />

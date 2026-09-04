@@ -73,7 +73,7 @@ function Card({
           source={{ uri: photo }}
           // Ink underneath, so the moment before a photograph arrives reads as
           // a dark card rather than as a broken one.
-          style={{ height, backgroundColor: '#14161A' }}
+          style={{ height, backgroundColor: '#0B0B0C' }}
           className="justify-end"
           resizeMode="cover"
         >
@@ -84,19 +84,19 @@ function Card({
             in the moment before it loads.
           */}
           <LinearGradient
-            colors={['transparent', 'rgba(20,22,26,0.35)', 'rgba(20,22,26,0.88)']}
+            colors={['transparent', 'rgba(11,11,12,0.35)', 'rgba(11,11,12,0.88)']}
             locations={[0.35, 0.68, 1]}
             style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '75%' }}
           />
           <View className="p-6">
-            <Title className="text-porcelain">{listing.name}</Title>
-            <Meta className="mt-1.5 text-porcelain/70">{meta}</Meta>
+            <Title className="text-paper">{listing.name}</Title>
+            <Meta className="mt-1.5 text-paper/70">{meta}</Meta>
           </View>
         </ImageBackground>
       ) : (
         <View
           style={{ height }}
-          className="justify-end border border-stone-line bg-porcelain-raised p-6 dark:bg-ink-raised"
+          className="justify-end border border-grey-line bg-paper-raised p-6 dark:bg-ink-raised"
         >
           <Title>{listing.name}</Title>
           <Meta className="mt-1.5">{meta}</Meta>
@@ -161,12 +161,12 @@ export default function Discover() {
   }
 
   return (
-    <View className="flex-1 bg-porcelain dark:bg-ink">
+    <View className="flex-1 bg-paper dark:bg-ink">
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-10 pb-16">
           <View className="gap-3 px-7 pt-4">
             <Display>Discover</Display>
-            <Lead className="text-stone">Places Suhail can actually get you into.</Lead>
+            <Lead className="text-grey">Places Suhail can actually get you into.</Lead>
           </View>
 
           {listings.isLoading ? (
@@ -177,7 +177,7 @@ export default function Discover() {
 
           {listings.isError ? (
             <View className="px-7">
-              <Body className="text-clay">I could not read the directory just now.</Body>
+              <Body className="text-alert">I could not read the directory just now.</Body>
             </View>
           ) : null}
 

@@ -52,14 +52,14 @@ function Entry({ booking }: { booking: Reservation }) {
       <Meta className="w-14 pt-1.5">{clock(booking.scheduled_for)}</Meta>
       <View className="flex-1 gap-0.5">
         <Title>{booking.venues?.name ?? 'Reservation'}</Title>
-        <Body className="text-stone">
+        <Body className="text-grey">
           {booking.party_size === 1 ? 'Just you' : `Table for ${booking.party_size}`}
         </Body>
         {/*
           A confirmed booking today needs no label. Anything else is a state
           worth naming on the screen someone checks first.
         */}
-        {settled ? null : <Meta className="mt-1 text-stone">{status.label}</Meta>}
+        {settled ? null : <Meta className="mt-1 text-grey">{status.label}</Meta>}
       </View>
     </View>
   );
@@ -100,10 +100,10 @@ export default function Home() {
             value={draft}
             onChangeText={setDraft}
             placeholder={`Ask ${BRAND.assistant} anything…`}
-            placeholderTextColor="#8A8D93"
+            placeholderTextColor="#8A8A8E"
             returnKeyType="send"
             onSubmitEditing={ask}
-            className="rounded-input border border-stone-line px-5 py-4 font-body text-lead text-ink dark:text-porcelain"
+            className="rounded-input border border-grey-line px-5 py-4 font-body text-lead text-ink dark:text-paper"
           />
           <Pressable
             onPress={ask}
@@ -135,13 +135,13 @@ export default function Home() {
         someone with a table at eight that they have nowhere to be.
       */}
       {reservations.isError ? (
-        <Lead className="text-stone">
+        <Lead className="text-grey">
           I could not check your bookings just now. Pull down in a moment.
         </Lead>
       ) : null}
 
       {!reservations.isLoading && !reservations.isError && today.length === 0 ? (
-        <Lead className="text-stone">
+        <Lead className="text-grey">
           {later.length > 0
             ? 'Nothing today. Your next booking is further down.'
             : 'Nothing booked. Tell me what you need and I will sort it.'}

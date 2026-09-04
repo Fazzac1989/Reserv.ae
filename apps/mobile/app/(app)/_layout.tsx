@@ -33,7 +33,7 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
   return (
     <View
       style={{ paddingBottom: Math.max(insets.bottom, 10) }}
-      className="flex-row border-t border-stone-line bg-porcelain px-3 pt-2.5 dark:bg-ink"
+      className="flex-row border-t border-grey-line bg-paper px-3 pt-2.5 dark:bg-ink"
     >
       {state.routes.map((route, index) => {
         const destination = DESTINATIONS.find((d) => d.name === route.name);
@@ -58,11 +58,11 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
             className="min-h-[44px] flex-1 items-center justify-center"
           >
             {/*
-              The current place is ink; the others are stone. No pill, no
-              underline, no accent — champagne means a booking is at stake and
-              nothing else, least of all which tab you are on.
+              The current place is ink; the others are grey. No pill, no
+              underline, no fill. Full contrast is what a booking at stake is paid
+              in, and which tab you are on is not that.
             */}
-            <Meta className={focused ? 'text-ink dark:text-porcelain' : undefined}>
+            <Meta className={focused ? 'text-ink dark:text-paper' : undefined}>
               {destination.label}
             </Meta>
           </Pressable>

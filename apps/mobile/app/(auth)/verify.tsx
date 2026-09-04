@@ -68,9 +68,7 @@ export default function Verify() {
         <View className="flex-1 items-center justify-center gap-4 px-7">
           <Body className="text-center">We lost track of which address to verify.</Body>
           <Pressable onPress={() => router.replace('/(auth)/sign-in')} accessibilityRole="button">
-            <Body className="font-body-medium text-ink underline dark:text-porcelain">
-              Start again
-            </Body>
+            <Body className="font-body-medium text-ink underline dark:text-paper">Start again</Body>
           </Pressable>
         </View>
       </Screen>
@@ -107,7 +105,7 @@ export default function Verify() {
             {busy ? <ActivityIndicator /> : null}
 
             {error ? (
-              <Muted className="text-clay" accessibilityLiveRegion="polite">
+              <Muted className="text-alert" accessibilityLiveRegion="polite">
                 {error}
               </Muted>
             ) : null}

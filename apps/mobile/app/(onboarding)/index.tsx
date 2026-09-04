@@ -90,20 +90,20 @@ export default function Onboarding() {
                   onLongPress={() => setZones((current) => toggle(current, zone.value))}
                   className={
                     isHome
-                      ? 'rounded-card bg-ink px-5 py-4 dark:bg-porcelain'
-                      : 'rounded-card border border-stone-line px-5 py-4'
+                      ? 'rounded-card bg-ink px-5 py-4 dark:bg-paper'
+                      : 'rounded-card border border-grey-line px-5 py-4'
                   }
                 >
                   <Body
                     className={
                       isHome
-                        ? 'font-body-medium text-porcelain dark:text-ink'
-                        : 'font-body-medium text-ink dark:text-porcelain'
+                        ? 'font-body-medium text-paper dark:text-ink'
+                        : 'font-body-medium text-ink dark:text-paper'
                     }
                   >
                     {zone.label}
                   </Body>
-                  <Muted className={isHome ? 'text-porcelain/70 dark:text-ink/70' : undefined}>
+                  <Muted className={isHome ? 'text-paper/70 dark:text-ink/70' : undefined}>
                     {zone.blurb}
                     {!isHome && isAlso ? ' · happy to travel here' : ''}
                   </Muted>
@@ -177,20 +177,20 @@ export default function Onboarding() {
                     onPress={() => setBands((c) => toggle(c, band.value))}
                     className={
                       selected
-                        ? 'rounded-card bg-ink px-5 py-4 dark:bg-porcelain'
-                        : 'rounded-card border border-stone-line px-5 py-4'
+                        ? 'rounded-card bg-ink px-5 py-4 dark:bg-paper'
+                        : 'rounded-card border border-grey-line px-5 py-4'
                     }
                   >
                     <Body
                       className={
                         selected
-                          ? 'font-body-medium text-porcelain dark:text-ink'
-                          : 'font-body-medium text-ink dark:text-porcelain'
+                          ? 'font-body-medium text-paper dark:text-ink'
+                          : 'font-body-medium text-ink dark:text-paper'
                       }
                     >
                       {band.label}
                     </Body>
-                    <Muted className={selected ? 'text-porcelain/70 dark:text-ink/70' : undefined}>
+                    <Muted className={selected ? 'text-paper/70 dark:text-ink/70' : undefined}>
                       {band.blurb}
                     </Muted>
                   </Pressable>
@@ -312,9 +312,9 @@ export default function Onboarding() {
           {current.render()}
         </ScrollView>
 
-        <View className="gap-3 border-t border-stone-line px-7 pb-4 pt-4 border-stone-line">
+        <View className="gap-3 border-t border-grey-line px-7 pb-4 pt-4 border-grey-line">
           {complete.isError ? (
-            <Muted className="text-clay">
+            <Muted className="text-alert">
               {complete.error instanceof Error
                 ? complete.error.message
                 : 'Could not save that. Try again.'}

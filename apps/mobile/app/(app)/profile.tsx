@@ -225,7 +225,7 @@ export default function ProfileScreen() {
           ))}
         </View>
         {bands.length === 0 ? (
-          <Muted className="text-clay">Pick at least one spend band.</Muted>
+          <Muted className="text-alert">Pick at least one spend band.</Muted>
         ) : null}
       </View>
 
@@ -282,7 +282,7 @@ export default function ProfileScreen() {
       />
 
       {error ? (
-        <Muted className="text-clay">
+        <Muted className="text-alert">
           {error instanceof Error ? error.message : 'Could not save that.'}
         </Muted>
       ) : null}

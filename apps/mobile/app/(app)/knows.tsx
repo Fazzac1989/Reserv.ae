@@ -62,7 +62,7 @@ function Row({
           accessibilityLabel="That is right"
           className="min-h-[44px] justify-center"
         >
-          <Body className={inference.confirmedAt !== null ? 'text-moss' : undefined}>
+          <Body className={inference.confirmedAt !== null ? 'text-ink' : undefined}>
             {inference.confirmedAt !== null ? 'Confirmed' : "That's right"}
           </Body>
         </Pressable>
@@ -199,7 +199,7 @@ export default function WhatSuhailKnows() {
         {(people.data ?? []).map((person) => (
           <View key={person.id} className="gap-1.5 py-2">
             <Title>{person.name}</Title>
-            <Body className="text-stone">{person.relation}</Body>
+            <Body className="text-grey">{person.relation}</Body>
             <Pressable
               onPress={() => forgetPerson.mutate(person.id)}
               disabled={forgetPerson.isPending}
@@ -238,7 +238,7 @@ export default function WhatSuhailKnows() {
             }
           />
           {savePerson.isError ? (
-            <Body className="text-clay">
+            <Body className="text-alert">
               {savePerson.error instanceof Error
                 ? savePerson.error.message
                 : 'Could not save that.'}
