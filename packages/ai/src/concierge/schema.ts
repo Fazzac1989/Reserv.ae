@@ -52,10 +52,12 @@ export function buildConciergeOutputSchema(zones: readonly [string, ...string[]]
   });
 }
 
-/** The shape every build shares, for the types the rest of the code uses. */
-const referenceSchema = buildConciergeOutputSchema(['dubai_marina']);
-
-export type ConciergeOutput = z.infer<typeof referenceSchema>;
+/**
+ * The shape every build shares, for the types the rest of the code uses. Taken
+ * from the builder's return type rather than from a sample schema, so no
+ * throwaway value is constructed at import time to be read only as a type.
+ */
+export type ConciergeOutput = z.infer<ReturnType<typeof buildConciergeOutputSchema>>;
 export type ConciergeIntent = ConciergeOutput['intent'];
 
 /** Fields with no fallback anywhere else. Everything else comes from the profile. */
