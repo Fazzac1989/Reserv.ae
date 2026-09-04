@@ -16,7 +16,38 @@
 set local role postgres;
 
 -- Deterministic ids so re-running the seed updates rather than duplicates.
-with demo_venues as (
+with
+/**
+ * Photography for the demo venues.
+ *
+ * Stock, and openly so: these venues are fictional, so an image of a real
+ * restaurant would be the one dishonest thing in an otherwise honest seed.
+ * Matched by kind — a barber's chair on a barber, a dining room on a
+ * restaurant — because the app is built around the picture and a mismatched
+ * one looks like a bug rather than a placeholder.
+ *
+ * Replaced by the venue's own photographs the moment a real one is onboarded.
+ */
+photos as (
+  select * from (values
+    ('d0000000-0000-4000-8000-000000000001'::uuid, '1517248135467-4c7edcad34c4'),
+    ('d0000000-0000-4000-8000-000000000002'::uuid, '1414235077428-338989a2e8c0'),
+    ('d0000000-0000-4000-8000-000000000003'::uuid, '1552566626-52f8b828add9'),
+    ('d0000000-0000-4000-8000-000000000004'::uuid, '1555396273-367ea4eb4db5'),
+    ('d0000000-0000-4000-8000-000000000005'::uuid, '1424847651672-bf20a4b0982b'),
+    ('d0000000-0000-4000-8000-000000000006'::uuid, '1540555700478-4be289fbecef'),
+    ('d0000000-0000-4000-8000-000000000007'::uuid, '1466978913421-dad2ebd01d17'),
+    ('d0000000-0000-4000-8000-000000000008'::uuid, '1514933651103-005eec06c04b'),
+    ('d0000000-0000-4000-8000-000000000009'::uuid, '1590846406792-0adc7f938f1d'),
+    ('d0000000-0000-4000-8000-000000000010'::uuid, '1585747860715-2ba37e788b70'),
+    ('d0000000-0000-4000-8000-000000000011'::uuid, '1590846406792-0adc7f938f1d'),
+    ('d0000000-0000-4000-8000-000000000012'::uuid, '1585747860715-2ba37e788b70'),
+    ('d0000000-0000-4000-8000-000000000013'::uuid, '1560066984-138dadb4c035'),
+    ('d0000000-0000-4000-8000-000000000014'::uuid, '1600334089648-b0d9d3028eb2'),
+    ('d0000000-0000-4000-8000-000000000015'::uuid, '1560066984-138dadb4c035')
+  ) as p(venue_id, unsplash_id)
+),
+demo_venues as (
   select * from (values
     -- id, name, vertical, zone, price_band, tags, house_note
     ('d0000000-0000-4000-8000-000000000001'::uuid, 'The Glasshouse Marina', 'restaurant', 'dubai_marina', 4,
@@ -70,7 +101,7 @@ with demo_venues as (
 )
 insert into public.venues (
   id, name, vertical, zone, address, price_band, tags, description, house_note,
-  opening_hours, best_times, onboarding_status, booking_consent_obtained_at, is_demo
+  opening_hours, best_times, photo_urls, onboarding_status, booking_consent_obtained_at, is_demo
 )
 select
   v.id,
@@ -80,7 +111,7 @@ select
   'Demo address, ' || replace(initcap(replace(v.zone, '_', ' ')), 'Jbr', 'JBR') || ', Dubai',
   v.price_band,
   v.tags,
-  'Fictional demo venue seeded for local development. Not a real business.',
+  'A sample listing while Reserv onboards real venues in Dubai.',
   v.house_note,
   -- Open Mon–Sun; salons and barbers start later and close earlier.
   (
@@ -95,6 +126,11 @@ select
     when v.vertical = 'restaurant' then array['early evening', 'weeknights']
     else array['weekday mornings']
   end,
+  array[
+    'https://images.unsplash.com/photo-' ||
+      (select p.unsplash_id from photos p where p.venue_id = v.id) ||
+      '?w=1400&q=80&auto=format&fit=crop'
+  ],
   'live',
   now() - interval '30 days',
   true
@@ -105,6 +141,7 @@ on conflict (id) do update set
   house_note = excluded.house_note,
   onboarding_status = excluded.onboarding_status,
   booking_consent_obtained_at = excluded.booking_consent_obtained_at,
+  photo_urls = excluded.photo_urls,
   is_demo = true;
 
 -- --- Booking channels -------------------------------------------------------
