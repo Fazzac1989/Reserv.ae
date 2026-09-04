@@ -293,10 +293,11 @@ By this point there are three real tools and the routing problem is a real
 problem. Build it then, against real traffic.
 
 **5 — Voice, supplier calls only.**
-`booker_voice` is specced. Calling a restaurant is tractable. Answering the
-user's own incoming calls is not a Twilio feature — it needs either porting
-their number to a VoIP carrier or conditional forwarding, and UAE call
-recording consent applies to both. Do the valuable half.
+Specified in [VOICE.md](VOICE.md), against ElevenLabs Agents for the call and
+nothing else. Calling a restaurant is tractable. Answering the user's own
+incoming calls is not a Twilio feature — it needs either porting their number
+to a VoIP carrier or conditional forwarding, and UAE call recording consent
+applies to both. Do the valuable half.
 
 **6 — Travel.**
 Needs the domain widening that is now done, plus supplier relationships that do
