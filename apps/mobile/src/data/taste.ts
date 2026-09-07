@@ -70,3 +70,47 @@ export const PRICE_BANDS: { value: number; label: string; blurb: string }[] = [
 ];
 
 export const PARTY_SIZES = [1, 2, 3, 4, 5, 6, 8];
+
+/**
+ * Preferences a concierge would actually state to a venue.
+ *
+ * Single-choice, and "either" is a first-class answer rather than a missing
+ * one. Asking a restaurant for a non-smoking table on behalf of somebody who
+ * did not mind is a request we invented.
+ */
+export const SEATING = [
+  { value: 'indoor', label: 'Inside' },
+  { value: 'outdoor', label: 'Outside' },
+  { value: 'either', label: 'Either' },
+] as const;
+
+export const SMOKING = [
+  { value: 'non_smoking', label: 'Non-smoking' },
+  { value: 'smoking', label: 'Smoking area' },
+  { value: 'either', label: 'Either' },
+] as const;
+
+export const ALCOHOL = [
+  { value: 'served', label: 'Licensed, please' },
+  { value: 'not_required', label: 'Not important' },
+  { value: 'none', label: 'Prefer none served' },
+] as const;
+
+export const ACCESSIBILITY = [
+  'Step-free entrance',
+  'Accessible toilet',
+  'Space for a wheelchair',
+  'Quiet table',
+  'Good lighting',
+] as const;
+
+export const FAMILY_NEEDS = ['Highchair', "Children's menu", 'Room for a pram', 'Early sitting'] as const;
+
+export const OCCASIONS = [
+  'Birthday',
+  'Anniversary',
+  'Business',
+  'Family',
+  'Date night',
+  'Celebration',
+] as const;

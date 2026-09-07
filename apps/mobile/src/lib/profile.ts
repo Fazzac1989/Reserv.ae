@@ -133,3 +133,77 @@ export function useCompleteOnboarding() {
     },
   });
 }
+
+/** The three things we ask permission for, and the wording each one refers to. */
+export const CONSENT_KINDS = ['data_sharing', 'whatsapp', 'marketing'] as const;
+export type ConsentKind = (typeof CONSENT_KINDS)[number];
+
+/** Bump when the wording below changes materially. */
+export const CONSENT_VERSION = 'v1';
+
+export function useConsents() {
+  const session = useSession();
+
+  return useQuery({
+    queryKey: ['consents', session?.user.id ?? null],
+    enabled: Boolean(session),
+    queryFn: async (): Promise<Record<string, boolean>> => {
+      const { data, error } = await supabase.from('user_consents').select('kind, granted');
+      if (error) throw error;
+      const map: Record<string, boolean> = {};
+      for (const row of data ?? []) map[row.kind] = row.granted;
+      return map;
+    },
+  });
+}
+
+/**
+ * Record a decision, rather than flip a flag.
+ *
+ * `decided_at` is written on every change because that is the whole point of
+ * the row: not that somebody consents, but that on this date they saw this
+ * version of the wording and said yes or no. Withdrawal is stored the same way
+ * as agreement — a `granted: false` row is a decision, and deleting the row
+ * instead would lose the fact that they were ever asked.
+ */
+export function useSetConsent() {
+  const client = useQueryClient();
+  const session = useSession();
+
+  return useMutation({
+    mutationFn: async ({ kind, granted }: { kind: ConsentKind; granted: boolean }) => {
+      if (!session) throw new Error('Sign in first.');
+      const { error } = await supabase.from('user_consents').upsert(
+        {
+          user_id: session.user.id,
+          kind,
+          granted,
+          version: CONSENT_VERSION,
+          decided_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id,kind' },
+      );
+      if (error) throw error;
+    },
+    onSettled: () => {
+      void client.invalidateQueries({ queryKey: ['consents', session?.user.id ?? null] });
+    },
+  });
+}
+
+/**
+ * Delete the account. Irreversible, and deliberately not undoable.
+ *
+ * The server function takes no argument naming whose account to delete — it
+ * reads the caller's own id — so there is no version of this that can be
+ * pointed at somebody else.
+ */
+export function useDeleteAccount() {
+  return useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc('delete_my_account');
+      if (error) throw error;
+      await supabase.auth.signOut();
+    },
+  });
+}

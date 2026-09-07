@@ -1266,56 +1266,112 @@ export type Database = {
           },
         ]
       }
+      user_consents: {
+        Row: {
+          decided_at: string
+          granted: boolean
+          kind: string
+          user_id: string
+          version: string
+        }
+        Insert: {
+          decided_at?: string
+          granted: boolean
+          kind: string
+          user_id: string
+          version?: string
+        }
+        Update: {
+          decided_at?: string
+          granted?: boolean
+          kind?: string
+          user_id?: string
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_consents_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_preferences: {
         Row: {
+          accessibility_needs: string[]
+          alcohol_preference: string | null
           allergies: string[]
           created_at: string
           cuisines_avoided: string[]
           cuisines_loved: string[]
           default_party_size: number
           dietary: string[]
+          family_needs: string[]
           favourite_venue_ids: string[]
           home_zone: string | null
           notes: string | null
+          occasions: string[]
           preferred_zones: string[]
           price_band_max: number
           price_band_min: number
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          seating_preference: string | null
+          smoking_preference: string | null
           standing_providers: Json
           updated_at: string
           user_id: string
           work_zone: string | null
         }
         Insert: {
+          accessibility_needs?: string[]
+          alcohol_preference?: string | null
           allergies?: string[]
           created_at?: string
           cuisines_avoided?: string[]
           cuisines_loved?: string[]
           default_party_size?: number
           dietary?: string[]
+          family_needs?: string[]
           favourite_venue_ids?: string[]
           home_zone?: string | null
           notes?: string | null
+          occasions?: string[]
           preferred_zones?: string[]
           price_band_max?: number
           price_band_min?: number
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          seating_preference?: string | null
+          smoking_preference?: string | null
           standing_providers?: Json
           updated_at?: string
           user_id: string
           work_zone?: string | null
         }
         Update: {
+          accessibility_needs?: string[]
+          alcohol_preference?: string | null
           allergies?: string[]
           created_at?: string
           cuisines_avoided?: string[]
           cuisines_loved?: string[]
           default_party_size?: number
           dietary?: string[]
+          family_needs?: string[]
           favourite_venue_ids?: string[]
           home_zone?: string | null
           notes?: string | null
+          occasions?: string[]
           preferred_zones?: string[]
           price_band_max?: number
           price_band_min?: number
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          seating_preference?: string | null
+          smoking_preference?: string | null
           standing_providers?: Json
           updated_at?: string
           user_id?: string
@@ -2159,6 +2215,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      delete_my_account: { Args: never; Returns: undefined }
       grant_role_by_email: {
         Args: {
           target_email: string

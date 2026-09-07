@@ -24,7 +24,7 @@ function psql(file) {
 
 let failed = false;
 
-for (const file of ['schema-guards.sql', 'rls.sql', 'venue-back-office.sql', 'saved-venues.sql']) {
+for (const file of ['schema-guards.sql', 'rls.sql', 'venue-back-office.sql', 'saved-venues.sql', 'preferences-consent.sql']) {
   console.log(`\n${'='.repeat(60)}\n${file}\n${'='.repeat(60)}`);
   try {
     const output = psql(file);
