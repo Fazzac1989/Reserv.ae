@@ -14,6 +14,22 @@ export type PreferencesUpdate = Database['public']['Tables']['user_preferences']
  * these read paths never have to cope with a half-created user.
  */
 
+/**
+ * The signed-in person's profile row, or null if there isn't one.
+ *
+ * `maybeSingle` rather than `single`, and the difference matters. `single`
+ * turns "no such row" into an HTTP 406 and an exception, which React Query
+ * then treats as a failure to retry — and a failure that is retried is a
+ * failure the app is waiting on rather than an answer it has. Worse, once a
+ * successful result has been cached, a later refetch that fails leaves
+ * `status` at 'success' and `isError` false, so a caller checking `isError`
+ * to notice a deleted account never notices it.
+ *
+ * A missing row is not an error. It is a definite answer to a reasonable
+ * question — is there a profile for this token? — and it means the account
+ * behind the token is gone. Returning null says so unambiguously, and the
+ * caller can act on it without having to interpret query metadata.
+ */
 export function useProfile() {
   const session = useSession();
   const userId = session?.user.id;
@@ -21,8 +37,12 @@ export function useProfile() {
   return useQuery({
     queryKey: ['profile', userId],
     enabled: Boolean(userId),
-    queryFn: async (): Promise<Profile> => {
-      const { data, error } = await supabase.from('users').select('*').eq('id', userId!).single();
+    queryFn: async (): Promise<Profile | null> => {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId!)
+        .maybeSingle();
       if (error) throw error;
       return data;
     },

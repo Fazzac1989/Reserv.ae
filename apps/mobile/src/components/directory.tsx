@@ -37,13 +37,22 @@ export interface Listing {
 
 const BANDS = ['', 'Everyday', 'Comfortable', 'Upmarket', 'Occasion'];
 
-/** Shelves, in the order somebody browsing would want them. */
-const SHELVES: { kind: string; title: string; blurb: string }[] = [
-  { kind: 'dining', title: 'Tables', blurb: 'Where Reserv would send you tonight.' },
-  { kind: 'grooming', title: 'Chairs', blurb: 'Barbers and salons worth keeping.' },
-  { kind: 'wellness', title: 'Quiet', blurb: 'Spas, and somewhere to disappear.' },
-  { kind: 'leisure', title: 'Days out', blurb: 'Beach clubs, courses, evenings.' },
-];
+/**
+ * How many venues a shelf shows before it stops.
+ *
+ * A collection can hold as many as ops likes — "Tonight" is currently every
+ * restaurant in the directory — but a horizontal rail nobody reaches the end
+ * of is a rail nobody scrolls twice. Ten is enough to feel deep without being
+ * a list pretending to be a shelf.
+ */
+const SHELF_LIMIT = 10;
+
+interface Collection {
+  slug: string;
+  title: string;
+  blurb: string | null;
+  sort_order: number;
+}
 
 function Card({
   listing,
@@ -133,7 +142,7 @@ export function Directory({
   const listings = useQuery({
     queryKey: ['discover'],
     queryFn: async () => {
-      const [venues, categories, places] = await Promise.all([
+      const [venues, categories, places, collectionList, collectionMembers] = await Promise.all([
         supabase
           .from('venues')
           .select(
@@ -154,6 +163,16 @@ export function Directory({
           .order('price_band', { ascending: false }),
         supabase.from('categories').select('slug, label, kind'),
         supabase.from('places').select('slug, label'),
+        // The shelves, as rows. They used to be a constant in this file, which
+        // meant "add a Brunch shelf" was a deploy rather than an edit.
+        supabase
+          .from('collections')
+          .select('slug, title, blurb, sort_order')
+          .order('sort_order', { ascending: true }),
+        supabase
+          .from('collection_venues')
+          .select('collection_slug, venue_id, sort_order')
+          .order('sort_order', { ascending: true }),
       ]);
       if (venues.error) throw venues.error;
 
@@ -165,13 +184,26 @@ export function Directory({
       }
       for (const p of places.data ?? []) labels[p.slug] = p.label;
 
-      return { venues: (venues.data ?? []) as Listing[], labels, kindOf };
+      // Grouped once here rather than filtered per shelf while rendering.
+      const members: Record<string, string[]> = {};
+      for (const row of collectionMembers.data ?? []) {
+        (members[row.collection_slug] ??= []).push(row.venue_id);
+      }
+
+      return {
+        venues: (venues.data ?? []) as Listing[],
+        labels,
+        kindOf,
+        collections: (collectionList.data ?? []) as Collection[],
+        members,
+      };
     },
   });
 
   const venues = listings.data?.venues ?? [];
   const labels = listings.data?.labels ?? {};
   const kindOf = listings.data?.kindOf ?? {};
+  const byId = new Map(venues.map((v) => [v.id, v]));
 
   /**
    * The opener, chosen rather than taken.
@@ -185,7 +217,6 @@ export function Directory({
     venues.find((v) => kindOf[v.vertical] === 'dining' && v.photo_urls?.[0]) ??
     venues.find((v) => v.photo_urls?.[0]) ??
     venues[0];
-  const rest = venues.filter((v) => v.id !== lead?.id);
 
   return (
     <View className="flex-1 bg-paper dark:bg-ink">
@@ -238,15 +269,30 @@ export function Directory({
             </View>
           ) : null}
 
-          {SHELVES.map((shelf) => {
-            const items = rest.filter((v) => kindOf[v.vertical] === shelf.kind);
+          {(listings.data?.collections ?? []).map((shelf) => {
+            /*
+             * A shelf is whatever ops put in it, minus the opener.
+             *
+             * `members` holds ids in the order ops chose; they are looked up
+             * rather than filtered so that order survives. A venue that has
+             * been unpublished since it was added to a collection simply is
+             * not in `byId`, so it drops out here rather than rendering as a
+             * gap — which is also what stops a collection outliving its
+             * contents.
+             */
+            const items = (listings.data?.members[shelf.slug] ?? [])
+              .filter((id) => id !== lead?.id)
+              .map((id) => byId.get(id))
+              .filter((v): v is Listing => v !== undefined)
+              .slice(0, SHELF_LIMIT);
+
             if (items.length === 0) return null;
 
             return (
-              <View key={shelf.kind} className="gap-4">
+              <View key={shelf.slug} className="gap-4">
                 <View className="gap-1.5 px-7">
                   <Meta>{shelf.title}</Meta>
-                  <Muted>{shelf.blurb}</Muted>
+                  {shelf.blurb ? <Muted>{shelf.blurb}</Muted> : null}
                 </View>
 
                 <ScrollView

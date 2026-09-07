@@ -59,16 +59,23 @@ function AuthGate() {
   /**
    * A session whose user no longer exists.
    *
-   * The token is still valid and still on the device, so `session` is truthy,
-   * but the profile lookup returns nothing and the app sits on the splash
-   * colour forever waiting for an answer that is not coming. It happens
-   * whenever an account is deleted or purged while a device still holds a
-   * token — and it happened here every time the local database was reset.
+   * The token is still on the device and still parses, so `session` is truthy,
+   * but there is no profile behind it. It happens whenever an account is
+   * deleted or purged while a device still holds a token.
+   *
+   * Keyed on the query having finished and found nothing, not on `isError`.
+   * The first version of this checked `isError` and did not work: `single()`
+   * made a missing row an exception, React Query retried it, and once any
+   * result had been cached a later failure left `status` at 'success' — so
+   * `isError` was false in exactly the situation this exists to catch. The
+   * profile hook returns null for a missing row now, which is a fact rather
+   * than a failure, and `isFetched` says the answer has actually arrived
+   * rather than being still on its way.
    *
    * Treated as signed out, because that is what it is. Signing out clears the
    * stale token so the next launch starts clean rather than repeating this.
    */
-  const orphaned = Boolean(session) && profile.isError;
+  const orphaned = Boolean(session) && profile.isFetched && !profile.data;
 
   useEffect(() => {
     if (!orphaned) return;
