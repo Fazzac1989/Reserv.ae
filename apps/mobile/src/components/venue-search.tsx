@@ -6,6 +6,7 @@ import { BRAND } from '@reservai/config';
 import { Body, Display, Meta, Muted, Title } from './ui/text';
 import { Chip } from './ui/chip';
 import { LiveStatus } from './booking-state';
+import { SaveButton } from './save-button';
 import {
   availabilityLabel,
   placeLabels,
@@ -75,11 +76,14 @@ function Result({
         {attributes.length > 0 ? (
           <Muted numberOfLines={1}>{attributes.join(' · ')}</Muted>
         ) : null}
-        {/*
-          Honest, and the same for every venue until something can actually
-          read a diary. "Available on request" is what it is.
-        */}
-        <Meta className="mt-0.5">{availabilityLabel('on_request')}</Meta>
+        <View className="mt-0.5 flex-row items-center justify-between">
+          {/*
+            Honest, and the same for every venue until something can actually
+            read a diary. "Available on request" is what it is.
+          */}
+          <Meta>{availabilityLabel('on_request')}</Meta>
+          <SaveButton venueId={venue.id} venueName={venue.name} />
+        </View>
       </View>
     </Pressable>
   );

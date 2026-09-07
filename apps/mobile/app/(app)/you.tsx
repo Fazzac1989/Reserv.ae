@@ -1,13 +1,14 @@
 import { Pressable, View } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { BRAND } from '@reservai/config';
 import { Rule, ScreenScroll } from '../../src/components/ui/screen';
+import { useSavedVenues } from '../../src/lib/saved';
 import { Body, Display, Meta, Muted, Title } from '../../src/components/ui/text';
 import { useProfile } from '../../src/lib/profile';
 import { signOut } from '../../src/lib/auth';
 
 /**
- * Everything about the person, and everything Suhail is allowed to do.
+ * Everything about the person, and everything Reserv is allowed to do.
  *
  * A hub rather than a settings screen: the two things worth reaching quickly
  * are what Suhail believes and what it may act on, and both are trust features
@@ -29,6 +30,8 @@ const SECTIONS = [
 
 export default function You() {
   const profile = useProfile();
+  const saved = useSavedVenues();
+  const router = useRouter();
 
   return (
     <ScreenScroll>
@@ -50,6 +53,37 @@ export default function You() {
           </View>
         ))}
       </View>
+
+      {/*
+        Kept venues.
+
+        Here rather than as a shelf on Discover: the things you saved are about
+        you, and Discover is about what is out there. Shown as a list of names
+        rather than as cards, because this is somewhere you come to find one
+        you already chose, not somewhere to browse again.
+      */}
+      {saved.data && saved.data.length > 0 ? (
+        <View className="gap-3">
+          <Meta>Kept</Meta>
+          <View>
+            {saved.data.map((venue, i) => (
+              <View key={venue.id}>
+                <Pressable
+                  onPress={() => router.push(`/venue/${venue.slug ?? venue.id}`)}
+                  accessibilityRole="button"
+                  className="min-h-[44px] justify-center py-3"
+                >
+                  <Body className="font-body-medium">{venue.name}</Body>
+                  <Muted>
+                    {[venue.neighbourhood, venue.tags?.[0]].filter(Boolean).join(' · ')}
+                  </Muted>
+                </Pressable>
+                {i < saved.data!.length - 1 ? <Rule /> : null}
+              </View>
+            ))}
+          </View>
+        </View>
+      ) : null}
 
       {/*
         Named rather than implied. The brief asks for a permissions centre and

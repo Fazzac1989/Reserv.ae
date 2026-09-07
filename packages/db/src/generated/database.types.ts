@@ -1870,6 +1870,7 @@ export type Database = {
           photo_urls: string[]
           price_band: number
           private_space: boolean | null
+          search_text: unknown
           slug: string | null
           smoking_policy: string | null
           tags: string[]
@@ -1910,6 +1911,7 @@ export type Database = {
           photo_urls?: string[]
           price_band: number
           private_space?: boolean | null
+          search_text?: unknown
           slug?: string | null
           smoking_policy?: string | null
           tags?: string[]
@@ -1950,6 +1952,7 @@ export type Database = {
           photo_urls?: string[]
           price_band?: number
           private_space?: boolean | null
+          search_text?: unknown
           slug?: string | null
           smoking_policy?: string | null
           tags?: string[]
@@ -2240,6 +2243,7 @@ export type Database = {
         }[]
       }
       revoke_connection: { Args: { p_provider: string }; Returns: undefined }
+      text_array_to_string: { Args: { arr: string[] }; Returns: string }
       time_to_confirmation: {
         Args: { p_from: string; p_to: string }
         Returns: {

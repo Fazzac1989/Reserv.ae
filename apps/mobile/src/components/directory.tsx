@@ -23,6 +23,7 @@ import { supabase } from '../lib/supabase';
 
 export interface Listing {
   id: string;
+  slug: string | null;
   name: string;
   vertical: string;
   zone: string;
@@ -136,7 +137,7 @@ export function Directory({
         supabase
           .from('venues')
           .select(
-            'id, name, vertical, zone, price_band, house_note, description, tags, photo_urls, is_demo',
+            'id, slug, name, vertical, zone, price_band, house_note, description, tags, photo_urls, is_demo',
           )
           // No `.eq('onboarding_status', 'live')` here, deliberately.
           //

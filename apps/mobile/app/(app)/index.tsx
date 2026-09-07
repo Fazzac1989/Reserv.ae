@@ -185,7 +185,7 @@ export default function Discover() {
       // shared link both lead to. It used to open the conversation with "tell
       // me about X", which asked the assistant to recite information the
       // profile already shows, more slowly and less reliably.
-      onOpen={(listing) => router.push(`/venue/${listing.id}`)}
+      onOpen={(listing) => router.push(`/venue/${listing.slug ?? listing.id}`)}
     />
   );
 }

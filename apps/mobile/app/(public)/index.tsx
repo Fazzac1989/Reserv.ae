@@ -13,5 +13,5 @@ import { Directory } from '../../src/components/directory';
 export default function PublicDirectory() {
   const router = useRouter();
 
-  return <Directory onOpen={(listing) => router.push(`/venue/${listing.id}`)} />;
+  return <Directory onOpen={(listing) => router.push(`/venue/${listing.slug ?? listing.id}`)} />;
 }
