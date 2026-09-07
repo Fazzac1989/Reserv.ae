@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Body, Display, Lead, Meta, Muted, Title } from '../../src/components/ui/text';
+import { TextCard } from '../../src/components/text-card';
 import { LiveStatus } from '../../src/components/booking-state';
 import { supabase } from '../../src/lib/supabase';
 
@@ -28,6 +29,7 @@ interface Listing {
   price_band: number;
   house_note: string | null;
   description: string | null;
+  tags: string[];
   photo_urls: string[];
   is_demo: boolean;
 }
@@ -47,12 +49,14 @@ function Card({
   labels,
   width,
   height,
+  large = false,
   onPress,
 }: {
   listing: Listing;
   labels: Record<string, string>;
   width: number;
   height: number;
+  large?: boolean;
   onPress: () => void;
 }) {
   const photo = listing.photo_urls?.[0];
@@ -94,13 +98,14 @@ function Card({
           </View>
         </ImageBackground>
       ) : (
-        <View
-          style={{ height }}
-          className="justify-end border border-grey-line bg-paper-raised p-6 dark:bg-ink-raised"
-        >
-          <Title>{listing.name}</Title>
-          <Meta className="mt-1.5">{meta}</Meta>
-        </View>
+        <TextCard
+          name={listing.name}
+          meta={meta}
+          note={listing.house_note ?? listing.description}
+          tags={listing.tags ?? []}
+          height={height}
+          large={large}
+        />
       )}
     </Pressable>
   );
@@ -117,7 +122,7 @@ export default function Discover() {
         supabase
           .from('venues')
           .select(
-            'id, name, vertical, zone, price_band, house_note, description, photo_urls, is_demo',
+            'id, name, vertical, zone, price_band, house_note, description, tags, photo_urls, is_demo',
           )
           .eq('onboarding_status', 'live')
           .order('price_band', { ascending: false }),
@@ -202,6 +207,7 @@ export default function Discover() {
                 labels={labels}
                 width={width - 56}
                 height={420}
+                large
                 onPress={() => open(lead)}
               />
               {lead.house_note ? <Lead>{lead.house_note}</Lead> : null}

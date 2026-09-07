@@ -1,5 +1,6 @@
 import { ImageBackground, Pressable, View } from 'react-native';
 import { Meta, Title } from './ui/text';
+import { TextCard } from './text-card';
 import type { SuggestionCard } from '../lib/agent';
 
 const BANDS = ['', 'Everyday', 'Comfortable', 'Upmarket', 'Occasion'];
@@ -18,9 +19,13 @@ export function metaLine(card: SuggestionCard): string {
  *
  * Photography is the only decoration the design allows, so the card is the
  * picture — the scrim exists to carry the serif, not to darken the image for
- * its own sake. Where a venue has no photograph the card falls back to a plain
- * surface rather than a placeholder graphic, because an empty frame with an
- * icon in it looks like a failure and a quiet card does not.
+ * its own sake.
+ *
+ * Where a venue has no photograph it gets the text card instead, the same one
+ * the directory uses. Most venues will not have a picture for a long time, so
+ * this is not an edge case to be tidied away: a suggestion Suhail is genuinely
+ * proud of has to look composed whether or not we happen to hold an image of
+ * the room.
  */
 export function VenueCard({
   card,
@@ -32,13 +37,6 @@ export function VenueCard({
   width: number;
 }) {
   const photo = card.photoUrls?.[0];
-
-  const body = (
-    <View className="flex-1 justify-end p-5">
-      <Title className={photo ? 'text-paper' : undefined}>{card.name}</Title>
-      <Meta className={photo ? 'mt-1.5 text-paper/70' : 'mt-1.5'}>{metaLine(card)}</Meta>
-    </View>
-  );
 
   return (
     <Pressable
@@ -57,12 +55,19 @@ export function VenueCard({
           <View className="absolute inset-x-0 bottom-0 h-1/2 bg-ink/20" />
           <View className="absolute inset-x-0 bottom-0 h-1/3 bg-ink/40" />
           <View className="absolute inset-x-0 bottom-0 h-1/4 bg-ink/55" />
-          {body}
+          <View className="flex-1 justify-end p-5">
+            <Title className="text-paper">{card.name}</Title>
+            <Meta className="mt-1.5 text-paper/70">{metaLine(card)}</Meta>
+          </View>
         </ImageBackground>
       ) : (
-        <View className="flex-1 border border-grey-line bg-paper-raised dark:bg-ink-raised">
-          {body}
-        </View>
+        <TextCard
+          name={card.name}
+          meta={metaLine(card)}
+          note={card.houseNote ?? card.rationale}
+          tags={card.tags}
+          height={256}
+        />
       )}
     </Pressable>
   );

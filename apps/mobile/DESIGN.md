@@ -80,6 +80,44 @@ with an icon in it looks like a failure, and a quiet dark card does not.
 No icons where a word is clearer. Where an icon is unavoidable: 1.5px stroke,
 never filled.
 
+### The card without a photograph
+
+Most of the directory will have no picture for a long time. A listing is
+factual information about a business and needs nobody's permission; a
+restaurant's photographs are its own, and we do not get to use them until it
+has claimed its listing and given them to us. So the text card is not a
+fallback for an unusual case — it is the card most venues will wear, and it
+has to hold its own in a shelf beside a photograph.
+
+The one move that makes it work is inverting the layout. A photographic card
+sets its name at the bottom, over the scrim. Copy that here and the top
+two-thirds is an empty box with writing at the foot, which reads exactly like
+an image that failed to load. Set from the top instead, with the tags pinned
+to the bottom under a hairline, and the same rectangle reads as a page: the
+space in the middle looks chosen rather than missing.
+
+```
+┌──────────────────────────┐
+│  BLUEWATERS · OCCASION   │  12 meta, at the top — the inversion
+│                          │
+│  Wheelhouse              │  22 Fr (32 on the opener)
+│  Bluewaters              │
+│                          │
+│  The room to book when   │  the note, doing the photograph's job
+│  someone is being        │  clamped: 4 lines, 6 on the opener
+│  congratulated.          │
+│                          │
+│                          │  chosen space, not missing space
+│  ──────────────────────  │  hairline
+│  STEAKHOUSE · WINE LIST  │  one line, clamped
+└──────────────────────────┘
+```
+
+The note is the substitute for the picture — it is what tells you what kind of
+room this is — so it gets the space to do it, and there are no placeholder
+graphics or icons anywhere near it. An empty frame with a camera in it looks
+like a failure; this does not.
+
 ## Structure
 
 Five tabs: Home, Suhail, Plans, Discover, You. The conversation is still the
