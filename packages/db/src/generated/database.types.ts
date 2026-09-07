@@ -98,6 +98,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "booking_attempts_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "venue_bookings"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "booking_attempts_venue_channel_id_fkey"
             columns: ["venue_channel_id"]
             isOneToOne: false
@@ -139,6 +146,13 @@ export type Database = {
             referencedRelation: "bookings"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "booking_reminders_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "venue_bookings"
+            referencedColumns: ["id"]
+          },
         ]
       }
       bookings: {
@@ -151,6 +165,7 @@ export type Database = {
           confirmed_at: string | null
           created_at: string
           external_ref: string | null
+          guest_name: string | null
           id: string
           no_show: boolean
           party_size: number
@@ -177,6 +192,7 @@ export type Database = {
           confirmed_at?: string | null
           created_at?: string
           external_ref?: string | null
+          guest_name?: string | null
           id?: string
           no_show?: boolean
           party_size: number
@@ -203,6 +219,7 @@ export type Database = {
           confirmed_at?: string | null
           created_at?: string
           external_ref?: string | null
+          guest_name?: string | null
           id?: string
           no_show?: boolean
           party_size?: number
@@ -277,6 +294,62 @@ export type Database = {
           sort_order?: number
         }
         Relationships: []
+      }
+      connections: {
+        Row: {
+          access_token_enc: string | null
+          access_token_expires_at: string | null
+          account_email: string | null
+          connected_at: string
+          id: string
+          last_used_at: string | null
+          provider: string
+          refresh_token_enc: string | null
+          revoked_at: string | null
+          revoked_reason: string | null
+          scopes: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token_enc?: string | null
+          access_token_expires_at?: string | null
+          account_email?: string | null
+          connected_at?: string
+          id?: string
+          last_used_at?: string | null
+          provider: string
+          refresh_token_enc?: string | null
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          scopes?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token_enc?: string | null
+          access_token_expires_at?: string | null
+          account_email?: string | null
+          connected_at?: string
+          id?: string
+          last_used_at?: string | null
+          provider?: string
+          refresh_token_enc?: string | null
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          scopes?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connections_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       conversations: {
         Row: {
@@ -499,6 +572,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ops_tasks_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "venue_bookings"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ops_tasks_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -510,6 +590,35 @@ export type Database = {
             columns: ["venue_id"]
             isOneToOne: false
             referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permissions: {
+        Row: {
+          domain: string
+          level: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          domain: string
+          level?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          domain?: string
+          level?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -586,6 +695,13 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_items_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "venue_bookings"
             referencedColumns: ["id"]
           },
           {
@@ -1279,6 +1395,95 @@ export type Database = {
           },
         ]
       }
+      venue_invites: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          revoked_at: string | null
+          role: Database["public"]["Enums"]["venue_member_role"]
+          venue_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          revoked_at?: string | null
+          role?: Database["public"]["Enums"]["venue_member_role"]
+          venue_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          revoked_at?: string | null
+          role?: Database["public"]["Enums"]["venue_member_role"]
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_invites_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      venue_members: {
+        Row: {
+          created_at: string
+          invited_by: string | null
+          role: Database["public"]["Enums"]["venue_member_role"]
+          updated_at: string
+          user_id: string
+          venue_id: string
+        }
+        Insert: {
+          created_at?: string
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["venue_member_role"]
+          updated_at?: string
+          user_id: string
+          venue_id: string
+        }
+        Update: {
+          created_at?: string
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["venue_member_role"]
+          updated_at?: string
+          user_id?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_members_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       venue_messages: {
         Row: {
           approved_at: string | null
@@ -1359,6 +1564,13 @@ export type Database = {
             columns: ["booking_id"]
             isOneToOne: false
             referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_messages_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "venue_bookings"
             referencedColumns: ["id"]
           },
           {
@@ -1536,7 +1748,106 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      my_connections: {
+        Row: {
+          account_email: string | null
+          connected_at: string | null
+          id: string | null
+          last_used_at: string | null
+          provider: string | null
+          revoked_at: string | null
+          scopes: string[] | null
+          user_id: string | null
+        }
+        Insert: {
+          account_email?: string | null
+          connected_at?: string | null
+          id?: string | null
+          last_used_at?: string | null
+          provider?: string | null
+          revoked_at?: string | null
+          scopes?: string[] | null
+          user_id?: string | null
+        }
+        Update: {
+          account_email?: string | null
+          connected_at?: string | null
+          id?: string | null
+          last_used_at?: string | null
+          provider?: string | null
+          revoked_at?: string | null
+          scopes?: string[] | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connections_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      venue_bookings: {
+        Row: {
+          cancelled_at: string | null
+          confirmed_at: string | null
+          created_at: string | null
+          external_ref: string | null
+          guest_name: string | null
+          id: string | null
+          no_show: boolean | null
+          party_size: number | null
+          provider_name: string | null
+          scheduled_for: string | null
+          service_name: string | null
+          special_requests: string | null
+          status: Database["public"]["Enums"]["booking_state"] | null
+          venue_id: string | null
+        }
+        Insert: {
+          cancelled_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          external_ref?: string | null
+          guest_name?: never
+          id?: string | null
+          no_show?: boolean | null
+          party_size?: number | null
+          provider_name?: string | null
+          scheduled_for?: string | null
+          service_name?: string | null
+          special_requests?: string | null
+          status?: Database["public"]["Enums"]["booking_state"] | null
+          venue_id?: string | null
+        }
+        Update: {
+          cancelled_at?: string | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          external_ref?: string | null
+          guest_name?: never
+          id?: string | null
+          no_show?: boolean | null
+          party_size?: number | null
+          provider_name?: string | null
+          scheduled_for?: string | null
+          service_name?: string | null
+          special_requests?: string | null
+          status?: Database["public"]["Enums"]["booking_state"] | null
+          venue_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       apply_booking_transition: {
@@ -1596,6 +1907,8 @@ export type Database = {
       }
       is_admin: { Args: never; Returns: boolean }
       is_ops: { Args: never; Returns: boolean }
+      manages_venue: { Args: { target_venue_id: string }; Returns: boolean }
+      my_venue_ids: { Args: never; Returns: string[] }
       ops_effort: {
         Args: { p_from: string; p_to: string }
         Returns: {
@@ -1658,6 +1971,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      redeem_venue_invites: { Args: never; Returns: number }
       retention_cohorts: {
         Args: never
         Returns: {
@@ -1667,6 +1981,7 @@ export type Database = {
           users: number
         }[]
       }
+      revoke_connection: { Args: { p_provider: string }; Returns: undefined }
       time_to_confirmation: {
         Args: { p_from: string; p_to: string }
         Returns: {
@@ -1725,7 +2040,13 @@ export type Database = {
       }
     }
     Enums: {
-      actor: "user" | "ops" | "system" | "api_webhook" | "parsed_confirmation"
+      actor:
+        | "user"
+        | "ops"
+        | "system"
+        | "api_webhook"
+        | "parsed_confirmation"
+        | "venue"
       app_role: "user" | "ops" | "admin"
       attempt_outcome:
         | "confirmed"
@@ -1786,6 +2107,7 @@ export type Database = {
         | "past_due"
         | "cancelled"
       suggestion_outcome: "pending" | "accepted" | "rejected" | "expired"
+      venue_member_role: "owner" | "manager" | "staff"
       venue_message_status:
         | "drafted"
         | "awaiting_approval"
@@ -1932,7 +2254,14 @@ export const Constants = {
   },
   public: {
     Enums: {
-      actor: ["user", "ops", "system", "api_webhook", "parsed_confirmation"],
+      actor: [
+        "user",
+        "ops",
+        "system",
+        "api_webhook",
+        "parsed_confirmation",
+        "venue",
+      ],
       app_role: ["user", "ops", "admin"],
       attempt_outcome: [
         "confirmed",
@@ -1999,6 +2328,7 @@ export const Constants = {
         "cancelled",
       ],
       suggestion_outcome: ["pending", "accepted", "rejected", "expired"],
+      venue_member_role: ["owner", "manager", "staff"],
       venue_message_status: [
         "drafted",
         "awaiting_approval",

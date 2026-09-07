@@ -24,10 +24,21 @@ function psql(file) {
 
 let failed = false;
 
-for (const file of ['schema-guards.sql', 'rls.sql']) {
+for (const file of ['schema-guards.sql', 'rls.sql', 'venue-back-office.sql']) {
   console.log(`\n${'='.repeat(60)}\n${file}\n${'='.repeat(60)}`);
   try {
-    console.log(psql(file));
+    const output = psql(file);
+    console.log(output);
+
+    // The two older files assert by printing a count next to the number they
+    // expect, which only fails if a human reads it. Newer ones print PASS or
+    // FAIL, and a FAIL anywhere fails the run.
+    const fails = output.split('\n').filter((line) => line.includes('FAIL'));
+    if (fails.length > 0) {
+      failed = true;
+      console.error(`${file} reported ${fails.length} failed assertion(s):`);
+      for (const line of fails) console.error(`  ${line.trim()}`);
+    }
   } catch (error) {
     failed = true;
     console.error(`${file} could not run:`, error.message);

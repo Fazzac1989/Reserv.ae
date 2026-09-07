@@ -166,6 +166,27 @@ describe('transition table — exhaustive matrix', () => {
     }
   }
 
+  /**
+   * The matrix above already proves this state by state, but only as a side
+   * effect of `venue` not appearing in any `actors` list. Stated here directly
+   * so that adding the first venue edge has to delete a test that says, in
+   * words, that venues cannot move bookings — rather than silently flipping a
+   * generated case.
+   */
+  it('gives a venue no way to move a booking at all', () => {
+    for (const from of BOOKING_STATES) {
+      for (const event of BOOKING_EVENTS) {
+        expect(canTransition(input(from, event, 'venue'))).toBe(false);
+        expect(() => transition(input(from, event, 'venue'))).toThrow();
+      }
+    }
+
+    const edgesNamingVenue = Object.values(TRANSITIONS).flatMap((events) =>
+      Object.values(events).filter((rule) => rule.actors.includes('venue')),
+    );
+    expect(edgesNamingVenue).toEqual([]);
+  });
+
   it('contains no edges beyond the specification', () => {
     const actual: string[] = [];
     for (const from of BOOKING_STATES) {

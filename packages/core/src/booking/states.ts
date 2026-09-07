@@ -64,7 +64,25 @@ export type BookingEvent = (typeof BOOKING_EVENTS)[number];
  * whose evidence must be attached; `system` is our own scheduler and may never
  * confirm anything.
  */
-export const ACTORS = ['user', 'ops', 'system', 'api_webhook', 'parsed_confirmation'] as const;
+export const ACTORS = [
+  'user',
+  'ops',
+  'system',
+  'api_webhook',
+  'parsed_confirmation',
+  /**
+   * A member of the venue itself, acting in the partner back office.
+   *
+   * Deliberately named by no edge in the transition table, so a venue can
+   * currently move nothing: the exhaustive matrix test asserts that every
+   * state × event pair rejects it. Letting a venue confirm its own booking is
+   * the most valuable thing the back office could do — a venue pressing
+   * "confirm" is better evidence than any reply our rails could parse — but it
+   * is a new edge with its own evidence requirement, not a widening of an
+   * existing one.
+   */
+  'venue',
+] as const;
 export type Actor = (typeof ACTORS)[number];
 
 /**
