@@ -7,6 +7,7 @@ import { updateVenue } from '../../../../lib/venues/actions';
 import { labelFor } from '../../../../lib/venues/constants';
 import { VenueForm } from '../../../../components/venues/venue-form';
 import { StatusControl } from '../../../../components/venues/status-control';
+import { VerificationControl } from '../../../../components/venues/verification-control';
 import { ChannelEditor } from '../../../../components/venues/channel-editor';
 import { PolicyForm } from '../../../../components/venues/policy-form';
 import { ContactList } from '../../../../components/venues/contact-list';
@@ -86,6 +87,13 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
           status={venue.onboarding_status}
           consentAt={venue.booking_consent_obtained_at}
         />
+      </Section>
+
+      <Section
+        title="Verification"
+        description="Whether a human has checked this listing against the venue. Until somebody has, the app tells users so and hedges every fact it reads out."
+      >
+        <VerificationControl venueId={venue.id} verifiedAt={venue.verified_at} />
       </Section>
 
       <Section

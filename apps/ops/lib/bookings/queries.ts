@@ -15,12 +15,23 @@ export interface QueueRow {
   task: { id: string; kind: string; priority: number; detail: string | null } | null;
 }
 
-/** Bookings that are not yet at rest, soonest first. */
+/**
+ * Bookings that are not yet at rest, soonest first.
+ *
+ * `alternative_offered` and `cancellation_requested` were missing when those
+ * states were added, and their absence was worse than cosmetic: a venue that
+ * had offered a different time, and a table nobody had told the venue to
+ * release, both disappeared from the queue entirely. Neither is at rest — one
+ * is waiting on the guest and one is waiting on us — and the ops console is
+ * where somebody notices when the guest never answers.
+ */
 const OPEN_STATES: BookingState[] = [
   'draft',
   'user_approved',
   'attempting',
   'pending_venue',
+  'alternative_offered',
+  'cancellation_requested',
   'escalated',
 ];
 

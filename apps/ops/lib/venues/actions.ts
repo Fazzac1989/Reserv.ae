@@ -207,6 +207,76 @@ export async function recordBookingConsent(venueId: string, note: string): Promi
   return { ok: true };
 }
 
+/**
+ * Record that a human checked this listing against the venue.
+ *
+ * Until this is set, every profile in the app says so — "not yet confirmed
+ * with the venue" — and every answer read off the record carries a caveat.
+ * That is the correct default and it is also a standing invitation to fix it,
+ * which is what this closes.
+ *
+ * The note is required and is not decoration. "Verified" with no account of
+ * who said what is a claim nobody can check later, and this is the field the
+ * app leans on to stop hedging.
+ */
+export async function verifyVenue(venueId: string, note: string): Promise<ActionResult> {
+  const ops = await requireOps();
+
+  const parsedNote = z.string().min(3).max(500).safeParse(note);
+  if (!parsedNote.success) {
+    return fail('Say who confirmed it and how — a name and a channel is enough.');
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('venues')
+    .update({ verified_at: new Date().toISOString(), verified_by: ops.id })
+    .eq('id', venueId);
+  if (error) return fail(error.message);
+
+  await supabase.rpc('record_ops_event', {
+    p_entity_type: 'venue',
+    p_entity_id: venueId,
+    p_event: 'venue_verified',
+    p_reason: parsedNote.data,
+  });
+
+  revalidatePath(`/venues/${venueId}`);
+  return { ok: true };
+}
+
+/**
+ * Withdraw verification.
+ *
+ * Needed as much as granting it. A listing that was checked a year ago and has
+ * since changed hands is worse than one that was never checked, because the
+ * app stops hedging about it — so there has to be a way back that is as easy
+ * as the way forward.
+ */
+export async function unverifyVenue(venueId: string, note: string): Promise<ActionResult> {
+  await requireOps();
+
+  const parsedNote = z.string().min(3).max(500).safeParse(note);
+  if (!parsedNote.success) return fail('Say what changed.');
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('venues')
+    .update({ verified_at: null, verified_by: null })
+    .eq('id', venueId);
+  if (error) return fail(error.message);
+
+  await supabase.rpc('record_ops_event', {
+    p_entity_type: 'venue',
+    p_entity_id: venueId,
+    p_event: 'venue_verification_withdrawn',
+    p_reason: parsedNote.data,
+  });
+
+  revalidatePath(`/venues/${venueId}`);
+  return { ok: true };
+}
+
 const ONBOARDING = ['lead', 'contacted', 'agreed', 'live', 'paused', 'lost'] as const;
 
 export async function setOnboardingStatus(
