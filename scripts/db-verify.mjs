@@ -46,6 +46,7 @@ for (const file of ['schema-guards.sql', 'rls.sql', 'venue-back-office.sql']) {
 }
 
 for (const script of [
+  'public-directory.mjs',
   'auth-e2e.mjs',
   'onboarding-e2e.mjs',
   'concierge-e2e.mjs',

@@ -113,11 +113,24 @@ check('venues visible', await countRows('venues', ops.token), 15);
 check('venue_booking_channels visible', await countRows('venue_booking_channels', ops.token), 35);
 check('venue_contacts visible', await countRows('venue_contacts', ops.token), 15);
 
-console.log('\n=== anon has no surface ===');
+console.log('\n=== anon has the directory, and only the directory ===');
+// This assertion used to read "anon read refused". The directory is public
+// now, so the interesting question moved: not whether a stranger can read
+// venues — they can, that is the product — but whether reading venues is
+// still the only thing they can do. public-directory.mjs is the thorough
+// version of this; the line below keeps the neighbouring reads honest.
 const anonRes = await fetch(`${API}/rest/v1/venues?select=id&limit=1`, { headers: { apikey: ANON } });
-const anonBody = await anonRes.text();
-check('anon read refused', anonRes.status >= 400 || anonBody === '[]', true);
-console.log(`      (status ${anonRes.status}, body ${anonBody.slice(0, 80)})`);
+check('anon can read the public directory', anonRes.status === 200, true);
+
+const anonContacts = await fetch(`${API}/rest/v1/venue_contacts?select=phone_e164&limit=1`, {
+  headers: { apikey: ANON },
+});
+check('anon still cannot read venue contacts', anonContacts.status >= 400, true);
+
+const anonUsers = await fetch(`${API}/rest/v1/users?select=email&limit=1`, {
+  headers: { apikey: ANON },
+});
+check('anon still cannot read profiles', anonUsers.status >= 400, true);
 
 console.log('\n=== a diner cannot write a booking ===');
 const write = await fetch(`${API}/rest/v1/bookings`, {

@@ -152,10 +152,21 @@ const hugeParty = await patch('user_preferences', `user_id=eq.${me.userId}`, me.
 });
 check('party size over 20 refused', hugeParty.status >= 400, true);
 
+// Was 'downtown', which was an unknown zone when zones were the three-value
+// enum and has been a perfectly good row in `places` ever since that enum was
+// dropped. The assertion was passing on a stale premise, then failing once
+// home_zone started being validated at all. Use something that will not
+// quietly become real.
 const badZone = await patch('user_preferences', `user_id=eq.${me.userId}`, me.token, {
-  home_zone: 'downtown',
+  home_zone: 'atlantis_moon_base',
 });
 check('unknown zone refused', badZone.status >= 400, true);
+
+// The other half, so the check above cannot pass by refusing everything.
+const goodZone = await patch('user_preferences', `user_id=eq.${me.userId}`, me.token, {
+  home_zone: 'downtown',
+});
+check('a real zone is accepted', goodZone.status < 400, true);
 
 console.log('\n=== a user cannot edit anyone else ===');
 const otherEmail = 'diner-other@example.invalid';

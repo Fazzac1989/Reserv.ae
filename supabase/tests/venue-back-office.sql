@@ -25,7 +25,7 @@
 -- like a broken policy rather than a dirty fixture. Clearing first costs
 -- nothing and removes a confusing failure mode.
 delete from public.venue_invites where email in ('partner@example.invalid', 'outsider@example.invalid');
-delete from public.bookings where id = '11111111-0000-4000-8000-000000000020';
+delete from public.bookings where id in ('11111111-0000-4000-8000-000000000020', '11111111-0000-4000-8000-000000000021');
 delete from auth.users where email in ('partner@example.invalid', 'outsider@example.invalid');
 
 insert into auth.users (id, instance_id, aud, role, email, encrypted_password,
@@ -39,10 +39,23 @@ values
    now(), now(), now(), '{"full_name":"Omar Outsider"}'::jsonb);
 
 -- A second booking, at venue B, so "sees only its own" has something to fail on.
+--
+-- Deliberately not a draft. `venue_bookings` filters drafts out, so a draft
+-- here would have made the isolation checks below pass for the wrong reason —
+-- venue A's partner would see nothing of venue B because nobody sees drafts,
+-- not because the venue predicate works. The draft case gets its own
+-- assertion instead.
 insert into public.bookings (id, user_id, venue_id, status, party_size, scheduled_for, guest_name)
 values ('11111111-0000-4000-8000-000000000020',
         'aaaaaaaa-0000-4000-8000-000000000001',
-        :venue_b, 'draft', 4, now() + interval '2 days', 'Alice Demo');
+        :venue_b, 'pending_venue', 4, now() + interval '2 days', 'Alice Demo');
+
+-- A draft at venue A: the partner's own venue, so only the draft rule can
+-- hide it. A booking the user has not approved is not the venue's business.
+insert into public.bookings (id, user_id, venue_id, status, party_size, scheduled_for, guest_name)
+values ('11111111-0000-4000-8000-000000000021',
+        'aaaaaaaa-0000-4000-8000-000000000001',
+        :venue_a, 'draft', 2, now() + interval '5 days', 'Alice Demo');
 
 update public.bookings set guest_name = 'Alice Demo'
  where id = '11111111-0000-4000-8000-000000000010';
@@ -75,6 +88,14 @@ select case when count(*) = 1 then 'PASS' else 'FAIL' end
 select case when guest_name = 'Alice Demo' then 'PASS' else 'FAIL' end
        || ' — partner sees the guest name it needs to seat them'
   from public.venue_bookings where id = '11111111-0000-4000-8000-000000000010';
+
+-- A draft is a booking the user has started and not approved. It is at this
+-- partner's own venue, so the venue predicate admits it and only the draft
+-- rule keeps it out. Nothing should be said to a restaurant about a table
+-- somebody is still thinking about.
+select case when count(*) = 0 then 'PASS' else 'FAIL' end
+       || ' — a draft at its own venue stays invisible (got ' || count(*) || ')'
+  from public.venue_bookings where id = '11111111-0000-4000-8000-000000000021';
 rollback;
 
 \echo ''
@@ -245,6 +266,13 @@ set local request.jwt.claims = '{"sub":"bbbbbbbb-0000-4000-8000-000000000002","r
 select case when count(*) >= 2 then 'PASS' else 'FAIL' end
        || ' — ops still sees every venue''s bookings (got ' || count(*) || ')'
   from public.venue_bookings;
+
+-- Ops reads drafts through the table, not through this view. The view is the
+-- partner's window and drops drafts for everyone who looks through it,
+-- including us; the ops console reads `bookings` directly.
+select case when count(*) = 0 then 'PASS' else 'FAIL' end
+       || ' — the draft is hidden from ops through this view too (got ' || count(*) || ')'
+  from public.venue_bookings where status = 'draft';
 
 with edited as (
   update public.venues set price_band = price_band where id = :venue_a returning 1
