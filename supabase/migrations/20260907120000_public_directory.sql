@@ -30,13 +30,34 @@
 
 -- --- First, take away what was never meant to be given -----------------------
 
-revoke truncate, references, trigger on all tables in schema public from anon, authenticated;
-
--- Existing tables are handled above; this is for the next one somebody adds.
-alter default privileges in schema public
-  revoke truncate, references, trigger on tables from anon, authenticated;
+-- `anon` gets nothing at all, and then exactly the directory, further down.
+--
+-- Not a narrower revoke, because the two databases turned out to disagree
+-- about what `anon` already had. A local stack built from these migrations by
+-- the CLI had inherited TRUNCATE, REFERENCES and TRIGGER. The production
+-- project, created through the dashboard, had inherited the classic
+-- `grant all on all tables in schema public to anon` — SELECT, INSERT, UPDATE
+-- and DELETE on `users`, `bookings`, `venue_contacts`, `connections`,
+-- `events_log`, everything.
+--
+-- Nothing had leaked through it, because every policy is `to authenticated`
+-- and RLS is what actually answers, so an anonymous caller read no rows. But
+-- RLS was the only thing answering. The second layer this codebase describes
+-- itself as having did not exist on the machine that matters, and no local
+-- test could have found that, because the local database did not have the
+-- problem.
+revoke all on all tables in schema public from anon;
+alter default privileges in schema public revoke all on tables from anon;
 alter default privileges for role postgres in schema public
-  revoke truncate, references, trigger on tables from anon, authenticated;
+  revoke all on tables from anon;
+
+-- `authenticated` keeps the SELECT/INSERT/UPDATE/DELETE the grants migration
+-- gives it deliberately, and loses the three nobody ever meant it to have.
+revoke truncate, references, trigger on all tables in schema public from authenticated;
+alter default privileges in schema public
+  revoke truncate, references, trigger on tables from authenticated;
+alter default privileges for role postgres in schema public
+  revoke truncate, references, trigger on tables from authenticated;
 
 /**
  * An anonymous caller has no business executing anything by name.
@@ -137,7 +158,11 @@ grant select (
 -- These two already carried a grant to anon and a policy limited to
 -- authenticated, so anon could reach the table and then read nothing from it.
 -- That is the grants/policies pairing failing closed exactly as designed. Now
--- the policies are what need widening; the grants were already right.
+-- the policies are what need widening — and the grants have to be restated,
+-- because the blanket revoke above took them away along with everything else.
+grant select on public.categories to anon;
+grant select on public.places to anon;
+
 create policy categories_read_anon on public.categories for select to anon using (true);
 create policy places_read_anon on public.places for select to anon using (true);
 
@@ -155,13 +180,24 @@ do $$
 declare
   leaked text;
 begin
-  select string_agg(distinct table_name || ' (' || privilege_type || ')', ', ')
+  -- Both catalogs. A column-level grant does not appear in role_table_grants,
+  -- which is how `venues` is absent from it despite being readable — so an
+  -- assertion that consulted only that view would wave through exactly the
+  -- mistake it exists to catch, a stray `grant select (phone_e164) on
+  -- venue_contacts to anon`.
+  select string_agg(distinct entry, ', ')
     into leaked
-    from information_schema.role_table_grants
-   where grantee = 'anon'
-     and table_schema = 'public'
-     and not (privilege_type = 'SELECT'
-              and table_name in ('venues', 'categories', 'places'));
+    from (
+      select table_name || ' (' || privilege_type || ')' as entry
+        from information_schema.role_table_grants
+       where grantee = 'anon' and table_schema = 'public'
+      union all
+      select table_name || '.' || column_name || ' (' || privilege_type || ')'
+        from information_schema.role_column_grants
+       where grantee = 'anon' and table_schema = 'public'
+    ) held
+   where entry !~ '^(venues|categories|places)[. ]'
+      or entry !~ '\(SELECT\)$';
 
   if leaked is not null then
     raise exception
