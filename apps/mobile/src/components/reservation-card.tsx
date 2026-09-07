@@ -47,6 +47,18 @@ export function statusCopy(reservation: Reservation): StatusCopy {
         detail: 'I have asked and am waiting for them to confirm.',
         tone: 'working',
       };
+    case 'alternative_offered':
+      return {
+        label: 'They have offered another time',
+        detail: 'Have a look — nothing is booked until you say yes.',
+        tone: 'attention',
+      };
+    case 'cancellation_requested':
+      return {
+        label: 'Cancelling',
+        detail: 'I am telling the venue. The table is still theirs until they answer.',
+        tone: 'working',
+      };
     case 'escalated':
       return {
         label: 'Taking longer',

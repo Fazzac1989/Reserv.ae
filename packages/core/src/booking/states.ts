@@ -16,6 +16,28 @@ export const BOOKING_STATES = [
   'attempting',
   /** Sent to the venue; waiting on them. The SLA clock runs here. */
   'pending_venue',
+  /**
+   * The venue cannot do what was asked but has offered something else, and the
+   * person has to decide.
+   *
+   * A state rather than a flag on `pending_venue`, because what the system may
+   * do next is completely different: nothing is owed by the venue any more,
+   * the SLA clock stops, and the only move is the user's. It is also the state
+   * the product exists to handle well — "they can do 8:30, shall I take it?"
+   * is the moment a concierge earns its keep, and a booking sitting in
+   * `pending_venue` while an offer goes unmentioned is the app quietly holding
+   * on to the one message the person needed.
+   */
+  'alternative_offered',
+  /**
+   * The person has asked to cancel a table the venue is holding, and the venue
+   * has not been told yet.
+   *
+   * Cancelling a confirmed booking is not instantaneous and pretending it is
+   * would be the same lie as confirming one that is not. Until the venue has
+   * been reached, the table is still theirs to hold and ours to release.
+   */
+  'cancellation_requested',
   /** A human must intervene. SLA breach, low confidence, out-of-bounds ask. */
   'escalated',
   /** Deterministic confirmation exists. The only state the user may rely on. */
@@ -54,6 +76,14 @@ export const BOOKING_EVENTS = [
   'remind',
   'complete',
   'cancel',
+  /** The venue came back with a different time from the one asked for. */
+  'offer_alternative',
+  /** The person took the offer. It still has to be said back to the venue. */
+  'accept_alternative',
+  /** The person did not want it. Try elsewhere rather than book it anyway. */
+  'decline_alternative',
+  /** The person asked to cancel. The venue does not know yet. */
+  'request_cancellation',
 ] as const;
 
 export type BookingEvent = (typeof BOOKING_EVENTS)[number];

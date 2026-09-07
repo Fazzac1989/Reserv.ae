@@ -54,6 +54,10 @@ const EXPECTED: Record<string, { to: BookingState; actors: Actor[] }> = {
   'attempting:decline': { to: 'failed', actors: ['system', 'ops'] },
   'attempting:escalate': { to: 'escalated', actors: ['system', 'ops'] },
   'attempting:cancel': { to: 'cancelled', actors: ['user', 'ops'] },
+  'attempting:offer_alternative': {
+    to: 'alternative_offered',
+    actors: ['api_webhook', 'parsed_confirmation', 'ops'],
+  },
 
   'pending_venue:confirm': {
     to: 'confirmed',
@@ -63,19 +67,44 @@ const EXPECTED: Record<string, { to: BookingState; actors: Actor[] }> = {
   'pending_venue:decline': { to: 'failed', actors: ['system', 'ops'] },
   'pending_venue:escalate': { to: 'escalated', actors: ['system', 'ops'] },
   'pending_venue:cancel': { to: 'cancelled', actors: ['user', 'ops'] },
+  'pending_venue:offer_alternative': {
+    to: 'alternative_offered',
+    actors: ['api_webhook', 'parsed_confirmation', 'ops'],
+  },
+
+  // Only the user may answer an offer. No 'system' on either decision edge:
+  // accepting a different time on somebody's behalf is the authority this
+  // product does not have, however obvious the answer looks.
+  'alternative_offered:accept_alternative': { to: 'attempting', actors: ['user'] },
+  'alternative_offered:decline_alternative': { to: 'attempting', actors: ['user'] },
+  'alternative_offered:escalate': { to: 'escalated', actors: ['system', 'ops'] },
+  'alternative_offered:cancel': { to: 'cancelled', actors: ['user', 'ops'] },
+
+  // A cancellation is not done until the venue knows. The user asks; only a
+  // venue acknowledgement or an ops action actually releases the table.
+  'cancellation_requested:cancel': {
+    to: 'cancelled',
+    actors: ['api_webhook', 'parsed_confirmation', 'ops'],
+  },
+  'cancellation_requested:escalate': { to: 'escalated', actors: ['system', 'ops'] },
 
   'escalated:start_attempt': { to: 'attempting', actors: ['ops'] },
   'escalated:confirm': { to: 'confirmed', actors: ['ops'] },
   'escalated:decline': { to: 'failed', actors: ['ops'] },
   'escalated:cancel': { to: 'cancelled', actors: ['user', 'ops'] },
 
+  'confirmed:request_cancellation': { to: 'cancellation_requested', actors: ['user', 'ops'] },
   'confirmed:remind': { to: 'reminded', actors: ['system'] },
   'confirmed:complete': { to: 'completed', actors: ['system', 'ops'] },
-  'confirmed:cancel': { to: 'cancelled', actors: ['user', 'ops'] },
+  // Ops only from here on. A user cancelling a table the venue is holding
+  // goes through request_cancellation, so the venue hears about it before the
+  // booking calls itself cancelled.
+  'confirmed:cancel': { to: 'cancelled', actors: ['ops'] },
 
   'reminded:remind': { to: 'reminded', actors: ['system'] },
   'reminded:complete': { to: 'completed', actors: ['system', 'ops'] },
-  'reminded:cancel': { to: 'cancelled', actors: ['user', 'ops'] },
+  'reminded:request_cancellation': { to: 'cancellation_requested', actors: ['user', 'ops'] },
+  'reminded:cancel': { to: 'cancelled', actors: ['ops'] },
 };
 
 const key = (from: BookingState, event: BookingEvent) => `${from}:${event}`;

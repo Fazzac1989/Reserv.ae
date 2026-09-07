@@ -56,6 +56,11 @@ export const TRANSITIONS: TransitionTable = {
   },
 
   attempting: {
+    offer_alternative: {
+      to: 'alternative_offered',
+      actors: ['api_webhook', 'parsed_confirmation', 'ops'],
+      note: 'The venue cannot do the time asked for but has proposed another.',
+    },
     await_venue: {
       to: 'pending_venue',
       actors: ['system', 'ops'],
@@ -89,6 +94,11 @@ export const TRANSITIONS: TransitionTable = {
   },
 
   pending_venue: {
+    offer_alternative: {
+      to: 'alternative_offered',
+      actors: ['api_webhook', 'parsed_confirmation', 'ops'],
+      note: 'The venue cannot do the time asked for but has proposed another.',
+    },
     confirm: {
       to: 'confirmed',
       actors: ['api_webhook', 'parsed_confirmation', 'ops'],
@@ -116,6 +126,59 @@ export const TRANSITIONS: TransitionTable = {
     },
   },
 
+
+  /*
+   * The venue has offered something else and the person has not answered yet.
+   *
+   * No system actor on the two decision edges, deliberately. Accepting a
+   * different time on somebody's behalf is exactly the authority this product
+   * does not have, however obvious the answer looks — an offer inside the
+   * approved window is still the venue changing the terms, and the person is
+   * the only one who can say yes to that.
+   */
+  alternative_offered: {
+    accept_alternative: {
+      to: 'attempting',
+      actors: ['user'],
+      note: 'They took it. The venue still has to be told yes before it is a table.',
+    },
+    decline_alternative: {
+      to: 'attempting',
+      actors: ['user'],
+      note: 'They did not want it. Fall back to the next rail or the next venue.',
+    },
+    escalate: {
+      to: 'escalated',
+      actors: ['system', 'ops'],
+      note: 'The offer was unclear, or carried a deposit or a minimum spend.',
+    },
+    cancel: {
+      to: 'cancelled',
+      actors: ['user', 'ops'],
+      note: 'They wanted the time they asked for and nothing else.',
+    },
+  },
+
+  /*
+   * They have asked to cancel a table the venue is still holding.
+   *
+   * The venue has not been told. Until it has, the booking is not cancelled —
+   * saying otherwise would be the same lie as a confirmation without evidence,
+   * pointed the other way, and it ends with a table held empty at eight.
+   */
+  cancellation_requested: {
+    cancel: {
+      to: 'cancelled',
+      actors: ['api_webhook', 'parsed_confirmation', 'ops'],
+      note: 'The venue acknowledged. Only now is the table actually released.',
+    },
+    escalate: {
+      to: 'escalated',
+      actors: ['system', 'ops'],
+      note: 'We could not reach the venue to release it. A human must.',
+    },
+  },
+
   escalated: {
     start_attempt: {
       to: 'attempting',
@@ -140,6 +203,11 @@ export const TRANSITIONS: TransitionTable = {
   },
 
   confirmed: {
+    request_cancellation: {
+      to: 'cancellation_requested',
+      actors: ['user', 'ops'],
+      note: 'They want out. The venue has to be told before the table is free.',
+    },
     remind: {
       to: 'reminded',
       actors: ['system'],
@@ -152,12 +220,17 @@ export const TRANSITIONS: TransitionTable = {
     },
     cancel: {
       to: 'cancelled',
-      actors: ['user', 'ops'],
-      note: 'Cancellation must still be executed against the venue by a rail.',
+      actors: ['ops'],
+      note: 'Ops only. A user cancelling a held table goes through request_cancellation so the venue is told first; this is for what ops has to close by hand.',
     },
   },
 
   reminded: {
+    request_cancellation: {
+      to: 'cancellation_requested',
+      actors: ['user', 'ops'],
+      note: 'Same as confirmed. A reminder does not make the table any less held.',
+    },
     remind: {
       to: 'reminded',
       actors: ['system'],
@@ -170,8 +243,8 @@ export const TRANSITIONS: TransitionTable = {
     },
     cancel: {
       to: 'cancelled',
-      actors: ['user', 'ops'],
-      note: 'Late cancellation; the venue cancellation policy may apply.',
+      actors: ['ops'],
+      note: 'Ops only, as in confirmed. A late cancellation still has to reach the venue, and the policy may apply.',
     },
   },
 

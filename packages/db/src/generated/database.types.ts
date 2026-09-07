@@ -157,24 +157,37 @@ export type Database = {
       }
       bookings: {
         Row: {
+          accessibility_requests: string | null
           calendar_event_id: string | null
           cancellation_reason: string | null
           cancelled_at: string | null
           completed_at: string | null
           confirmation_evidence: Json | null
           confirmed_at: string | null
+          consent_at: string | null
+          consent_shared: Json | null
+          consent_version: string | null
           created_at: string
+          earliest_acceptable: string | null
           external_ref: string | null
           guest_name: string | null
+          guest_phone_e164: string | null
           id: string
+          idempotency_key: string | null
+          latest_acceptable: string | null
           no_show: boolean
+          occasion: string | null
+          offered_note: string | null
+          offered_start: string | null
           party_size: number
           provider_name: string | null
           rated_at: string | null
           rating: number | null
           rating_note: string | null
           request_id: string | null
+          required_user_action: string | null
           scheduled_for: string
+          seating_preference: string | null
           service_name: string | null
           special_requests: string | null
           status: Database["public"]["Enums"]["booking_state"]
@@ -184,24 +197,37 @@ export type Database = {
           venue_id: string
         }
         Insert: {
+          accessibility_requests?: string | null
           calendar_event_id?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           completed_at?: string | null
           confirmation_evidence?: Json | null
           confirmed_at?: string | null
+          consent_at?: string | null
+          consent_shared?: Json | null
+          consent_version?: string | null
           created_at?: string
+          earliest_acceptable?: string | null
           external_ref?: string | null
           guest_name?: string | null
+          guest_phone_e164?: string | null
           id?: string
+          idempotency_key?: string | null
+          latest_acceptable?: string | null
           no_show?: boolean
+          occasion?: string | null
+          offered_note?: string | null
+          offered_start?: string | null
           party_size: number
           provider_name?: string | null
           rated_at?: string | null
           rating?: number | null
           rating_note?: string | null
           request_id?: string | null
+          required_user_action?: string | null
           scheduled_for: string
+          seating_preference?: string | null
           service_name?: string | null
           special_requests?: string | null
           status?: Database["public"]["Enums"]["booking_state"]
@@ -211,24 +237,37 @@ export type Database = {
           venue_id: string
         }
         Update: {
+          accessibility_requests?: string | null
           calendar_event_id?: string | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
           completed_at?: string | null
           confirmation_evidence?: Json | null
           confirmed_at?: string | null
+          consent_at?: string | null
+          consent_shared?: Json | null
+          consent_version?: string | null
           created_at?: string
+          earliest_acceptable?: string | null
           external_ref?: string | null
           guest_name?: string | null
+          guest_phone_e164?: string | null
           id?: string
+          idempotency_key?: string | null
+          latest_acceptable?: string | null
           no_show?: boolean
+          occasion?: string | null
+          offered_note?: string | null
+          offered_start?: string | null
           party_size?: number
           provider_name?: string | null
           rated_at?: string | null
           rating?: number | null
           rating_note?: string | null
           request_id?: string | null
+          required_user_action?: string | null
           scheduled_for?: string
+          seating_preference?: string | null
           service_name?: string | null
           special_requests?: string | null
           status?: Database["public"]["Enums"]["booking_state"]
@@ -2108,6 +2147,7 @@ export type Database = {
       }
       venue_bookings: {
         Row: {
+          accessibility_requests: string | null
           cancelled_at: string | null
           confirmed_at: string | null
           created_at: string | null
@@ -2115,15 +2155,18 @@ export type Database = {
           guest_name: string | null
           id: string | null
           no_show: boolean | null
+          occasion: string | null
           party_size: number | null
           provider_name: string | null
           scheduled_for: string | null
+          seating_preference: string | null
           service_name: string | null
           special_requests: string | null
           status: Database["public"]["Enums"]["booking_state"] | null
           venue_id: string | null
         }
         Insert: {
+          accessibility_requests?: string | null
           cancelled_at?: string | null
           confirmed_at?: string | null
           created_at?: string | null
@@ -2131,15 +2174,18 @@ export type Database = {
           guest_name?: never
           id?: string | null
           no_show?: boolean | null
+          occasion?: string | null
           party_size?: number | null
           provider_name?: string | null
           scheduled_for?: string | null
+          seating_preference?: string | null
           service_name?: string | null
           special_requests?: string | null
           status?: Database["public"]["Enums"]["booking_state"] | null
           venue_id?: string | null
         }
         Update: {
+          accessibility_requests?: string | null
           cancelled_at?: string | null
           confirmed_at?: string | null
           created_at?: string | null
@@ -2147,9 +2193,11 @@ export type Database = {
           guest_name?: never
           id?: string | null
           no_show?: boolean | null
+          occasion?: string | null
           party_size?: number | null
           provider_name?: string | null
           scheduled_for?: string | null
+          seating_preference?: string | null
           service_name?: string | null
           special_requests?: string | null
           status?: Database["public"]["Enums"]["booking_state"] | null
@@ -2385,14 +2433,20 @@ export type Database = {
         | "remind"
         | "complete"
         | "cancel"
+        | "offer_alternative"
+        | "accept_alternative"
+        | "decline_alternative"
+        | "request_cancellation"
       booking_platform: "sevenrooms" | "eat_app" | "fresha" | "other"
       booking_state:
         | "draft"
         | "user_approved"
         | "attempting"
         | "pending_venue"
+        | "alternative_offered"
         | "escalated"
         | "confirmed"
+        | "cancellation_requested"
         | "reminded"
         | "completed"
         | "cancelled"
@@ -2601,6 +2655,10 @@ export const Constants = {
         "remind",
         "complete",
         "cancel",
+        "offer_alternative",
+        "accept_alternative",
+        "decline_alternative",
+        "request_cancellation",
       ],
       booking_platform: ["sevenrooms", "eat_app", "fresha", "other"],
       booking_state: [
@@ -2608,8 +2666,10 @@ export const Constants = {
         "user_approved",
         "attempting",
         "pending_venue",
+        "alternative_offered",
         "escalated",
         "confirmed",
+        "cancellation_requested",
         "reminded",
         "completed",
         "cancelled",
