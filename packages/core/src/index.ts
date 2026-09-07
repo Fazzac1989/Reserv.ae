@@ -5,3 +5,4 @@ export * from './rails/index';
 export * from './curator/index';
 export * from './lifecycle/index';
 export * from './memory/index';
+export * from './venue/answers';

@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BRAND } from '@reservai/config';
+import { answerVenueQuestion, caveatFor, type VenueQuestion } from '@reservai/core';
 import { Body, Display, Lead, Meta, Muted, Title } from '../../../src/components/ui/text';
 import { Button } from '../../../src/components/ui/button';
 import { Chip } from '../../../src/components/ui/chip';
@@ -74,16 +75,33 @@ function Fact({ label, value }: { label: string; value: string | null | undefine
  * `alcohol_policy` is null invites the assistant to guess at exactly the kind
  * of question it must never guess at.
  */
-function contextualQuestions(v: Venue): string[] {
-  const qs: string[] = [];
-  if (v.children_policy) qs.push('Is it suitable for children?');
-  if (v.has_outdoor) qs.push('Can I sit outside?');
-  if (v.dress_code) qs.push('What should I wear?');
-  if (v.dietary_options.length > 0) qs.push('Can they do gluten free?');
-  if (v.alcohol_policy) qs.push('Is alcohol served?');
-  if (v.parking.length > 0) qs.push('What is parking like?');
-  qs.push('What is the best table to ask for?');
-  return qs.slice(0, 5);
+const QUESTION_LABELS: Record<VenueQuestion, string> = {
+  children: 'Is it suitable for children?',
+  outdoor: 'Can I sit outside?',
+  dress_code: 'What should I wear?',
+  dietary: 'Can they do gluten free?',
+  alcohol: 'Is alcohol served?',
+  parking: 'What is parking like?',
+  accessibility: 'Is it step-free?',
+  private: 'Is there a private room?',
+  view: 'What is the view?',
+};
+
+/**
+ * Which questions to offer, and in what order.
+ *
+ * Only the ones the record can actually answer are put first. Offering "is
+ * alcohol served?" against a null field invites the assistant to guess at
+ * exactly the kind of question it must never guess at — and offering it and
+ * then saying "I do not know" wastes the tap. The unanswerable ones are not
+ * hidden entirely, because "I will ask them" is a useful answer too; they just
+ * do not lead.
+ */
+function contextualQuestions(v: Venue): VenueQuestion[] {
+  const all = Object.keys(QUESTION_LABELS) as VenueQuestion[];
+  const answerable = all.filter((q) => answerVenueQuestion(q, v).kind === 'answered');
+  const rest = all.filter((q) => answerVenueQuestion(q, v).kind === 'unknown');
+  return [...answerable, ...rest].slice(0, 5);
 }
 
 /**
@@ -105,6 +123,7 @@ export default function PublicVenue() {
   const router = useRouter();
   const session = useSession();
   const [booking, setBooking] = useState(false);
+  const [asked, setAsked] = useState<VenueQuestion | null>(null);
 
   const venue = useQuery({
     queryKey: ['venue', id],
@@ -182,15 +201,15 @@ export default function PublicVenue() {
     router.push('/(auth)/sign-in');
   }
 
-  function ask(question: string) {
-    if (!v) return;
-    if (!session) {
-      rememberIntent(v.id, v.name);
-      router.push('/(auth)/sign-in');
-      return;
-    }
-    router.push({ pathname: '/suhail', params: { ask: `${question} (about ${v.name})` } });
-  }
+  /*
+   * Answered here, from the record, rather than handed to the assistant.
+   *
+   * "Is it suitable for children?" is not a question of judgement — either the
+   * field says something or it does not. Sending it to a model would be asking
+   * for a confident sentence about a venue nobody has checked, which is the
+   * one failure this product cannot afford. It is also slower, and the answer
+   * is already on the screen above.
+   */
 
   return (
     <View className="flex-1 bg-paper dark:bg-ink">
@@ -401,9 +420,23 @@ export default function PublicVenue() {
                   <Meta>Ask {BRAND.name}</Meta>
                   <View className="flex-row flex-wrap gap-2">
                     {contextualQuestions(v).map((q) => (
-                      <Chip key={q} label={q} selected={false} onPress={() => ask(q)} />
+                      <Chip
+                        key={q}
+                        label={QUESTION_LABELS[q]}
+                        selected={asked === q}
+                        onPress={() => setAsked(asked === q ? null : q)}
+                      />
                     ))}
                   </View>
+
+                  {asked ? (
+                    <View className="gap-2 rounded-card border border-grey-line p-5">
+                      <Body>{answerVenueQuestion(asked, v).text}</Body>
+                      {caveatFor(answerVenueQuestion(asked, v)) ? (
+                        <Muted>{caveatFor(answerVenueQuestion(asked, v))}</Muted>
+                      ) : null}
+                    </View>
+                  ) : null}
                 </View>
 
                 <Rule />
