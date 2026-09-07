@@ -6,6 +6,7 @@ export type Flags = z.infer<typeof flagSchema>;
 export const RAIL_FLAGS = {
   api: 'FLAG_RAIL_API',
   whatsapp: 'FLAG_RAIL_WHATSAPP',
+  email: 'FLAG_RAIL_EMAIL',
   voice: 'FLAG_RAIL_VOICE',
   manual: 'FLAG_RAIL_MANUAL',
 } as const satisfies Record<string, keyof Flags>;

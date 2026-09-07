@@ -51,7 +51,7 @@ export type Zone = PlaceSlug;
 /** 1 = everyday, 4 = special occasion. */
 export const priceBandSchema = z.number().int().min(1).max(4);
 
-export const RAIL_KINDS = ['api', 'whatsapp', 'voice', 'manual'] as const;
+export const RAIL_KINDS = ['api', 'whatsapp', 'email', 'voice', 'manual'] as const;
 export const railKindSchema = z.enum(RAIL_KINDS);
 export type RailKindSchema = z.infer<typeof railKindSchema>;
 

@@ -99,6 +99,24 @@ export interface BookingPlatformAdapter {
   cancel(externalRef: string, reason: string): Promise<void>;
 
   /**
+   * Change a reservation the platform already holds.
+   *
+   * Returns the same outcome type as `reserve`, because a modification can
+   * fail in exactly the ways a booking can: the new time may be unavailable,
+   * the platform may accept it pending confirmation, or it may decline. It is
+   * not a fire-and-forget update, and treating it as one is how somebody ends
+   * up at a restaurant at the old time.
+   *
+   * Null where the platform has no modification endpoint — common, and not an
+   * error. The rail then cancels and rebooks, which is what a person phoning
+   * up would do, and the caller has to know that is what happened.
+   */
+  modify(
+    externalRef: string,
+    changes: { startsAt?: string; partySize?: number },
+  ): Promise<ReservationOutcome | null>;
+
+  /**
    * Verify and parse a webhook.
    *
    * Verification and parsing are one call on purpose. Two calls is an

@@ -74,6 +74,18 @@ export class StubPlatform implements BookingPlatformAdapter {
     // Nothing to undo. A real adapter calls the platform here.
   }
 
+  /**
+   * Null: this stub has no modification endpoint.
+   *
+   * Deliberately the null answer rather than a cheerful `confirmed`. Most real
+   * platforms cannot modify either, and a stub that pretends otherwise would
+   * let the cancel-and-rebook path go unwritten and unexercised until the day
+   * a partner turned out not to support it.
+   */
+  async modify(): Promise<null> {
+    return null;
+  }
+
   parseWebhook(rawBody: string, headers: Record<string, string | undefined>): PlatformEvent | null {
     if (!this.webhookSecret) return null;
 

@@ -269,6 +269,7 @@ const publicSchema = baseSchema.extend({
 export const flagSchema = z.object({
   FLAG_RAIL_API: boolish.default('false'),
   FLAG_RAIL_WHATSAPP: boolish.default('false'),
+  FLAG_RAIL_EMAIL: boolish.default('false'),
   FLAG_RAIL_VOICE: boolish.default('false'),
   FLAG_RAIL_MANUAL: boolish.default('true'),
   FLAG_STRIPE_SUBSCRIPTIONS: boolish.default('false'),

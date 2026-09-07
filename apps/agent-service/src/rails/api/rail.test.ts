@@ -30,6 +30,8 @@ function adapter(over: Partial<BookingPlatformAdapter> = {}): BookingPlatformAda
     checkAvailability: async () => null,
     reserve: async () => ({ status: 'pending', externalRef: 'ext-1' }),
     cancel: async () => undefined,
+    // Most platforms cannot modify. Null is the honest default here too.
+    modify: async () => null,
     parseWebhook: () => null,
     ...over,
   };
