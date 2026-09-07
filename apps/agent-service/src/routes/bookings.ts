@@ -15,6 +15,36 @@ interface Options {
 
 const approveBody = z.object({ suggestionId: z.string().uuid() });
 
+/**
+ * Everything the booking sheet collects.
+ *
+ * Validated here as well as in the client, because the client is not the only
+ * thing that can post to this and "the form checked it" is not a guarantee.
+ */
+const requestBody = z.object({
+  venueId: z.string().uuid(),
+  scheduledFor: z.string().datetime(),
+  partySize: z.number().int().min(1).max(20),
+  guestName: z.string().min(1).max(120),
+  guestPhone: z
+    .string()
+    // The same shape the database check constraint enforces, so a bad number
+    // is refused here with a sentence rather than there with a constraint name.
+    .regex(/^\+[1-9]\d{7,14}$/, 'A mobile number needs a country code.')
+    .optional(),
+  earliestAcceptable: z.string().datetime().optional(),
+  latestAcceptable: z.string().datetime().optional(),
+  occasion: z.string().max(120).optional(),
+  seatingPreference: z.enum(['indoor', 'outdoor', 'either']).optional(),
+  accessibilityRequests: z.string().max(500).optional(),
+  specialRequests: z.string().max(500).optional(),
+  /** Which wording they agreed to, and exactly what it authorised. */
+  consentVersion: z.string().min(1).max(20),
+  consentShared: z.record(z.string(), z.boolean()),
+  /** Generated once per attempt by the client and resent on retry. */
+  idempotencyKey: z.string().min(8).max(100),
+});
+
 const transitionBody = z.object({
   event: z.enum(BOOKING_EVENTS),
   reason: z.string().max(1000).optional(),
@@ -200,6 +230,128 @@ export async function registerBookingRoutes(app: FastifyInstance, { env }: Optio
   });
 
   /** The user's own bookings, newest first. */
+
+  /**
+   * A booking made from the booking sheet rather than from a suggestion card.
+   *
+   * The other path starts with something the Curator proposed. This one starts
+   * with a venue the person found themselves, so everything the venue will be
+   * told arrives in the body — and so does the record that they agreed to it
+   * being told.
+   *
+   * Idempotent by key. A double tap, a retry after a dropped connection or a
+   * resubmitted form all carry the same key, and the second one returns the
+   * booking the first one made instead of making another. The unique index on
+   * (user_id, idempotency_key) is what actually guarantees it; this lookup
+   * just makes the second attempt succeed quietly rather than fail loudly.
+   */
+  app.post('/bookings/request', async (request, reply) => {
+    const user = await requireUser(request, env);
+
+    const parsed = requestBody.safeParse(request.body);
+    if (!parsed.success) {
+      return reply.status(400).send({ error: parsed.error.issues[0]?.message ?? 'Check the details.' });
+    }
+    const body = parsed.data;
+
+    const asUser = userClient(env, user.accessToken);
+    const asService = serviceClient(env);
+
+    // Already made. Return it rather than making a second one.
+    const { data: existing } = await asService
+      .from('bookings')
+      .select('id, status')
+      .eq('user_id', user.id)
+      .eq('idempotency_key', body.idempotencyKey)
+      .maybeSingle();
+
+    if (existing) {
+      return reply.send({ bookingId: existing.id, status: existing.status, duplicate: true });
+    }
+
+    // RLS decides whether this venue is one they may see at all, so a venue
+    // that is not live cannot be booked by guessing its id.
+    const { data: venue } = await asUser
+      .from('venues')
+      .select('id, name')
+      .eq('id', body.venueId)
+      .maybeSingle();
+    if (!venue) return reply.status(404).send({ error: 'No such venue.' });
+
+    const { data: preferences } = await asUser
+      .from('user_preferences')
+      .select('dietary, allergies')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    /*
+     * Allergies travel with every booking whether or not somebody remembered
+     * to type them, and they lead. A kitchen reading this needs the allergy
+     * before the preference, and "no shellfish" is not the same kind of
+     * sentence as "vegetarian".
+     */
+    const specialRequests = [
+      ...(preferences?.allergies ?? []).map((a) => `Allergy: ${a}`),
+      ...(preferences?.dietary ?? []),
+      ...(body.specialRequests ? [body.specialRequests] : []),
+    ]
+      .join('. ')
+      .trim();
+
+    const { data: booking, error: createError } = await asService
+      .from('bookings')
+      .insert({
+        user_id: user.id,
+        venue_id: venue.id,
+        status: 'draft',
+        party_size: body.partySize,
+        scheduled_for: body.scheduledFor,
+        earliest_acceptable: body.earliestAcceptable ?? null,
+        latest_acceptable: body.latestAcceptable ?? null,
+        guest_name: body.guestName,
+        guest_phone_e164: body.guestPhone ?? null,
+        occasion: body.occasion ?? null,
+        seating_preference: body.seatingPreference ?? null,
+        accessibility_requests: body.accessibilityRequests ?? null,
+        special_requests: specialRequests || null,
+        // The record of what they agreed to, written with the booking rather
+        // than looked up later. The profile can change; this cannot.
+        consent_version: body.consentVersion,
+        consent_at: new Date().toISOString(),
+        consent_shared: body.consentShared,
+        idempotency_key: body.idempotencyKey,
+      })
+      .select('id')
+      .single();
+
+    if (createError) {
+      // The unique index fired between the lookup above and this insert — two
+      // requests in flight at once. Whichever lost the race returns the row
+      // the winner created, which is the same answer either way.
+      if (createError.code === '23505') {
+        const { data: raced } = await asService
+          .from('bookings')
+          .select('id, status')
+          .eq('user_id', user.id)
+          .eq('idempotency_key', body.idempotencyKey)
+          .maybeSingle();
+        if (raced) {
+          return reply.send({ bookingId: raced.id, status: raced.status, duplicate: true });
+        }
+      }
+      throw createError;
+    }
+
+    await applyTransition(env, {
+      bookingId: booking.id,
+      event: 'user_approve',
+      actor: 'user',
+      actorId: user.id,
+    });
+
+    return reply.send({ bookingId: booking.id, status: 'user_approved', duplicate: false });
+  });
+
   app.get('/bookings', async (request, reply) => {
     const user = await requireUser(request, env);
 

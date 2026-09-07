@@ -238,3 +238,35 @@ export function rateBooking(
     body: JSON.stringify(input),
   });
 }
+
+export interface BookingRequest {
+  venueId: string;
+  scheduledFor: string;
+  partySize: number;
+  guestName: string;
+  guestPhone?: string;
+  earliestAcceptable?: string;
+  latestAcceptable?: string;
+  occasion?: string;
+  seatingPreference?: 'indoor' | 'outdoor' | 'either';
+  accessibilityRequests?: string;
+  specialRequests?: string;
+  consentVersion: string;
+  consentShared: Record<string, boolean>;
+  idempotencyKey: string;
+}
+
+/**
+ * Ask Reserv to get a table.
+ *
+ * The key is generated once when the sheet opens, not when Confirm is pressed,
+ * and it is the same key on every retry. That is the whole point: a request
+ * that times out and is sent again is the same booking arriving twice, and the
+ * server returns the first one rather than making a second. Generating it at
+ * press time would give each tap its own key and defeat the exercise.
+ */
+export function requestBooking(
+  body: BookingRequest,
+): Promise<{ bookingId: string; status: string; duplicate: boolean }> {
+  return request('/bookings/request', { method: 'POST', body: JSON.stringify(body) });
+}

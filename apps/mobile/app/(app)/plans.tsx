@@ -110,12 +110,57 @@ export default function Plans() {
   const busy = cancel.isPending || calendar.isPending || rate.isPending;
   const all = plans.data ?? [];
   const bookings = loose.data ?? [];
+
+  /*
+   * Grouped by what is being asked of the person, not by date.
+   *
+   * "Action required" first, because a venue offering 8:30 is useless
+   * information at the bottom of a list. Then what is in flight, then what is
+   * settled, then what is over. A booking that needs an answer and a booking
+   * that needs nothing look identical in a single chronological list, which is
+   * how somebody misses the one message that mattered.
+   */
+  const NEEDS_YOU = ['alternative_offered'];
+  const IN_FLIGHT = [
+    'draft',
+    'user_approved',
+    'attempting',
+    'pending_venue',
+    'escalated',
+    'cancellation_requested',
+  ];
+  const SETTLED = ['confirmed', 'reminded'];
+
+  const groups = [
+    {
+      key: 'action',
+      title: 'Needs you',
+      rows: bookings.filter((b) => NEEDS_YOU.includes(b.status)),
+    },
+    {
+      key: 'settled',
+      title: 'Confirmed',
+      rows: bookings.filter((b) => SETTLED.includes(b.status)),
+    },
+    {
+      key: 'flight',
+      title: 'Reserv is working on these',
+      rows: bookings.filter((b) => IN_FLIGHT.includes(b.status)),
+    },
+    {
+      key: 'done',
+      title: 'Earlier',
+      rows: bookings.filter(
+        (b) => !NEEDS_YOU.includes(b.status) && !IN_FLIGHT.includes(b.status) && !SETTLED.includes(b.status),
+      ),
+    },
+  ].filter((g) => g.rows.length > 0);
   const nothing = !plans.isLoading && !loose.isLoading && all.length === 0 && bookings.length === 0;
 
   return (
     <ScreenScroll>
       <View className="gap-4 pt-4">
-        <Display>Plans</Display>
+        <Display>My Plans</Display>
         <Lead className="text-grey">Everything arranged, and what it is for.</Lead>
       </View>
 
@@ -159,10 +204,10 @@ export default function Plans() {
         </View>
       ))}
 
-      {bookings.length > 0 ? (
-        <View className="gap-2">
-          <Meta>{all.length > 0 ? 'Not in a plan' : 'Booked'}</Meta>
-          {bookings.map((booking) => (
+      {groups.map((group) => (
+        <View key={group.key} className="gap-2">
+          <Meta>{group.title}</Meta>
+          {group.rows.map((booking) => (
             <View key={booking.id}>
               <ReservationCard
                 reservation={booking}
@@ -202,7 +247,7 @@ export default function Plans() {
             </View>
           ))}
         </View>
-      ) : null}
+      ))}
 
       {naming ? (
         <View className="gap-3">

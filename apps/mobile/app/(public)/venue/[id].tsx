@@ -1,4 +1,5 @@
 import { ImageBackground, Linking, Pressable, ScrollView, View } from 'react-native';
+import { useState } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,6 +11,7 @@ import { Chip } from '../../../src/components/ui/chip';
 import { Rule } from '../../../src/components/ui/screen';
 import { LiveStatus } from '../../../src/components/booking-state';
 import { SaveButton } from '../../../src/components/save-button';
+import { BookingSheet } from '../../../src/components/booking-sheet';
 import { availabilityLabel, placeLabels, venueBySlugOrId } from '../../../src/lib/venues';
 import { supabase } from '../../../src/lib/supabase';
 import { useSession } from '../../../src/store/session';
@@ -102,6 +104,7 @@ export default function PublicVenue() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const session = useSession();
+  const [booking, setBooking] = useState(false);
 
   const venue = useQuery({
     queryKey: ['venue', id],
@@ -159,10 +162,20 @@ export default function PublicVenue() {
     ? [v.has_indoor ? 'Indoor' : null, v.has_outdoor ? 'Outdoor' : null].filter(Boolean).join(' and ')
     : '';
 
+  /*
+   * A form, not a conversation.
+   *
+   * This used to hand "a table at X" to the assistant, which then had to ask
+   * for the date, the time and the party size one message at a time. Somebody
+   * who has already decided where they are going does not want an interview —
+   * they want to say when, and be done. The assistant is still the right way
+   * in when the question is which venue; it is the wrong way to fill in four
+   * known fields.
+   */
   function book() {
     if (!v) return;
     if (session) {
-      router.push({ pathname: '/suhail', params: { ask: `A table at ${v.name}` } });
+      setBooking(true);
       return;
     }
     rememberIntent(v.id, v.name);
@@ -445,6 +458,19 @@ export default function PublicVenue() {
           ) : null}
         </ScrollView>
       </SafeAreaView>
+
+      {booking && v ? (
+        <BookingSheet
+          venueId={v.id}
+          venueName={v.name}
+          vertical={v.vertical}
+          onClose={() => setBooking(false)}
+          onBooked={(bookingId) => {
+            setBooking(false);
+            router.push({ pathname: '/plans', params: { highlight: bookingId } });
+          }}
+        />
+      ) : null}
     </View>
   );
 }
