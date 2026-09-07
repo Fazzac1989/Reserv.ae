@@ -19,6 +19,15 @@
 
 \echo '=== 0. FIXTURES: a partner at venue A, and an outsider with no venue ==='
 
+-- Re-runnable. Section 8 creates an invitation and section 9 expires it, so a
+-- second run against the same database would otherwise collide on the pending
+-- unique index and then read the expired row — which fails in a way that looks
+-- like a broken policy rather than a dirty fixture. Clearing first costs
+-- nothing and removes a confusing failure mode.
+delete from public.venue_invites where email in ('partner@example.invalid', 'outsider@example.invalid');
+delete from public.bookings where id = '11111111-0000-4000-8000-000000000020';
+delete from auth.users where email in ('partner@example.invalid', 'outsider@example.invalid');
+
 insert into auth.users (id, instance_id, aud, role, email, encrypted_password,
                         email_confirmed_at, created_at, updated_at, raw_user_meta_data)
 values

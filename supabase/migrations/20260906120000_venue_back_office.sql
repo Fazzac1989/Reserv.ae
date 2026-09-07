@@ -227,14 +227,14 @@ create policy venue_policies_member on public.venue_policies
 -- reach the venue, and a member editing one could redirect our booking traffic.
 -- Changing a channel is a support conversation, not a form.
 
-create policy bookings_select_member on public.bookings
-  for select to authenticated
-  using (public.manages_venue(venue_id));
-
--- Read-only for now. A venue confirming its own booking is worth more than
--- anything else in this file, but it is a booking state transition and belongs
--- in the state machine rather than in an RLS policy. See the `venue` actor,
--- which exists here and deliberately has no edges yet.
+-- Note what is deliberately absent: there is NO policy granting a venue member
+-- access to `public.bookings`. A partner reads bookings only through the
+-- `venue_bookings` view below, and the reason is written out there.
+--
+-- Read-only either way for now. A venue confirming its own booking is worth
+-- more than anything else in this file, but it is a booking state transition
+-- and belongs in the state machine rather than in an RLS policy. See the
+-- `venue` actor, which exists here and deliberately has no edges yet.
 
 create policy venue_members_select_own on public.venue_members
   for select to authenticated
@@ -324,16 +324,30 @@ comment on function public.guard_venue_member_columns is
 
 -- --- The partner''s view of its bookings ------------------------------------
 --
--- security_invoker so the reader's own RLS decides which rows come back. Ops
--- sees every row through it; a member sees its own venue's; an end user sees
--- their own bookings and no others, which is harmless.
---
--- The column list is the point of the view: what a restaurant needs in order
+-- The column list is the point of this view: what a restaurant needs in order
 -- to seat somebody, and nothing more. No user_id, no email, no phone number,
 -- no taste profile, no rating, no internal state history.
+--
+-- It is a SECURITY DEFINER view — the default — and that is load-bearing.
+--
+-- The obvious construction is `security_invoker = true` plus an RLS policy
+-- letting a member select their venue's rows from `bookings`. That was the
+-- first attempt and it is wrong, because security_invoker means the reader
+-- needs privileges on the underlying table, and a reader with privileges on
+-- the table can simply query the table. The narrow column list then protects
+-- nobody: `GET /venue_bookings` returns thirteen columns and `GET /bookings`
+-- returns all of them, to the same person, with the same token. An end-to-end
+-- test asking PostgREST directly is what caught it; the console's own UI
+-- looked perfectly correct throughout, because the UI was never the thing
+-- keeping anyone out.
+--
+-- So: no policy on `bookings` for members at all, and the scope lives in this
+-- view's WHERE clause instead. A definer view bypasses RLS on `bookings`,
+-- which means this predicate is the only thing standing between one venue and
+-- another's guest list. It is one line, it is here, and partner-e2e.mjs
+-- attacks it directly rather than trusting it.
 
-create view public.venue_bookings
-with (security_invoker = true) as
+create view public.venue_bookings as
   select
     b.id,
     b.venue_id,
@@ -349,7 +363,14 @@ with (security_invoker = true) as
     b.no_show,
     b.external_ref,
     b.created_at
-  from public.bookings b;
+  from public.bookings b
+  where (public.manages_venue(b.venue_id) or public.is_ops())
+    -- A draft is a suggestion the user has not approved. Nothing has been
+    -- asked of the venue, and it may never be. Showing it would tell a
+    -- restaurant that somebody is considering them, which is the user's
+    -- business rather than theirs, and would fill the book with tables that
+    -- were never requested.
+    and b.status <> 'draft';
 
 comment on view public.venue_bookings is
   'What a venue sees of a booking. Deliberately excludes every way to contact '

@@ -6,6 +6,12 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["serve", "-s", "apps/mobile/dist-web", "-l", "4319"],
       "port": 4319
+    },
+    {
+      "name": "ops",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@reservai/ops", "dev"],
+      "port": 3000
     }
   ]
 }

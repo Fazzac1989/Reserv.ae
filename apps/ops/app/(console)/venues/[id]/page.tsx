@@ -10,6 +10,8 @@ import { StatusControl } from '../../../../components/venues/status-control';
 import { ChannelEditor } from '../../../../components/venues/channel-editor';
 import { PolicyForm } from '../../../../components/venues/policy-form';
 import { ContactList } from '../../../../components/venues/contact-list';
+import { AccessList } from '../../../../components/venues/access-list';
+import { listVenueAccess } from '../../../../lib/partners/queries';
 import {
   Card,
   CardContent,
@@ -45,7 +47,11 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
   await requireOps();
   const { id } = await params;
 
-  const [detail, choices] = await Promise.all([getVenue(id), listChoices()]);
+  const [detail, choices, access] = await Promise.all([
+    getVenue(id),
+    listChoices(),
+    listVenueAccess(id),
+  ]);
   if (!detail) notFound();
 
   const { venue, channels, policy, contacts, events } = detail;
@@ -94,6 +100,13 @@ export default async function VenuePage({ params }: { params: Promise<{ id: stri
         description="Deterministic filters the Curator applies before an LLM ever ranks this venue."
       >
         <PolicyForm venueId={venue.id} policy={policy} />
+      </Section>
+
+      <Section
+        title="Back office access"
+        description="People from the venue who can manage this listing and see its bookings. They see nothing of any other venue, and no way to contact a guest."
+      >
+        <AccessList venueId={venue.id} members={access.members} invites={access.invites} />
       </Section>
 
       <Section

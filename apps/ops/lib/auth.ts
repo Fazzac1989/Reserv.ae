@@ -34,7 +34,17 @@ export const requireOps = cache(async (): Promise<OpsUser> => {
   if (error) throw error;
 
   const isOps = (roles ?? []).some((r) => r.role === 'ops' || r.role === 'admin');
-  if (!isOps) redirect('/no-access');
+  if (!isOps) {
+    // A venue's own staff sign in through the same door and land here. They are
+    // not refused, they are simply somewhere else: send them to their own
+    // console rather than to a page that tells them they have no account.
+    await supabase.rpc('redeem_venue_invites');
+    const { count } = await supabase
+      .from('venue_members')
+      .select('venue_id', { count: 'exact', head: true });
+
+    redirect(count && count > 0 ? '/partner' : '/no-access');
+  }
 
   const { data: profile } = await supabase
     .from('users')

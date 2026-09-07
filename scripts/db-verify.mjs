@@ -54,6 +54,7 @@ for (const script of [
   'lifecycle-e2e.mjs',
   'metrics-e2e.mjs',
   'memory-e2e.mjs',
+  'partner-e2e.mjs',
 ]) {
   console.log(`\n${'='.repeat(60)}\n${script}\n${'='.repeat(60)}`);
   try {
