@@ -16,6 +16,7 @@ import {
   ZONES,
 } from '../../src/data/taste';
 import { useCompleteOnboarding } from '../../src/lib/profile';
+import { takeIntent, useBookingIntent } from '../../src/store/intent';
 
 type Zone = string;
 
@@ -34,6 +35,7 @@ function toggle<T>(list: T[], value: T): T[] {
 export default function Onboarding() {
   const router = useRouter();
   const complete = useCompleteOnboarding();
+  const intent = useBookingIntent();
 
   const [step, setStep] = useState(0);
   const [fullName, setFullName] = useState('');
@@ -257,14 +259,32 @@ export default function Onboarding() {
     [fullName, homeZone, zones, loved, avoided, bands, dietary, allergies, partySize],
   );
 
-  const current = steps[step]!;
-  const isLast = step === steps.length - 1;
+  /**
+   * Somebody who arrived by pressing "Book a table" is asked one question.
+   *
+   * The full wizard is six screens of taste — cuisines, price, dietary, party
+   * size — and every one of them stands between a person who has decided they
+   * want a table and the table. Only the name is genuinely needed to book,
+   * because it is the name we give the restaurant. The rest is preference
+   * that makes later suggestions better, and it can be asked at a moment when
+   * nothing is being interrupted, or simply learned from what they book.
+   *
+   * The unasked steps keep their defaults, which are neutral rather than
+   * confident: nothing loved, nothing avoided, no dietary needs, and a price
+   * range of 2-3. An empty preference reads as "no opinion recorded", not as
+   * "dislikes everything".
+   */
+  const visible = intent ? steps.slice(0, 1) : steps;
+  const current = visible[step]!;
+  const isLast = step === visible.length - 1;
 
   async function onNext() {
     if (!isLast) {
       setStep((s) => s + 1);
       return;
     }
+
+    const booking = takeIntent();
 
     await complete.mutateAsync({
       fullName,
@@ -285,6 +305,16 @@ export default function Onboarding() {
       },
     });
 
+    // Back to what they came for, not to a home screen. An app that makes you
+    // sign up and then forgets why has not deferred the sign-up, only moved it.
+    if (booking) {
+      router.replace({
+        pathname: '/suhail',
+        params: { ask: `A table at ${booking.venueName}` },
+      });
+      return;
+    }
+
     router.replace('/(app)');
   }
 
@@ -295,7 +325,7 @@ export default function Onboarding() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View className="gap-6 px-7 pt-4">
-          <StepProgress total={steps.length} current={step} />
+          <StepProgress total={visible.length} current={step} />
         </View>
 
         <ScrollView
@@ -322,7 +352,7 @@ export default function Onboarding() {
           ) : null}
 
           <Button
-            label={isLast ? 'Finish' : 'Continue'}
+            label={isLast && intent ? 'Continue to booking' : isLast ? 'Finish' : 'Continue'}
             onPress={onNext}
             disabled={!current.canAdvance}
             loading={complete.isPending}

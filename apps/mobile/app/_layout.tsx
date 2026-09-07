@@ -22,9 +22,19 @@ function Splash() {
   return <View className="flex-1 bg-paper dark:bg-ink" />;
 }
 
+/** Groups a signed-out visitor is allowed to be in. */
+const PUBLIC_GROUPS = ['(public)', '(auth)'];
+
 /**
- * Routes between the three states the app can be in: signed out, signed in but
- * not yet onboarded, and ready.
+ * Routes between the states the app can be in: signed out and browsing,
+ * signed out and signing in, signed in but not yet onboarded, and ready.
+ *
+ * Being signed out is no longer an error state. The directory is public, so a
+ * visitor with no session lands in `(public)` and can look at everything;
+ * `(auth)` is somewhere they choose to go, usually because they pressed a
+ * button that books a table. The redirect below sends them to the directory
+ * rather than to sign-in, which is the whole difference between a product with
+ * a front door and one with a gate.
  *
  * Nothing renders until each answer is known. Showing sign-in for a frame on a
  * cold start reads as being logged out, and flashing the wizard at someone who
@@ -49,7 +59,7 @@ function AuthGate() {
     if (resolving) return;
 
     if (!session) {
-      if (group !== '(auth)') router.replace('/(auth)/sign-in');
+      if (!PUBLIC_GROUPS.includes(group ?? '')) router.replace('/(public)');
       return;
     }
 
@@ -58,10 +68,20 @@ function AuthGate() {
       return;
     }
 
-    if (group === '(auth)' || group === '(onboarding)') {
+    // Signed in and onboarded.
+    //
+    // The public *directory* is included, so somebody who browsed their way
+    // in, signed up and came back does not sit on the signed-out version of a
+    // screen they now have a better one of. A public *venue page* is not: that
+    // is the page links point at, and a link that works for a stranger and
+    // bounces a member to their home screen is a worse link. `segments` is
+    // ['(public)'] for the directory and ['(public)', 'venue', '[id]'] for a
+    // listing, so the length is the difference.
+    const onPublicIndex = group === '(public)' && segments.length === 1;
+    if (group === '(auth)' || group === '(onboarding)' || onPublicIndex) {
       router.replace('/(app)');
     }
-  }, [resolving, session, onboarded, group, router]);
+  }, [resolving, session, onboarded, group, segments.length, router]);
 
   if (resolving) return <Splash />;
 

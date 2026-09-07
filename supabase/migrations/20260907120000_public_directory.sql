@@ -108,6 +108,14 @@ comment on policy venues_select_anon on public.venues is
 -- which describe our commercial relationship with the venue rather than any
 -- fact about it, and the timestamps, which say more about our operations than
 -- about dinner.
+--
+-- One consequence worth knowing before it surprises somebody: Postgres
+-- requires SELECT on a column to FILTER by it, not merely to return it. A
+-- client that says `onboarding_status = 'live'` is refused the entire query
+-- rather than quietly getting the rows. That is the correct behaviour and it
+-- caught a real case here — the directory screen was re-stating this policy
+-- as a client-side filter, which is both unnecessary, since RLS already
+-- applies it to everyone, and impossible, since the column is not readable.
 grant select (
   id,
   name,
