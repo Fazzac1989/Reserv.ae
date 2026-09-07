@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Body, Display, Lead, Meta, Muted, Title } from './ui/text';
 import { TextCard } from './text-card';
 import { LiveStatus } from './booking-state';
+import { BRAND } from '@reservai/config';
 import { supabase } from '../lib/supabase';
 
 /**
@@ -110,7 +111,22 @@ function Card({
   );
 }
 
-export function Directory({ onOpen }: { onOpen: (listing: Listing) => void }) {
+export function Directory({
+  onOpen,
+  header,
+}: {
+  onOpen: (listing: Listing) => void;
+  /**
+   * What sits above the shelves.
+   *
+   * Signed in, this is the greeting, the search field and whatever is booked
+   * today — the things the old Home screen carried before Discover absorbed
+   * it. Signed out there is no name to greet and nothing booked, so the
+   * default title stands in. Passing it rather than branching inside keeps
+   * this component about the directory and nothing else.
+   */
+  header?: React.ReactNode;
+}) {
   const width = Dimensions.get('window').width;
 
   const listings = useQuery({
@@ -174,10 +190,12 @@ export function Directory({ onOpen }: { onOpen: (listing: Listing) => void }) {
     <View className="flex-1 bg-paper dark:bg-ink">
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-10 pb-16">
-          <View className="gap-3 px-7 pt-4">
-            <Display>Discover</Display>
-            <Lead className="text-grey">Places Suhail can actually get you into.</Lead>
-          </View>
+          {header ?? (
+            <View className="gap-3 px-7 pt-4">
+              <Display>Discover</Display>
+              <Lead className="text-grey">Places {BRAND.assistant} can actually get you into.</Lead>
+            </View>
+          )}
 
           {listings.isLoading ? (
             <View className="px-7">

@@ -3,24 +3,26 @@ import { Pressable, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { BRAND } from '@reservai/config';
-import { Rule, ScreenScroll } from '../../src/components/ui/screen';
+import { Rule } from '../../src/components/ui/screen';
 import { Body, Display, Lead, Meta, Muted, Title } from '../../src/components/ui/text';
+import { Directory } from '../../src/components/directory';
 import { listReservations, type Reservation } from '../../src/lib/agent';
 import { useProfile } from '../../src/lib/profile';
 import { statusCopy } from '../../src/components/reservation-card';
 
 /**
- * The first thing, and deliberately not a dashboard.
+ * Discover, and the first thing anybody sees.
  *
- * Four things at most: who you are, somewhere to say what you want, what is
- * happening today, and — only when there is genuinely something — what Suhail
- * thinks you might want next. Everything else in this product is one tap away
- * and does not need a tile here advertising it.
+ * This screen used to be Home: a greeting, a place to ask, and what was on
+ * today. Discover was a separate tab of shelves. Two tabs, and the top one
+ * answered "what is happening" while the one below answered "where should I
+ * go" — which is the question people actually open this app with. They are one
+ * screen now, in that order: who you are, what you want, what is already
+ * arranged, and then somewhere to go.
  *
- * The rule that keeps it calm: nothing appears unless it is true. An empty day
- * says the day is empty. It does not fill the space with a card inviting you
- * to explore, which is what a screen does when it has been designed to look
- * busy rather than to be read.
+ * The rule that keeps it calm survives the merge: nothing appears unless it is
+ * true. An empty day says the day is empty rather than filling the space with
+ * a card inviting you to explore.
  */
 
 function firstName(full: string | null): string | null {
@@ -65,7 +67,7 @@ function Entry({ booking }: { booking: Reservation }) {
   );
 }
 
-export default function Home() {
+export default function Discover() {
   const router = useRouter();
   const profile = useProfile();
   const [draft, setDraft] = useState('');
@@ -87,32 +89,38 @@ export default function Home() {
     setDraft('');
   }
 
-  return (
-    <ScreenScroll>
-      <View className="gap-7 pt-4">
-        <Display>
-          {greeting()}
-          {name ? `, ${name}` : ''}
-        </Display>
+  const header = (
+    <View className="gap-8 px-7 pt-4">
+      <Display>
+        {greeting()}
+        {name ? `, ${name}` : ''}
+      </Display>
 
-        <View className="gap-3">
-          <TextInput
-            value={draft}
-            onChangeText={setDraft}
-            placeholder={`Ask ${BRAND.assistant} anything…`}
-            placeholderTextColor="#8A8A8E"
-            returnKeyType="send"
-            onSubmitEditing={ask}
-            className="rounded-input border border-grey-line px-5 py-4 font-body text-lead text-ink dark:text-paper"
-          />
-          <Pressable
-            onPress={ask}
-            accessibilityRole="button"
-            className="min-h-[44px] justify-center"
-          >
-            <Muted>{draft.trim().length > 0 ? 'Ask' : 'Or just start talking'}</Muted>
-          </Pressable>
-        </View>
+      {/*
+        One field doing two jobs, because to the person typing they are the
+        same job. "Italian near Downtown" is a search; "somewhere quiet for my
+        anniversary" is a question; nobody wants to decide which they are
+        about to type before they type it.
+      */}
+      <View className="gap-3">
+        <TextInput
+          value={draft}
+          onChangeText={setDraft}
+          // Short enough to survive a 375px screen, which the longer version
+          // did not — it truncated mid-sentence, which is worse than a shorter
+          // prompt. It also happens to be the better invitation: a search box
+          // asks for a keyword, and this asks for the thing people actually
+          // arrive with.
+          placeholder="What are you in the mood for?"
+          placeholderTextColor="#8A8A8E"
+          returnKeyType="search"
+          onSubmitEditing={ask}
+          accessibilityLabel={`Search restaurants or ask ${BRAND.assistant}`}
+          className="rounded-input border border-grey-line px-5 py-4 font-body text-lead text-ink dark:text-paper"
+        />
+        <Pressable onPress={ask} accessibilityRole="button" className="min-h-[44px] justify-center">
+          <Muted>{draft.trim().length > 0 ? 'Ask' : 'Or just start talking'}</Muted>
+        </Pressable>
       </View>
 
       {today.length > 0 ? (
@@ -140,36 +148,37 @@ export default function Home() {
         </Lead>
       ) : null}
 
-      {!reservations.isLoading && !reservations.isError && today.length === 0 ? (
-        <Lead className="text-grey">
-          {later.length > 0
-            ? 'Nothing today. Your next booking is further down.'
-            : 'Nothing booked. Tell me what you need and I will sort it.'}
-        </Lead>
-      ) : null}
-
       {later.length > 0 ? (
         <View className="gap-2">
           <Meta>Coming up</Meta>
           <View>
-            {later.slice(0, 3).map((booking, i) => (
+            {later.slice(0, 2).map((booking, i) => (
               <View key={booking.id}>
                 <Entry booking={booking} />
-                {i < Math.min(later.length, 3) - 1 ? <Rule /> : null}
+                {i < Math.min(later.length, 2) - 1 ? <Rule /> : null}
               </View>
             ))}
           </View>
-          {later.length > 3 ? (
-            <Pressable
-              onPress={() => router.push('/plans')}
-              accessibilityRole="button"
-              className="min-h-[44px] justify-center"
-            >
-              <Muted>All {later.length} in Plans</Muted>
-            </Pressable>
-          ) : null}
+          <Pressable
+            onPress={() => router.push('/plans')}
+            accessibilityRole="button"
+            className="min-h-[44px] justify-center"
+          >
+            <Muted>
+              {later.length > 2 ? `All ${later.length} in My Plans` : 'Everything in My Plans'}
+            </Muted>
+          </Pressable>
         </View>
       ) : null}
-    </ScreenScroll>
+    </View>
+  );
+
+  return (
+    <Directory
+      header={header}
+      onOpen={(listing) =>
+        router.push({ pathname: '/suhail', params: { ask: `Tell me about ${listing.name}` } })
+      }
+    />
   );
 }

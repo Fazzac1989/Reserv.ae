@@ -7,24 +7,27 @@ import { Meta } from '../../src/components/ui/text';
 import { registerForPush } from '../../src/lib/notifications';
 
 /**
- * Five places, named in words.
+ * Four places, named in words.
+ *
+ * It was five. Home and Discover were separate tabs, and the top one answered
+ * "what is happening today" while the one below answered "where should I go" —
+ * which is the question people open this app with. They are one screen now,
+ * so the greeting and the shelves are no longer a tab apart.
  *
  * Icons are what a tab bar reaches for when it has more destinations than it
- * can label, and this one has exactly as many as it can. A word says which of
- * Plans and Discover you are about to open; two small pictograms would not,
- * and would need learning first.
+ * can label. At four it can label all of them, and a word says which of My
+ * Plans and Discover you are about to open where two pictograms would not.
  *
- * The screens below it are not the whole app — the conversation is still where
- * anything actually gets done, and Home exists to hand you to it already
- * knowing what you were looking at.
+ * The route names are unchanged even where the labels are not: `/suhail` and
+ * `/you` are already linked to from inside the app and from notifications, and
+ * renaming a working URL to match a label is a cost with no reader.
  */
 
 const DESTINATIONS = [
-  { name: 'index', label: 'Home' },
-  { name: 'suhail', label: 'Suhail' },
-  { name: 'plans', label: 'Plans' },
-  { name: 'discover', label: 'Discover' },
-  { name: 'you', label: 'You' },
+  { name: 'index', label: 'Discover' },
+  { name: 'suhail', label: 'Ask Reserv' },
+  { name: 'plans', label: 'My Plans' },
+  { name: 'you', label: 'Profile' },
 ] as const;
 
 function TabBar({ state, navigation }: BottomTabBarProps) {
@@ -33,7 +36,7 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
   return (
     <View
       style={{ paddingBottom: Math.max(insets.bottom, 10) }}
-      className="flex-row border-t border-grey-line bg-paper px-3 pt-2.5 dark:bg-ink"
+      className="flex-row border-t border-grey-line bg-paper px-1 pt-2.5 dark:bg-ink"
     >
       {state.routes.map((route, index) => {
         const destination = DESTINATIONS.find((d) => d.name === route.name);
@@ -62,7 +65,18 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
               underline, no fill. Full contrast is what a booking at stake is paid
               in, and which tab you are on is not that.
             */}
-            <Meta className={focused ? 'text-ink dark:text-paper' : undefined}>
+            {/*
+              Tracking tightened from the 1.4px the meta size carries
+              everywhere else. Two of these labels are two words, and at full
+              tracking four of them sit shoulder to shoulder with no air
+              between. This is the one place the type scale is overridden, and
+              it is because the bar has a width rather than because it looks
+              better in isolation.
+            */}
+            <Meta
+              numberOfLines={1}
+              className={`tracking-[0.6px] ${focused ? 'text-ink dark:text-paper' : ''}`}
+            >
               {destination.label}
             </Meta>
           </Pressable>
