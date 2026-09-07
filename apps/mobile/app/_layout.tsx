@@ -9,6 +9,7 @@ import { Fraunces_400Regular, Fraunces_500Medium } from '@expo-google-fonts/frau
 import { Inter_400Regular, Inter_500Medium } from '@expo-google-fonts/inter';
 import { initSessionListener, useSession, useSessionLoading } from '../src/store/session';
 import { useProfile } from '../src/lib/profile';
+import { supabase } from '../src/lib/supabase';
 import '../global.css';
 
 /**
@@ -55,10 +56,29 @@ function AuthGate() {
   // them behind a spinner; the wizard's own save will surface the problem.
   const resolving = sessionLoading || (Boolean(session) && profile.isLoading);
 
+  /**
+   * A session whose user no longer exists.
+   *
+   * The token is still valid and still on the device, so `session` is truthy,
+   * but the profile lookup returns nothing and the app sits on the splash
+   * colour forever waiting for an answer that is not coming. It happens
+   * whenever an account is deleted or purged while a device still holds a
+   * token — and it happened here every time the local database was reset.
+   *
+   * Treated as signed out, because that is what it is. Signing out clears the
+   * stale token so the next launch starts clean rather than repeating this.
+   */
+  const orphaned = Boolean(session) && profile.isError;
+
+  useEffect(() => {
+    if (!orphaned) return;
+    void supabase.auth.signOut();
+  }, [orphaned]);
+
   useEffect(() => {
     if (resolving) return;
 
-    if (!session) {
+    if (!session || orphaned) {
       if (!PUBLIC_GROUPS.includes(group ?? '')) router.replace('/(public)');
       return;
     }
@@ -81,7 +101,7 @@ function AuthGate() {
     if (group === '(auth)' || group === '(onboarding)' || onPublicIndex) {
       router.replace('/(app)');
     }
-  }, [resolving, session, onboarded, group, segments.length, router]);
+  }, [resolving, session, orphaned, onboarded, group, segments.length, router]);
 
   if (resolving) return <Splash />;
 

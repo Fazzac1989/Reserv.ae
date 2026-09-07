@@ -98,7 +98,9 @@ export default function AppLayout() {
       {DESTINATIONS.map((d) => (
         <Tabs.Screen key={d.name} name={d.name} options={{ title: d.label }} />
       ))}
-      {/* Reached from You, not from the bar. */}
+      {/* Reached from a screen rather than the bar: search from Discover, the
+          other two from Profile. */}
+      <Tabs.Screen name="search" options={{ href: null }} />
       <Tabs.Screen name="knows" options={{ href: null }} />
       <Tabs.Screen name="profile" options={{ href: null }} />
     </Tabs>

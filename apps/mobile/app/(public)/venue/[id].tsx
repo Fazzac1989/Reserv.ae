@@ -7,7 +7,7 @@ import { Body, Display, Lead, Meta, Muted, Title } from '../../../src/components
 import { Button } from '../../../src/components/ui/button';
 import { Rule } from '../../../src/components/ui/screen';
 import { LiveStatus } from '../../../src/components/booking-state';
-import { supabase } from '../../../src/lib/supabase';
+import { placeLabels, venueBySlugOrId } from '../../../src/lib/venues';
 import { useSession } from '../../../src/store/session';
 import { rememberIntent } from '../../../src/store/intent';
 
@@ -45,28 +45,10 @@ export default function PublicVenue() {
   const venue = useQuery({
     queryKey: ['public-venue', id],
     enabled: Boolean(id),
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('venues')
-        .select(
-          'id, name, zone, price_band, tags, address, description, house_note, best_times, photo_urls, is_demo',
-        )
-        .eq('id', id)
-        .maybeSingle();
-      if (error) throw error;
-      return data as Venue | null;
-    },
+    queryFn: () => venueBySlugOrId(id) as Promise<Venue | null>,
   });
 
-  const places = useQuery({
-    queryKey: ['places'],
-    queryFn: async () => {
-      const { data } = await supabase.from('places').select('slug, label');
-      const labels: Record<string, string> = {};
-      for (const p of data ?? []) labels[p.slug] = p.label;
-      return labels;
-    },
-  });
+  const places = useQuery({ queryKey: ['places'], queryFn: placeLabels });
 
   const v = venue.data;
   const photo = v?.photo_urls?.[0];

@@ -78,14 +78,18 @@ export default function Discover() {
   const today = (reservations.data?.upcoming ?? []).filter((b) => isToday(b.scheduled_for));
   const later = (reservations.data?.upcoming ?? []).filter((b) => !isToday(b.scheduled_for));
 
-  function ask() {
+  /**
+   * The field goes to results, not to the conversation.
+   *
+   * It is tempting to guess — send a sentence to the assistant and a keyword
+   * to search — but a field whose destination depends on how you phrased it is
+   * a field you cannot predict. Results are the cheaper wrong answer: they
+   * come back instantly, and the results page carries "Ask Reserv" for the
+   * cases where a list was not what the person wanted.
+   */
+  function search() {
     const text = draft.trim();
-    if (text.length === 0) {
-      router.push('/suhail');
-      return;
-    }
-    // Handed over rather than answered here. One conversation, one place.
-    router.push({ pathname: '/suhail', params: { ask: text } });
+    router.push(text.length > 0 ? { pathname: '/search', params: { q: text } } : '/search');
     setDraft('');
   }
 
@@ -97,10 +101,11 @@ export default function Discover() {
       </Display>
 
       {/*
-        One field doing two jobs, because to the person typing they are the
-        same job. "Italian near Downtown" is a search; "somewhere quiet for my
-        anniversary" is a question; nobody wants to decide which they are
-        about to type before they type it.
+        The prompt invites a sentence and the field returns a list, which is a
+        deliberate mismatch rather than an oversight. "Somewhere quiet for an
+        anniversary" is a perfectly good full-text query, and a list arrives
+        instantly where a conversation takes a turn. The results page carries
+        "Ask Reserv" for the times a list was not the answer.
       */}
       <View className="gap-3">
         <TextInput
@@ -114,12 +119,12 @@ export default function Discover() {
           placeholder="What are you in the mood for?"
           placeholderTextColor="#8A8A8E"
           returnKeyType="search"
-          onSubmitEditing={ask}
+          onSubmitEditing={search}
           accessibilityLabel={`Search restaurants or ask ${BRAND.assistant}`}
           className="rounded-input border border-grey-line px-5 py-4 font-body text-lead text-ink dark:text-paper"
         />
-        <Pressable onPress={ask} accessibilityRole="button" className="min-h-[44px] justify-center">
-          <Muted>{draft.trim().length > 0 ? 'Ask' : 'Or just start talking'}</Muted>
+        <Pressable onPress={search} accessibilityRole="button" className="min-h-[44px] justify-center">
+          <Muted>{draft.trim().length > 0 ? 'Search' : 'Or just start talking'}</Muted>
         </Pressable>
       </View>
 
@@ -176,9 +181,11 @@ export default function Discover() {
   return (
     <Directory
       header={header}
-      onOpen={(listing) =>
-        router.push({ pathname: '/suhail', params: { ask: `Tell me about ${listing.name}` } })
-      }
+      // The venue's own page, the same destination a search result and a
+      // shared link both lead to. It used to open the conversation with "tell
+      // me about X", which asked the assistant to recite information the
+      // profile already shows, more slowly and less reliably.
+      onOpen={(listing) => router.push(`/venue/${listing.id}`)}
     />
   );
 }
