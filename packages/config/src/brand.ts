@@ -13,8 +13,17 @@ export const BRAND = Object.freeze({
   /** The company and the app. */
   name: 'Reserv',
   tagline: 'Life, handled.',
-  /** The assistant the user actually talks to. */
-  assistant: 'Suhail',
+  /**
+   * The assistant the user actually talks to.
+   *
+   * The same word as the company, deliberately. It was Suhail — a name with
+   * its own character, which is a real thing to give up — but the product had
+   * ended up with two names for one thing: a tab that said Ask Reserv opening
+   * a conversation with somebody called Suhail. One name is easier to trust
+   * than two, and it retires an open trademark question rather than answering
+   * it.
+   */
+  assistant: 'Reserv',
   /** What the assistant is, said once, for prompts and onboarding. */
   assistantRole: 'personal AI lifestyle assistant',
   /** Where the pilot operates. Used for phrasing, not for filtering. */

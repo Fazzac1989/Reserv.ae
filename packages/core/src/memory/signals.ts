@@ -125,7 +125,7 @@ export function worthShowing(signals: readonly PreferenceSignal[], now: Date): I
     .sort((a, b) => b.confidence - a.confidence);
 }
 
-/** How sure Suhail is, said the way a person would say it. */
+/** How sure Reserv is, said the way a person would say it. */
 export function confidenceWord(confidence: number): string {
   // Distinct from the screen's own "You told me" heading, which is about the
   // preferences typed during onboarding rather than an inference confirmed.

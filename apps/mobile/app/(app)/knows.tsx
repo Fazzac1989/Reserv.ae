@@ -82,7 +82,7 @@ function Row({
   );
 }
 
-export default function WhatSuhailKnows() {
+export default function WhatReservKnows() {
   const router = useRouter();
   const preferences = usePreferences();
   const inferences = useInferences();
@@ -116,8 +116,8 @@ export default function WhatSuhailKnows() {
         >
           <Meta>Back</Meta>
         </Pressable>
-        <Display>What Suhail knows</Display>
-        <Lead>Everything here can be corrected. Suhail stops assuming it the moment you do.</Lead>
+        <Display>What Reserv knows</Display>
+        <Lead>Everything here can be corrected. Reserv stops assuming it the moment you do.</Lead>
       </View>
 
       <View className="gap-4">

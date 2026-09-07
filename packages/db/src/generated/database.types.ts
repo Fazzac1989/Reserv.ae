@@ -295,6 +295,83 @@ export type Database = {
         }
         Relationships: []
       }
+      collection_venues: {
+        Row: {
+          collection_slug: string
+          created_at: string
+          sort_order: number
+          venue_id: string
+        }
+        Insert: {
+          collection_slug: string
+          created_at?: string
+          sort_order?: number
+          venue_id: string
+        }
+        Update: {
+          collection_slug?: string
+          created_at?: string
+          sort_order?: number
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_venues_collection_slug_fkey"
+            columns: ["collection_slug"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "collection_venues_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections: {
+        Row: {
+          blurb: string | null
+          created_at: string
+          is_active: boolean
+          slug: string
+          sort_order: number
+          title: string
+          updated_at: string
+          vertical: string | null
+        }
+        Insert: {
+          blurb?: string | null
+          created_at?: string
+          is_active?: boolean
+          slug: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+          vertical?: string | null
+        }
+        Update: {
+          blurb?: string | null
+          created_at?: string
+          is_active?: boolean
+          slug?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+          vertical?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collections_vertical_fkey"
+            columns: ["vertical"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       connections: {
         Row: {
           access_token_enc: string | null
@@ -1043,6 +1120,39 @@ export type Database = {
           },
         ]
       }
+      saved_venues: {
+        Row: {
+          created_at: string
+          user_id: string
+          venue_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+          venue_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_venues_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_venues_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           cancelled_at: string | null
@@ -1484,6 +1594,47 @@ export type Database = {
           },
         ]
       }
+      venue_menus: {
+        Row: {
+          created_at: string
+          id: string
+          sort_order: number
+          storage_path: string | null
+          title: string
+          updated_at: string
+          url: string | null
+          venue_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          sort_order?: number
+          storage_path?: string | null
+          title: string
+          updated_at?: string
+          url?: string | null
+          venue_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          sort_order?: number
+          storage_path?: string | null
+          title?: string
+          updated_at?: string
+          url?: string | null
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_menus_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       venue_messages: {
         Row: {
           approved_at: string | null
@@ -1582,6 +1733,56 @@ export type Database = {
           },
         ]
       }
+      venue_offers: {
+        Row: {
+          created_at: string
+          description: string | null
+          ends_on: string | null
+          id: string
+          is_active: boolean
+          kind: string
+          starts_on: string | null
+          terms: string | null
+          title: string
+          updated_at: string
+          venue_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          ends_on?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: string
+          starts_on?: string | null
+          terms?: string | null
+          title: string
+          updated_at?: string
+          venue_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          ends_on?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: string
+          starts_on?: string | null
+          terms?: string | null
+          title?: string
+          updated_at?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_offers_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       venue_policies: {
         Row: {
           blackout_windows: Json
@@ -1640,66 +1841,123 @@ export type Database = {
       }
       venues: {
         Row: {
+          accessibility: string[]
           address: string | null
+          alcohol_policy: string | null
+          ambience: string[]
+          avg_spend_aed: number | null
           best_times: string[]
           booking_consent_obtained_at: string | null
+          children_policy: string | null
           created_at: string
           description: string | null
+          dietary_options: string[]
+          dress_code: string | null
+          has_indoor: boolean | null
+          has_outdoor: boolean | null
+          has_view: string | null
           house_note: string | null
           id: string
           is_demo: boolean
           lat: number | null
           lng: number | null
           name: string
+          neighbourhood: string | null
           onboarding_status: Database["public"]["Enums"]["venue_onboarding_status"]
           opening_hours: Json
+          parent_venue: string | null
+          parking: string[]
           photo_urls: string[]
           price_band: number
+          private_space: boolean | null
+          slug: string | null
+          smoking_policy: string | null
           tags: string[]
           updated_at: string
+          verified_at: string | null
+          verified_by: string | null
           vertical: string
+          video_urls: string[]
           zone: string
         }
         Insert: {
+          accessibility?: string[]
           address?: string | null
+          alcohol_policy?: string | null
+          ambience?: string[]
+          avg_spend_aed?: number | null
           best_times?: string[]
           booking_consent_obtained_at?: string | null
+          children_policy?: string | null
           created_at?: string
           description?: string | null
+          dietary_options?: string[]
+          dress_code?: string | null
+          has_indoor?: boolean | null
+          has_outdoor?: boolean | null
+          has_view?: string | null
           house_note?: string | null
           id?: string
           is_demo?: boolean
           lat?: number | null
           lng?: number | null
           name: string
+          neighbourhood?: string | null
           onboarding_status?: Database["public"]["Enums"]["venue_onboarding_status"]
           opening_hours?: Json
+          parent_venue?: string | null
+          parking?: string[]
           photo_urls?: string[]
           price_band: number
+          private_space?: boolean | null
+          slug?: string | null
+          smoking_policy?: string | null
           tags?: string[]
           updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
           vertical: string
+          video_urls?: string[]
           zone: string
         }
         Update: {
+          accessibility?: string[]
           address?: string | null
+          alcohol_policy?: string | null
+          ambience?: string[]
+          avg_spend_aed?: number | null
           best_times?: string[]
           booking_consent_obtained_at?: string | null
+          children_policy?: string | null
           created_at?: string
           description?: string | null
+          dietary_options?: string[]
+          dress_code?: string | null
+          has_indoor?: boolean | null
+          has_outdoor?: boolean | null
+          has_view?: string | null
           house_note?: string | null
           id?: string
           is_demo?: boolean
           lat?: number | null
           lng?: number | null
           name?: string
+          neighbourhood?: string | null
           onboarding_status?: Database["public"]["Enums"]["venue_onboarding_status"]
           opening_hours?: Json
+          parent_venue?: string | null
+          parking?: string[]
           photo_urls?: string[]
           price_band?: number
+          private_space?: boolean | null
+          slug?: string | null
+          smoking_policy?: string | null
           tags?: string[]
           updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
           vertical?: string
+          video_urls?: string[]
           zone?: string
         }
         Relationships: [

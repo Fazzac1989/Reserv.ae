@@ -38,7 +38,7 @@ const BANDS = ['', 'Everyday', 'Comfortable', 'Upmarket', 'Occasion'];
 
 /** Shelves, in the order somebody browsing would want them. */
 const SHELVES: { kind: string; title: string; blurb: string }[] = [
-  { kind: 'dining', title: 'Tables', blurb: 'Where Suhail would send you tonight.' },
+  { kind: 'dining', title: 'Tables', blurb: 'Where Reserv would send you tonight.' },
   { kind: 'grooming', title: 'Chairs', blurb: 'Barbers and salons worth keeping.' },
   { kind: 'wellness', title: 'Quiet', blurb: 'Spas, and somewhere to disappear.' },
   { kind: 'leisure', title: 'Days out', blurb: 'Beach clubs, courses, evenings.' },
@@ -212,7 +212,7 @@ export function Directory({
           {!listings.isLoading && venues.length === 0 ? (
             <View className="px-7">
               <Muted>
-                Nothing here yet. Suhail only lists places that have agreed to take bookings, so
+                Nothing here yet. Reserv only lists places that have agreed to take bookings, so
                 this fills up as they do.
               </Muted>
             </View>
@@ -276,7 +276,7 @@ export function Directory({
           {venues.some((v) => v.is_demo) ? (
             <View className="px-7">
               <Muted>
-                Some of these are samples while Reserv onboards real venues. Suhail will tell you
+                Some of these are samples while Reserv onboards real venues. Reserv will tell you
                 which before it books anything.
               </Muted>
             </View>

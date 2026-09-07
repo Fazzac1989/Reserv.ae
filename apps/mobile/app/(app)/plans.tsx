@@ -125,7 +125,7 @@ export default function Plans() {
 
       {nothing ? (
         <Muted>
-          Nothing arranged yet. Ask Suhail for something and it will appear here — a plan is for
+          Nothing arranged yet. Ask Reserv for something and it will appear here — a plan is for
           when one occasion needs several bookings.
         </Muted>
       ) : null}
@@ -250,7 +250,7 @@ export default function Plans() {
         accessibilityRole="button"
         className="min-h-[44px] justify-center"
       >
-        <Muted>Ask Suhail for something</Muted>
+        <Muted>Ask Reserv for something</Muted>
       </Pressable>
     </ScreenScroll>
   );
