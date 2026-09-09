@@ -135,14 +135,11 @@ export default function Today() {
   const later = upcoming.filter((b) => !isToday(b.scheduled_for));
   const decisions = upcoming.filter((b) => DECIDABLE.includes(b.status));
 
-  const nothingAtAll =
-    !reservations.isLoading && !reservations.isError && upcoming.length === 0;
+  const nothingAtAll = !reservations.isLoading && !reservations.isError && upcoming.length === 0;
 
   function ask(text?: string) {
     const message = (text ?? draft).trim();
-    router.push(
-      message.length > 0 ? { pathname: '/suhail', params: { ask: message } } : '/suhail',
-    );
+    router.push(message.length > 0 ? { pathname: '/suhail', params: { ask: message } } : '/suhail');
     setDraft('');
   }
 
@@ -180,7 +177,11 @@ export default function Today() {
           className="rounded-input border border-grey-line bg-paper-raised px-5 py-4 font-body text-lead text-ink dark:bg-ink-raised dark:text-paper"
         />
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-2">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerClassName="gap-2"
+        >
           {['Plan my weekend', 'Book dinner', 'Family visiting'].map((quick) => (
             <Chip key={quick} label={quick} selected={false} onPress={() => ask(quick)} />
           ))}
@@ -261,7 +262,9 @@ export default function Today() {
             accessibilityRole="button"
             className="min-h-[44px] justify-center"
           >
-            <Muted>{later.length > 3 ? `All ${later.length} in Plans` : 'Everything in Plans'}</Muted>
+            <Muted>
+              {later.length > 3 ? `All ${later.length} in Plans` : 'Everything in Plans'}
+            </Muted>
           </Pressable>
         </View>
       ) : null}
@@ -275,8 +278,8 @@ export default function Today() {
       {nothingAtAll ? (
         <View className="gap-4">
           <Lead className="text-grey">
-            Nothing arranged yet. Tell me what you need and I will sort it — a table, an
-            afternoon, a weekend with people visiting.
+            Nothing arranged yet. Tell me what you need and I will sort it — a table, an afternoon,
+            a weekend with people visiting.
           </Lead>
           <Pressable
             onPress={() => ask('Plan my weekend')}

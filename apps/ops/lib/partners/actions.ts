@@ -75,10 +75,7 @@ export async function inviteVenueMember(
  * rows, so the address can be invited again, and the record of having invited
  * them survives.
  */
-export async function revokeVenueInvite(
-  venueId: string,
-  inviteId: string,
-): Promise<ActionResult> {
+export async function revokeVenueInvite(venueId: string, inviteId: string): Promise<ActionResult> {
   await requireOps();
 
   const supabase = await createClient();

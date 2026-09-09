@@ -46,9 +46,9 @@ describe('answering from the record', () => {
 
   it('distinguishes seating outside as well as in', () => {
     expect(answerVenueQuestion('outdoor', restaurant).text).toContain('as well as in');
-    expect(
-      answerVenueQuestion('outdoor', { ...restaurant, has_indoor: false }).text,
-    ).toBe('Yes, the seating is outside.');
+    expect(answerVenueQuestion('outdoor', { ...restaurant, has_indoor: false }).text).toBe(
+      'Yes, the seating is outside.',
+    );
   });
 });
 

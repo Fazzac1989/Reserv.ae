@@ -73,8 +73,8 @@ export function AccessList({
     <div className="flex flex-col gap-5">
       {members.length === 0 && invites.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          Nobody from this venue has access. It is listed, not claimed — bookings still work,
-          and they simply do not see them.
+          Nobody from this venue has access. It is listed, not claimed — bookings still work, and
+          they simply do not see them.
         </p>
       ) : null}
 

@@ -104,7 +104,12 @@ export const ACCESSIBILITY = [
   'Good lighting',
 ] as const;
 
-export const FAMILY_NEEDS = ['Highchair', "Children's menu", 'Room for a pram', 'Early sitting'] as const;
+export const FAMILY_NEEDS = [
+  'Highchair',
+  "Children's menu",
+  'Room for a pram',
+  'Early sitting',
+] as const;
 
 export const OCCASIONS = [
   'Birthday',

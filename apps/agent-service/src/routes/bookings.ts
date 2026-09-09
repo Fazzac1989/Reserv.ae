@@ -250,7 +250,9 @@ export async function registerBookingRoutes(app: FastifyInstance, { env }: Optio
 
     const parsed = requestBody.safeParse(request.body);
     if (!parsed.success) {
-      return reply.status(400).send({ error: parsed.error.issues[0]?.message ?? 'Check the details.' });
+      return reply
+        .status(400)
+        .send({ error: parsed.error.issues[0]?.message ?? 'Check the details.' });
     }
     const body = parsed.data;
 

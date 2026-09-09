@@ -23,7 +23,10 @@ export default async function PartnerLayout({ children }: { children: React.Reac
     <div className="min-h-screen">
       <header className="border-b">
         <div className="mx-auto flex max-w-4xl items-center gap-6 px-6 py-3">
-          <Link href="/partner" className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          <Link
+            href="/partner"
+            className="text-xs uppercase tracking-[0.2em] text-muted-foreground"
+          >
             Reserv
           </Link>
           <nav className="flex items-center gap-4">

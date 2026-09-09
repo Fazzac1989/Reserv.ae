@@ -70,10 +70,7 @@ function applies(question: VenueQuestion, vertical: string): boolean {
   return !['alcohol', 'dietary'].includes(question);
 }
 
-export function answerVenueQuestion(
-  question: VenueQuestion,
-  facts: VenueFacts,
-): VenueAnswer {
+export function answerVenueQuestion(question: VenueQuestion, facts: VenueFacts): VenueAnswer {
   if (!applies(question, facts.vertical)) {
     return {
       kind: 'not_asked',
@@ -128,9 +125,7 @@ export function answerVenueQuestion(
 
     case 'dietary': {
       const options = list(facts.dietary_options);
-      return options
-        ? answered(`They list ${options}.`)
-        : unknown();
+      return options ? answered(`They list ${options}.`) : unknown();
     }
 
     case 'parking': {

@@ -35,7 +35,11 @@ function colour(className: string | undefined, fallback: string): string {
 export function Display({ className, ...props }: TextProps) {
   return (
     <RNText
-      className={cn('font-display text-display', colour(className, 'text-ink dark:text-paper'), className)}
+      className={cn(
+        'font-display text-display',
+        colour(className, 'text-ink dark:text-paper'),
+        className,
+      )}
       {...props}
     />
   );
@@ -45,7 +49,11 @@ export function Display({ className, ...props }: TextProps) {
 export function Title({ className, ...props }: TextProps) {
   return (
     <RNText
-      className={cn('font-display text-title', colour(className, 'text-ink dark:text-paper'), className)}
+      className={cn(
+        'font-display text-title',
+        colour(className, 'text-ink dark:text-paper'),
+        className,
+      )}
       {...props}
     />
   );
@@ -55,7 +63,11 @@ export function Title({ className, ...props }: TextProps) {
 export function Lead({ className, ...props }: TextProps) {
   return (
     <RNText
-      className={cn('font-body text-lead', colour(className, 'text-ink dark:text-paper'), className)}
+      className={cn(
+        'font-body text-lead',
+        colour(className, 'text-ink dark:text-paper'),
+        className,
+      )}
       {...props}
     />
   );
@@ -64,7 +76,11 @@ export function Lead({ className, ...props }: TextProps) {
 export function Body({ className, ...props }: TextProps) {
   return (
     <RNText
-      className={cn('font-body text-body', colour(className, 'text-ink dark:text-paper'), className)}
+      className={cn(
+        'font-body text-body',
+        colour(className, 'text-ink dark:text-paper'),
+        className,
+      )}
       {...props}
     />
   );
@@ -73,7 +89,10 @@ export function Body({ className, ...props }: TextProps) {
 /** Anything secondary: rationale, helper text, the quieter half of a pair. */
 export function Muted({ className, ...props }: TextProps) {
   return (
-    <RNText className={cn('font-body text-body', colour(className, 'text-grey'), className)} {...props} />
+    <RNText
+      className={cn('font-body text-body', colour(className, 'text-grey'), className)}
+      {...props}
+    />
   );
 }
 

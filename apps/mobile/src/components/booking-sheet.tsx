@@ -294,8 +294,8 @@ export function BookingSheet({
                   maxLength={20}
                 />
                 <Muted>
-                  The venue is given the name. The number only goes with it if you put one here,
-                  and only so they can reach you about this booking.
+                  The venue is given the name. The number only goes with it if you put one here, and
+                  only so they can reach you about this booking.
                 </Muted>
 
                 <TextField

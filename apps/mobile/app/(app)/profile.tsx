@@ -468,8 +468,8 @@ export default function ProfileScreen() {
           />
         </View>
         <Muted>
-          A reminder for a table tonight still arrives. This holds back everything that could
-          have waited until morning.
+          A reminder for a table tonight still arrives. This holds back everything that could have
+          waited until morning.
         </Muted>
       </View>
 
@@ -582,7 +582,6 @@ export default function ProfileScreen() {
           </Muted>
         ) : null}
       </View>
-
     </ScreenScroll>
   );
 }

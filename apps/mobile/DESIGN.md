@@ -23,8 +23,8 @@ screen, which is the intended effect.
 | `paper`        | `#F6F6F7`                | Day background; night text           |
 | `paper-raised` | `#FFFFFF`                | The one surface that lifts, by day   |
 | `grey`         | `#8A8A8E`                | Secondary text, metadata             |
-| `grey-line`    | `rgba(138,138,142,0.16)` | Hairlines, and every border           |
-| `alert`        | `#C2453D`                | Errors and cancellations, and only    |
+| `grey-line`    | `rgba(138,138,142,0.16)` | Hairlines, and every border          |
+| `alert`        | `#C2453D`                | Errors and cancellations, and only   |
 
 `alert` is the only chromatic colour in the application, and it means something
 went wrong. There is no counterpart for success.

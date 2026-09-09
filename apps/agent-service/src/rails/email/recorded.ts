@@ -50,10 +50,7 @@ export class RecordedEmailProvider implements EmailProvider {
    * written on the day the credentials arrive is a provider whose signature
    * check has never been run.
    */
-  parseInbound(
-    rawBody: string,
-    headers: Record<string, string | undefined>,
-  ): InboundEmail | null {
+  parseInbound(rawBody: string, headers: Record<string, string | undefined>): InboundEmail | null {
     if (!this.signingSecret) return null;
 
     const provided = headers['x-reserv-signature'];

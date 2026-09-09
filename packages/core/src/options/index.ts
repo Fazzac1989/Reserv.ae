@@ -49,10 +49,7 @@ export function availabilityStateOf(facts: OptionFacts): AvailabilityState {
   return 'on_request';
 }
 
-export function availabilityLabelOf(
-  facts: OptionFacts,
-  now: Date = new Date(),
-): string {
+export function availabilityLabelOf(facts: OptionFacts, now: Date = new Date()): string {
   const state = availabilityStateOf(facts);
 
   switch (state) {
@@ -89,9 +86,7 @@ export function availabilityLabelOf(
  * to book a table because we cannot predict dinner would make the product
  * useless. What blocks is a charge we know exists and cannot quantify.
  */
-export type ApprovalCheck =
-  | { readonly ok: true }
-  | { readonly ok: false; readonly reason: string };
+export type ApprovalCheck = { readonly ok: true } | { readonly ok: false; readonly reason: string };
 
 export function canApprove(facts: OptionFacts): ApprovalCheck {
   // They take a deposit and we do not know how much. This is the case the rule
@@ -99,7 +94,8 @@ export function canApprove(facts: OptionFacts): ApprovalCheck {
   if (facts.requiresDeposit === true && !facts.deposit) {
     return {
       ok: false,
-      reason: 'They take a deposit and I do not know how much yet. I will find out before you commit to anything.',
+      reason:
+        'They take a deposit and I do not know how much yet. I will find out before you commit to anything.',
     };
   }
 
@@ -148,7 +144,9 @@ export function breakdownOf(facts: OptionFacts): Breakdown {
  */
 export type AccessibilityStatus = 'recorded' | 'unknown';
 
-export function accessibilityStatusOf(accessibility: readonly string[] | null): AccessibilityStatus {
+export function accessibilityStatusOf(
+  accessibility: readonly string[] | null,
+): AccessibilityStatus {
   return accessibility && accessibility.length > 0 ? 'recorded' : 'unknown';
 }
 

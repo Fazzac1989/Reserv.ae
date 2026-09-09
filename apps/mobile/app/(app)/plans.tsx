@@ -151,7 +151,10 @@ export default function Plans() {
       key: 'done',
       title: 'Earlier',
       rows: bookings.filter(
-        (b) => !NEEDS_YOU.includes(b.status) && !IN_FLIGHT.includes(b.status) && !SETTLED.includes(b.status),
+        (b) =>
+          !NEEDS_YOU.includes(b.status) &&
+          !IN_FLIGHT.includes(b.status) &&
+          !SETTLED.includes(b.status),
       ),
     },
   ].filter((g) => g.rows.length > 0);

@@ -192,9 +192,7 @@ export default function Onboarding() {
                     >
                       {band.label}
                     </Body>
-                    <Muted className={selected ? 'text-white/75' : undefined}>
-                      {band.blurb}
-                    </Muted>
+                    <Muted className={selected ? 'text-white/75' : undefined}>{band.blurb}</Muted>
                   </Pressable>
                 );
               })}

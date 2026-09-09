@@ -59,10 +59,7 @@ export interface VenueFilters {
  * real city's worth of them, and the indexes for this exist precisely so it
  * does not have to be rewritten later.
  */
-export async function searchVenues(
-  filters: VenueFilters,
-  limit = 40,
-): Promise<VenueCardData[]> {
+export async function searchVenues(filters: VenueFilters, limit = 40): Promise<VenueCardData[]> {
   let query = supabase.from('venues').select(VENUE_CARD_COLUMNS);
 
   const q = filters.q?.trim();
@@ -130,12 +127,7 @@ export function priceLabel(venue: VenueCardData): string | null {
  * there is one to return it. Inventing "Available tonight" from an opening
  * time would be the one lie the product cannot afford.
  */
-export type Availability =
-  | 'available'
-  | 'limited'
-  | 'on_request'
-  | 'checking'
-  | 'unavailable';
+export type Availability = 'available' | 'limited' | 'on_request' | 'checking' | 'unavailable';
 
 export function availabilityLabel(state: Availability): string {
   switch (state) {

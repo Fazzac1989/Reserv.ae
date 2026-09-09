@@ -126,7 +126,6 @@ export const TRANSITIONS: TransitionTable = {
     },
   },
 
-
   /*
    * The venue has offered something else and the person has not answered yet.
    *

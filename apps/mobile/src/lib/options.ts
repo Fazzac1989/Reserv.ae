@@ -90,9 +90,7 @@ export async function listOptions(requestId: string): Promise<VenueOption[]> {
         .in('venue_id', venueIds)
     : { data: [], error: null };
 
-  const policyFor = new Map(
-    (policies.data ?? []).map((p) => [p.venue_id, p] as const),
-  );
+  const policyFor = new Map((policies.data ?? []).map((p) => [p.venue_id, p] as const));
 
   return rows.map((r) => {
     const policy = policyFor.get(r.venue_id);

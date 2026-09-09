@@ -1,5 +1,8 @@
 node_modules
 dist
+# The Expo web export. `dist` alone does not match it, so a local build made
+# `format:check` fail on generated bundles that CI never sees.
+dist-web
 .next
 .turbo
 coverage

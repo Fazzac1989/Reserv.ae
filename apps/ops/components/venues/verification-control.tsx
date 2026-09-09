@@ -72,8 +72,8 @@ export function VerificationControl({
 
       {!verified && !open ? (
         <p className="text-sm text-muted-foreground">
-          Every profile for this venue tells users it has not been confirmed, and every answer
-          about it is hedged. That is correct until somebody checks.
+          Every profile for this venue tells users it has not been confirmed, and every answer about
+          it is hedged. That is correct until somebody checks.
         </p>
       ) : null}
 

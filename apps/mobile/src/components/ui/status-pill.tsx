@@ -21,7 +21,10 @@ import { Meta } from './text';
  */
 export type StatusTone = 'confirmed' | 'waiting' | 'attention' | 'quiet';
 
-const TONE: Record<StatusTone, { text: string; bg: string; icon: keyof typeof Feather.glyphMap; iconColour: string }> = {
+const TONE: Record<
+  StatusTone,
+  { text: string; bg: string; icon: keyof typeof Feather.glyphMap; iconColour: string }
+> = {
   confirmed: {
     text: 'text-accent',
     bg: 'bg-accent-panel',

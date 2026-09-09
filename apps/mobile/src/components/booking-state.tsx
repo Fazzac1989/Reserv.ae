@@ -44,10 +44,7 @@ export function LiveStatus({ label }: { label: string }) {
       accessibilityRole="progressbar"
       accessibilityLabel={label}
     >
-      <Animated.View
-        className="h-2 w-2 rounded-full bg-accent"
-        style={{ opacity: pulse }}
-      />
+      <Animated.View className="h-2 w-2 rounded-full bg-accent" style={{ opacity: pulse }} />
       <Body className="flex-1">{label}</Body>
     </View>
   );

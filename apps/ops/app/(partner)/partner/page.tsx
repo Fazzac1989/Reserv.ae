@@ -1,7 +1,13 @@
 import { requireVenueMember, selectVenue } from '../../../lib/partner-auth';
 import { getVenueBook, type VenueBooking } from '../../../lib/partners/bookings';
 import { VenueSwitcher } from '../../../components/partner/venue-switcher';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '../../../components/ui/card';
 import { Badge } from '../../../components/ui/badge';
 
 export const dynamic = 'force-dynamic';

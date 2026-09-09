@@ -75,10 +75,18 @@ function OptionCard({
 }) {
   const facts = factsOf(option);
   const state = availabilityStateOf(facts);
-  const where = [option.neighbourhood ?? option.zone.replace(/_/g, ' ')].filter(Boolean).join(' · ');
+  const where = [option.neighbourhood ?? option.zone.replace(/_/g, ' ')]
+    .filter(Boolean)
+    .join(' · ');
 
   const total = option.price
-    ? totalOf([{ amount: option.price.amount, source: option.price.source, checkedAt: option.priceCheckedAt }])
+    ? totalOf([
+        {
+          amount: option.price.amount,
+          source: option.price.source,
+          checkedAt: option.priceCheckedAt,
+        },
+      ])
     : null;
   const caveat = total ? priceCaveat(total) : null;
   const access = accessibilityStatusOf(option.accessibility);
@@ -115,7 +123,10 @@ function OptionCard({
         <Rule />
 
         <View>
-          <Line label="When" value={`${dayLabel(option.proposedStart)}, ${clock(option.proposedStart)}`} />
+          <Line
+            label="When"
+            value={`${dayLabel(option.proposedStart)}, ${clock(option.proposedStart)}`}
+          />
           <Line
             label="Estimated total"
             value={total ? `${formatMoney(total.amount)}${caveat ? ` · ${caveat}` : ''}` : null}
@@ -128,9 +139,7 @@ function OptionCard({
           <Line
             label="Access"
             value={
-              access === 'recorded'
-                ? option.accessibility.join(', ')
-                : 'Not recorded — I can ask'
+              access === 'recorded' ? option.accessibility.join(', ') : 'Not recorded — I can ask'
             }
           />
           <Line label="Cancellation" value={option.cancellationTerms} />
@@ -255,9 +264,18 @@ export default function Compare() {
           </View>
 
           <View>
-            <Line label="When" value={`${dayLabel(selected.proposedStart)}, ${clock(selected.proposedStart)}`} />
-            <Line label="Total" value={breakdown?.total ? formatMoney(breakdown.total) : 'Not known yet'} />
-            <Line label="Due now" value={breakdown?.dueNow ? formatMoney(breakdown.dueNow) : null} />
+            <Line
+              label="When"
+              value={`${dayLabel(selected.proposedStart)}, ${clock(selected.proposedStart)}`}
+            />
+            <Line
+              label="Total"
+              value={breakdown?.total ? formatMoney(breakdown.total) : 'Not known yet'}
+            />
+            <Line
+              label="Due now"
+              value={breakdown?.dueNow ? formatMoney(breakdown.dueNow) : null}
+            />
             <Line
               label="Due on the night"
               value={breakdown?.dueLater ? formatMoney(breakdown.dueLater) : null}
