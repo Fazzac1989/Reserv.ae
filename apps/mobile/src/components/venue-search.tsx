@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Image, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { COLUMN } from './ui/screen';
 import { useQuery } from '@tanstack/react-query';
 import { BRAND } from '@reservai/config';
 import { Body, Display, Meta, Muted, Title } from './ui/text';
@@ -73,9 +74,7 @@ function Result({
         <Body className="text-grey" numberOfLines={1}>
           {[cuisine, spend].filter(Boolean).join(' · ')}
         </Body>
-        {attributes.length > 0 ? (
-          <Muted numberOfLines={1}>{attributes.join(' · ')}</Muted>
-        ) : null}
+        {attributes.length > 0 ? <Muted numberOfLines={1}>{attributes.join(' · ')}</Muted> : null}
         <View className="mt-0.5 flex-row items-center justify-between">
           {/*
             Honest, and the same for every venue until something can actually
@@ -143,163 +142,172 @@ export function VenueSearch({
   return (
     <View className="flex-1 bg-paper dark:bg-ink">
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
-        <View className="gap-4 px-7 pb-3 pt-4">
-          <TextInput
-            value={draft}
-            onChangeText={setDraft}
-            onSubmitEditing={() => update({ q: draft })}
-            placeholder="Restaurant, cuisine, area…"
-            placeholderTextColor="#8A8F86"
-            returnKeyType="search"
-            autoCorrect={false}
-            accessibilityLabel="Search venues"
-            className="rounded-input border border-grey-line px-5 py-4 font-body text-lead text-ink dark:text-paper"
-          />
-
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerClassName="gap-2"
-          >
-            {PRIMARY_ZONES.map((zone) => (
-              <Chip
-                key={zone}
-                label={labels[zone] ?? zone}
-                selected={filters.zone === zone}
-                onPress={() => update({ zone: filters.zone === zone ? undefined : zone })}
-              />
-            ))}
-          </ScrollView>
-
-          <View className="flex-row items-center gap-2">
-            <Chip
-              label="Outside"
-              selected={Boolean(filters.outdoor)}
-              onPress={() => update({ outdoor: filters.outdoor ? undefined : true })}
+        {/*
+          One column around both halves. The filters do not scroll and the
+          results do, so capping only the scrolling half would have left the
+          search field stretched across a laptop above a narrow list.
+        */}
+        <View className={`flex-1 ${COLUMN}`}>
+          <View className="gap-4 px-7 pb-3 pt-4">
+            <TextInput
+              value={draft}
+              onChangeText={setDraft}
+              onSubmitEditing={() => update({ q: draft })}
+              placeholder="Restaurant, cuisine, area…"
+              placeholderTextColor="#8A8F86"
+              returnKeyType="search"
+              autoCorrect={false}
+              accessibilityLabel="Search venues"
+              className="rounded-input border border-grey-line px-5 py-4 font-body text-lead text-ink dark:text-paper"
             />
-            <Chip
-              label="Under 200"
-              selected={filters.bandMax === 2}
-              onPress={() => update({ bandMax: filters.bandMax === 2 ? undefined : 2 })}
-            />
-            <Pressable
-              onPress={() => setShowMore((s) => !s)}
-              accessibilityRole="button"
-              accessibilityState={{ expanded: showMore }}
-              className="min-h-[44px] justify-center px-1"
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerClassName="gap-2"
             >
-              <Meta className={activeCount > 0 ? 'text-ink dark:text-paper' : undefined}>
-                {showMore ? 'Less' : activeCount > 0 ? `More · ${activeCount}` : 'More'}
-              </Meta>
-            </Pressable>
+              {PRIMARY_ZONES.map((zone) => (
+                <Chip
+                  key={zone}
+                  label={labels[zone] ?? zone}
+                  selected={filters.zone === zone}
+                  onPress={() => update({ zone: filters.zone === zone ? undefined : zone })}
+                />
+              ))}
+            </ScrollView>
+
+            <View className="flex-row items-center gap-2">
+              <Chip
+                label="Outside"
+                selected={Boolean(filters.outdoor)}
+                onPress={() => update({ outdoor: filters.outdoor ? undefined : true })}
+              />
+              <Chip
+                label="Under 200"
+                selected={filters.bandMax === 2}
+                onPress={() => update({ bandMax: filters.bandMax === 2 ? undefined : 2 })}
+              />
+              <Pressable
+                onPress={() => setShowMore((s) => !s)}
+                accessibilityRole="button"
+                accessibilityState={{ expanded: showMore }}
+                className="min-h-[44px] justify-center px-1"
+              >
+                <Meta className={activeCount > 0 ? 'text-ink dark:text-paper' : undefined}>
+                  {showMore ? 'Less' : activeCount > 0 ? `More · ${activeCount}` : 'More'}
+                </Meta>
+              </Pressable>
+            </View>
+
+            {showMore ? (
+              <View className="gap-4 rounded-card border border-grey-line p-5">
+                <View className="gap-2">
+                  <Meta>Looking for</Meta>
+                  <View className="flex-row flex-wrap gap-2">
+                    {['restaurant', 'barber', 'salon'].map((v) => (
+                      <Chip
+                        key={v}
+                        label={
+                          v === 'restaurant' ? 'A table' : v === 'barber' ? 'A barber' : 'A salon'
+                        }
+                        selected={filters.vertical === v}
+                        onPress={() => update({ vertical: filters.vertical === v ? undefined : v })}
+                      />
+                    ))}
+                  </View>
+                </View>
+
+                <View className="gap-2">
+                  <Meta>Dietary</Meta>
+                  <View className="flex-row flex-wrap gap-2">
+                    {['vegetarian', 'vegan', 'gluten free on request'].map((d) => (
+                      <Chip
+                        key={d}
+                        label={d === 'gluten free on request' ? 'Gluten free' : d}
+                        selected={filters.dietary === d}
+                        onPress={() => update({ dietary: filters.dietary === d ? undefined : d })}
+                      />
+                    ))}
+                  </View>
+                </View>
+
+                <View className="gap-2">
+                  <Meta>Setting</Meta>
+                  <View className="flex-row flex-wrap gap-2">
+                    <Chip
+                      label="Has a view"
+                      selected={Boolean(filters.view)}
+                      onPress={() => update({ view: filters.view ? undefined : true })}
+                    />
+                  </View>
+                </View>
+
+                {activeCount > 0 ? (
+                  <Pressable
+                    onPress={() => {
+                      const cleared = { q: filters.q };
+                      setFilters(cleared);
+                      onFiltersChange?.(cleared);
+                    }}
+                    accessibilityRole="button"
+                    className="min-h-[44px] justify-center"
+                  >
+                    <Muted>Clear filters</Muted>
+                  </Pressable>
+                ) : null}
+              </View>
+            ) : null}
           </View>
 
-          {showMore ? (
-            <View className="gap-4 rounded-card border border-grey-line p-5">
-              <View className="gap-2">
-                <Meta>Looking for</Meta>
-                <View className="flex-row flex-wrap gap-2">
-                  {['restaurant', 'barber', 'salon'].map((v) => (
-                    <Chip
-                      key={v}
-                      label={v === 'restaurant' ? 'A table' : v === 'barber' ? 'A barber' : 'A salon'}
-                      selected={filters.vertical === v}
-                      onPress={() => update({ vertical: filters.vertical === v ? undefined : v })}
-                    />
-                  ))}
-                </View>
-              </View>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerClassName="px-7 pb-16"
+            keyboardShouldPersistTaps="handled"
+          >
+            {results.isLoading ? <LiveStatus label="Looking…" /> : null}
 
-              <View className="gap-2">
-                <Meta>Dietary</Meta>
-                <View className="flex-row flex-wrap gap-2">
-                  {['vegetarian', 'vegan', 'gluten free on request'].map((d) => (
-                    <Chip
-                      key={d}
-                      label={d === 'gluten free on request' ? 'Gluten free' : d}
-                      selected={filters.dietary === d}
-                      onPress={() => update({ dietary: filters.dietary === d ? undefined : d })}
-                    />
-                  ))}
-                </View>
-              </View>
+            {results.isError ? (
+              <Body className="text-alert">
+                I could not run that search just now. Try again in a moment.
+              </Body>
+            ) : null}
 
-              <View className="gap-2">
-                <Meta>Setting</Meta>
-                <View className="flex-row flex-wrap gap-2">
-                  <Chip
-                    label="Has a view"
-                    selected={Boolean(filters.view)}
-                    onPress={() => update({ view: filters.view ? undefined : true })}
-                  />
-                </View>
-              </View>
-
-              {activeCount > 0 ? (
+            {!results.isLoading && !results.isError && venues.length === 0 ? (
+              <View className="gap-4 pt-2">
+                <Display>Nothing matched</Display>
+                <Body className="text-grey">
+                  {activeCount > 0
+                    ? 'Try removing a filter, or describe what you are after and I will look properly.'
+                    : `Nothing here matches that. Describe what you are after and ${BRAND.name} will look properly.`}
+                </Body>
                 <Pressable
-                  onPress={() => {
-                    const cleared = { q: filters.q };
-                    setFilters(cleared);
-                    onFiltersChange?.(cleared);
-                  }}
+                  onPress={() => onAsk(draft || (filters.q ?? ''))}
                   accessibilityRole="button"
                   className="min-h-[44px] justify-center"
                 >
-                  <Muted>Clear filters</Muted>
+                  <Body className="font-body-medium">Ask {BRAND.name} instead</Body>
                 </Pressable>
-              ) : null}
-            </View>
-          ) : null}
-        </View>
+              </View>
+            ) : null}
 
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerClassName="px-7 pb-16"
-          keyboardShouldPersistTaps="handled"
-        >
-          {results.isLoading ? <LiveStatus label="Looking…" /> : null}
+            {venues.map((venue, i) => (
+              <View key={venue.id}>
+                <Result venue={venue} labels={labels} onOpen={() => onOpen(venue)} />
+                {i < venues.length - 1 ? <View className="h-px w-full bg-grey-line" /> : null}
+              </View>
+            ))}
 
-          {results.isError ? (
-            <Body className="text-alert">
-              I could not run that search just now. Try again in a moment.
-            </Body>
-          ) : null}
-
-          {!results.isLoading && !results.isError && venues.length === 0 ? (
-            <View className="gap-4 pt-2">
-              <Display>Nothing matched</Display>
-              <Body className="text-grey">
-                {activeCount > 0
-                  ? 'Try removing a filter, or describe what you are after and I will look properly.'
-                  : `Nothing here matches that. Describe what you are after and ${BRAND.name} will look properly.`}
-              </Body>
+            {venues.length > 0 ? (
               <Pressable
                 onPress={() => onAsk(draft || (filters.q ?? ''))}
                 accessibilityRole="button"
-                className="min-h-[44px] justify-center"
+                className="min-h-[44px] justify-center pt-6"
               >
-                <Body className="font-body-medium">Ask {BRAND.name} instead</Body>
+                <Muted>Not quite it? Ask {BRAND.name}</Muted>
               </Pressable>
-            </View>
-          ) : null}
-
-          {venues.map((venue, i) => (
-            <View key={venue.id}>
-              <Result venue={venue} labels={labels} onOpen={() => onOpen(venue)} />
-              {i < venues.length - 1 ? <View className="h-px w-full bg-grey-line" /> : null}
-            </View>
-          ))}
-
-          {venues.length > 0 ? (
-            <Pressable
-              onPress={() => onAsk(draft || (filters.q ?? ''))}
-              accessibilityRole="button"
-              className="min-h-[44px] justify-center pt-6"
-            >
-              <Muted>Not quite it? Ask {BRAND.name}</Muted>
-            </Pressable>
-          ) : null}
-        </ScrollView>
+            ) : null}
+          </ScrollView>
+        </View>
       </SafeAreaView>
     </View>
   );

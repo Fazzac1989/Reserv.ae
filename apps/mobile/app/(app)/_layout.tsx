@@ -5,6 +5,7 @@ import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
 import { Meta } from '../../src/components/ui/text';
+import { COLUMN } from '../../src/components/ui/screen';
 import { registerForPush } from '../../src/lib/notifications';
 
 /**
@@ -44,78 +45,88 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
 
   return (
+    /*
+     * The bar reaches the edges of the window; the four items do not.
+     *
+     * Chrome anchored to the bottom of a screen has to span it — a bar that
+     * stops short of the edges reads as a floating widget, and the ground
+     * beneath it as a gap. What must not span it is the row inside: four tabs
+     * spread across a laptop are four tabs nobody can hit without looking.
+     */
     <View
       style={{ paddingBottom: Math.max(insets.bottom, 10) }}
-      className="flex-row border-t border-grey-line bg-paper px-1 pt-2.5 dark:bg-ink"
+      className="border-t border-grey-line bg-paper pt-2.5 dark:bg-ink"
     >
-      {state.routes.map((route, index) => {
-        const destination = DESTINATIONS.find((d) => d.name === route.name);
-        if (!destination) return null;
+      <View className={`flex-row px-1 ${COLUMN}`}>
+        {state.routes.map((route, index) => {
+          const destination = DESTINATIONS.find((d) => d.name === route.name);
+          if (!destination) return null;
 
-        const focused = state.index === index;
+          const focused = state.index === index;
 
-        return (
-          <Pressable
-            key={route.key}
-            onPress={() => {
-              const event = navigation.emit({
-                type: 'tabPress',
-                target: route.key,
-                canPreventDefault: true,
-              });
-              if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
-            }}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: focused }}
-            accessibilityLabel={destination.label}
-            className="min-h-[44px] flex-1 items-center justify-center"
-          >
-            {/*
+          return (
+            <Pressable
+              key={route.key}
+              onPress={() => {
+                const event = navigation.emit({
+                  type: 'tabPress',
+                  target: route.key,
+                  canPreventDefault: true,
+                });
+                if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
+              }}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: focused }}
+              accessibilityLabel={destination.label}
+              className="min-h-[44px] flex-1 items-center justify-center"
+            >
+              {/*
               A fixed slot the icon sits in, so the four labels share a
               baseline. The raised circle used to be pushed up with a negative
               margin, which moved the row's own height with it and left "Ask"
               twelve pixels below its neighbours. Out of the flow entirely, the
               circle can be as tall as it likes and the labels never know.
             */}
-            <View className="h-5 w-14 items-center justify-center">
-              {destination.raised ? (
-                <View
-                  className="absolute bottom-0 h-14 w-14 items-center justify-center rounded-full bg-accent"
-                  // A real shadow rather than a border. The circle has to read
-                  // as sitting above the bar, and an outline reads as a hole in
-                  // it.
-                  style={{
-                    shadowColor: '#183F35',
-                    shadowOpacity: 0.28,
-                    shadowRadius: 12,
-                    shadowOffset: { width: 0, height: 4 },
-                    elevation: 6,
-                  }}
-                >
-                  <Feather name={destination.icon} size={22} color="#FFFFFF" />
-                </View>
-              ) : (
-                <Feather
-                  name={destination.icon}
-                  size={20}
-                  color={focused ? '#183F35' : '#8A8F86'}
-                />
-              )}
-            </View>
-            {/*
+              <View className="h-5 w-14 items-center justify-center">
+                {destination.raised ? (
+                  <View
+                    className="absolute bottom-0 h-14 w-14 items-center justify-center rounded-full bg-accent"
+                    // A real shadow rather than a border. The circle has to read
+                    // as sitting above the bar, and an outline reads as a hole in
+                    // it.
+                    style={{
+                      shadowColor: '#183F35',
+                      shadowOpacity: 0.28,
+                      shadowRadius: 12,
+                      shadowOffset: { width: 0, height: 4 },
+                      elevation: 6,
+                    }}
+                  >
+                    <Feather name={destination.icon} size={22} color="#FFFFFF" />
+                  </View>
+                ) : (
+                  <Feather
+                    name={destination.icon}
+                    size={20}
+                    color={focused ? '#183F35' : '#8A8F86'}
+                  />
+                )}
+              </View>
+              {/*
               The accent marks the current tab. Tracking is tightened from the
               1.4px the meta size carries everywhere else, because four labels
               at full tracking sit shoulder to shoulder with no air between.
             */}
-            <Meta
-              numberOfLines={1}
-              className={`mt-1 tracking-[0.6px] ${focused ? 'text-accent' : ''}`}
-            >
-              {destination.label}
-            </Meta>
-          </Pressable>
-        );
-      })}
+              <Meta
+                numberOfLines={1}
+                className={`mt-1 tracking-[0.6px] ${focused ? 'text-accent' : ''}`}
+              >
+                {destination.label}
+              </Meta>
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }

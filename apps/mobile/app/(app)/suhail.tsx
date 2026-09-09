@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  Dimensions,
+  useWindowDimensions,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -17,7 +17,7 @@ import {
   useAudioRecorder,
   useAudioRecorderState,
 } from 'expo-audio';
-import { Screen } from '../../src/components/ui/screen';
+import { COLUMN_MAX, Screen } from '../../src/components/ui/screen';
 import { Button } from '../../src/components/ui/button';
 import { Body, Display, Lead, Meta, Muted } from '../../src/components/ui/text';
 import { VenueCard } from '../../src/components/venue-card';
@@ -266,7 +266,11 @@ export default function Conversation() {
   const empty = turns.length === 0 && watching === null;
   // Cards peek past the edge so it reads as a row that continues, not as one
   // card that happens to be narrow.
-  const cardWidth = Math.min(Dimensions.get('window').width - 96, 300);
+  // Measured against the column rather than the window, and re-measured when
+  // the window changes — `Dimensions.get` is read once, so a web build resized
+  // after load kept the width it started with.
+  const column = Math.min(useWindowDimensions().width, COLUMN_MAX);
+  const cardWidth = Math.min(column - 96, 300);
 
   return (
     <Screen>

@@ -9,7 +9,7 @@ import { answerVenueQuestion, caveatFor, type VenueQuestion } from '@reservai/co
 import { Body, Display, Lead, Meta, Muted, Title } from '../../../src/components/ui/text';
 import { Button } from '../../../src/components/ui/button';
 import { Chip } from '../../../src/components/ui/chip';
-import { Rule } from '../../../src/components/ui/screen';
+import { COLUMN, Rule } from '../../../src/components/ui/screen';
 import { LiveStatus } from '../../../src/components/booking-state';
 import { SaveButton } from '../../../src/components/save-button';
 import { BookingSheet } from '../../../src/components/booking-sheet';
@@ -174,11 +174,15 @@ export default function PublicVenue() {
 
   const photo = v?.photo_urls?.[0];
   const where = v
-    ? [v.parent_venue, v.neighbourhood ?? places.data?.[v.zone] ?? v.zone].filter(Boolean).join(' · ')
+    ? [v.parent_venue, v.neighbourhood ?? places.data?.[v.zone] ?? v.zone]
+        .filter(Boolean)
+        .join(' · ')
     : '';
   const meta = v ? [where, BANDS[v.price_band]].filter(Boolean).join(' · ') : '';
   const seating = v
-    ? [v.has_indoor ? 'Indoor' : null, v.has_outdoor ? 'Outdoor' : null].filter(Boolean).join(' and ')
+    ? [v.has_indoor ? 'Indoor' : null, v.has_outdoor ? 'Outdoor' : null]
+        .filter(Boolean)
+        .join(' and ')
     : '';
 
   /*
@@ -214,7 +218,10 @@ export default function PublicVenue() {
   return (
     <View className="flex-1 bg-paper dark:bg-ink">
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="pb-8">
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerClassName={`pb-8 ${COLUMN}`}
+        >
           <View className="flex-row items-center justify-between px-7 pb-2 pt-4">
             <Pressable
               onPress={() => router.back()}
@@ -290,7 +297,7 @@ export default function PublicVenue() {
               ) : null}
 
               <View className="gap-7 px-7 pt-8">
-                {v.house_note ?? v.description ? (
+                {(v.house_note ?? v.description) ? (
                   <Lead>{v.house_note ?? v.description}</Lead>
                 ) : null}
 

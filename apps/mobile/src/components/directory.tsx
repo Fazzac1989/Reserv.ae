@@ -1,8 +1,9 @@
-import { Dimensions, ImageBackground, Pressable, ScrollView, View } from 'react-native';
+import { ImageBackground, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Body, Display, Lead, Meta, Muted, Title } from './ui/text';
+import { COLUMN, COLUMN_MAX } from './ui/screen';
 import { TextCard } from './text-card';
 import { LiveStatus } from './booking-state';
 import { BRAND } from '@reservai/config';
@@ -151,10 +152,7 @@ function Card({
           resizeMode="cover"
         />
       ) : (
-        <View
-          style={{ height: height - 92 }}
-          className="items-center justify-center bg-paper"
-        >
+        <View style={{ height: height - 92 }} className="items-center justify-center bg-paper">
           <Meta>{(listing.tags?.[0] ?? '').toUpperCase()}</Meta>
         </View>
       )}
@@ -183,7 +181,19 @@ export function Directory({
    */
   header?: React.ReactNode;
 }) {
-  const width = Dimensions.get('window').width;
+  /*
+   * The column the shelves sit in, not the window they are drawn on.
+   *
+   * Cards are measured rather than flowed — a hero is `width - 56` and a shelf
+   * card a third of that — so on a laptop a card sized from the window came out
+   * over a thousand pixels wide and hung out of the column it belonged to.
+   *
+   * `useWindowDimensions` rather than `Dimensions.get` because the second is
+   * read once and never again: on the web build, dragging the window narrower
+   * left every card at the width it had when the page loaded.
+   */
+  const window = useWindowDimensions();
+  const width = Math.min(window.width, COLUMN_MAX);
 
   const listings = useQuery({
     queryKey: ['discover'],
@@ -267,7 +277,10 @@ export function Directory({
   return (
     <View className="flex-1 bg-paper dark:bg-ink">
       <SafeAreaView style={{ flex: 1 }} edges={['top']}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerClassName="gap-10 pb-16">
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerClassName={`gap-10 pb-16 ${COLUMN}`}
+        >
           {header ?? (
             <View className="gap-3 px-7 pt-4">
               <Display>Discover</Display>
