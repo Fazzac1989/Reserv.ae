@@ -418,18 +418,19 @@ where v.is_demo;
 -- into the app. Membership is derived from tags here; in production it is an
 -- editorial choice made in the console.
 
-insert into public.collections (slug, title, blurb, sort_order, vertical) values
-  ('tonight', 'Tonight', 'Open this evening, and worth the trip.', 10, 'restaurant'),
-  ('date-night', 'Date night', 'Quiet enough to hear each other.', 20, 'restaurant'),
-  ('business-lunch', 'Business lunch', 'In and out, without it feeling rushed.', 30, 'restaurant'),
-  ('beachfront', 'By the water', 'Sand, sea, or a view of one of them.', 40, 'restaurant'),
-  ('family', 'With the children', 'Highchairs, patience, and somewhere to move.', 50, 'restaurant'),
-  ('brunch', 'Brunch', 'The weekend institution, done properly.', 60, 'restaurant'),
-  ('hidden-gems', 'Hidden gems', 'Places people keep to themselves.', 70, 'restaurant'),
-  ('chairs', 'Chairs', 'Barbers and salons worth keeping.', 80, null),
-  ('quiet', 'Quiet', 'Somewhere to disappear for an hour.', 90, null)
-on conflict (slug) do update set
-  title = excluded.title, blurb = excluded.blurb, sort_order = excluded.sort_order;
+-- The collections themselves are defined in a migration, not here.
+--
+-- They are configuration rather than demo data: the nine shelves are the
+-- structure of the front page and belong in every environment, including a
+-- production database full of entirely real venues. Defining them here meant
+-- `supabase db push` created none of them, because push applies migrations
+-- and does not run the seed — and Discover went out with no shelves at all.
+--
+-- The membership below stays, and has to. A migration runs against an empty
+-- venues table locally, since `db reset` seeds afterwards; the migration's
+-- own membership insert therefore only ever populates environments where the
+-- venues already exist. Both are `on conflict do nothing`, so whichever runs
+-- second adds what the first could not see and overwrites nothing ops changed.
 
 insert into public.collection_venues (collection_slug, venue_id, sort_order)
 select c.slug, v.id, v.price_band
