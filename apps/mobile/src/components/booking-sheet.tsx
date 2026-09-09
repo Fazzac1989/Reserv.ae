@@ -370,7 +370,7 @@ export function BookingSheet({
                   <View
                     className={
                       agreed
-                        ? 'mt-1 h-5 w-5 rounded-sm bg-ink dark:bg-paper'
+                        ? 'mt-1 h-5 w-5 rounded-sm bg-accent'
                         : 'mt-1 h-5 w-5 rounded-sm border border-grey-line'
                     }
                   />

@@ -74,49 +74,95 @@ function Card({
     .filter(Boolean)
     .join(' · ');
 
+  /*
+   * Two shapes, and the difference is deliberate.
+   *
+   * The opener is full-bleed photography with the name over a scrim — the
+   * thing at the top of a page that makes somebody want dinner. A shelf card
+   * is a white card with the photograph inside it and the name underneath,
+   * which is what the reference does and what reads correctly at a third of
+   * the size: text over a small photograph is a caption fighting an image,
+   * and text under one is a label.
+   *
+   * White rather than sand, on purpose. The ground is tinted and a photograph
+   * on a tinted ground picks up the tint; on white it keeps its own colour,
+   * which is the whole reason the cards are a different surface from the page.
+   */
+  if (large) {
+    return (
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={`${listing.name}, ${meta}`}
+        style={{ width }}
+        className="overflow-hidden rounded-card"
+      >
+        {photo ? (
+          <ImageBackground
+            source={{ uri: photo }}
+            // Ink underneath, so the moment before a photograph arrives reads
+            // as a dark card rather than as a broken one.
+            style={{ height, backgroundColor: '#1C1613' }}
+            className="justify-end"
+            resizeMode="cover"
+          >
+            {/*
+              One gradient rather than three stacked boxes. Stacked opacities
+              leave a visible edge wherever one ends, which a dark photograph
+              hides and a bright one does not — and which every photograph
+              shows in the moment before it loads.
+            */}
+            <LinearGradient
+              colors={['transparent', 'rgba(28,22,19,0.35)', 'rgba(28,22,19,0.88)']}
+              locations={[0.35, 0.68, 1]}
+              style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '75%' }}
+            />
+            <View className="p-6">
+              <Title className="text-white">{listing.name}</Title>
+              <Meta className="mt-1.5 text-white/75">{meta}</Meta>
+            </View>
+          </ImageBackground>
+        ) : (
+          <TextCard
+            name={listing.name}
+            meta={meta}
+            note={listing.house_note ?? listing.description}
+            tags={listing.tags ?? []}
+            height={height}
+            large
+          />
+        )}
+      </Pressable>
+    );
+  }
+
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`${listing.name}, ${meta}`}
       style={{ width }}
-      className="overflow-hidden rounded-card"
+      className="overflow-hidden rounded-card bg-paper-raised dark:bg-ink-raised"
     >
       {photo ? (
         <ImageBackground
           source={{ uri: photo }}
-          // Ink underneath, so the moment before a photograph arrives reads as
-          // a dark card rather than as a broken one.
-          style={{ height, backgroundColor: '#0B0B0C' }}
-          className="justify-end"
+          style={{ height: height - 92, backgroundColor: '#1C1613' }}
           resizeMode="cover"
-        >
-          {/*
-            One gradient rather than three stacked boxes. Stacked opacities
-            leave a visible edge wherever one ends, which a dark photograph
-            hides and a bright one does not — and which every photograph shows
-            in the moment before it loads.
-          */}
-          <LinearGradient
-            colors={['transparent', 'rgba(11,11,12,0.35)', 'rgba(11,11,12,0.88)']}
-            locations={[0.35, 0.68, 1]}
-            style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '75%' }}
-          />
-          <View className="p-6">
-            <Title className="text-paper">{listing.name}</Title>
-            <Meta className="mt-1.5 text-paper/70">{meta}</Meta>
-          </View>
-        </ImageBackground>
-      ) : (
-        <TextCard
-          name={listing.name}
-          meta={meta}
-          note={listing.house_note ?? listing.description}
-          tags={listing.tags ?? []}
-          height={height}
-          large={large}
         />
+      ) : (
+        <View
+          style={{ height: height - 92 }}
+          className="items-center justify-center bg-paper"
+        >
+          <Meta>{(listing.tags?.[0] ?? '').toUpperCase()}</Meta>
+        </View>
       )}
+
+      <View className="gap-1 p-4">
+        <Title numberOfLines={1}>{listing.name}</Title>
+        <Meta numberOfLines={1}>{meta}</Meta>
+      </View>
     </Pressable>
   );
 }

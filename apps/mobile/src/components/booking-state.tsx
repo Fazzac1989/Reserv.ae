@@ -45,7 +45,7 @@ export function LiveStatus({ label }: { label: string }) {
       accessibilityLabel={label}
     >
       <Animated.View
-        className="h-2 w-2 rounded-full bg-ink dark:bg-paper"
+        className="h-2 w-2 rounded-full bg-accent"
         style={{ opacity: pulse }}
       />
       <Body className="flex-1">{label}</Body>

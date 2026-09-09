@@ -2,13 +2,15 @@ import { ActivityIndicator, Pressable, Text, type PressableProps } from 'react-n
 import { cn } from '../../lib/cn';
 
 /**
- * `commit` is the one that goes to full contrast, and the name is the point:
- * a stray use is visible in the diff rather than only on the screen. Reserve a
+ * `commit` is the one that carries the accent, and the name is the point: a
+ * stray use is visible in the diff rather than only on the screen. Reserve a
  * table, confirm a time. Nothing else.
  *
- * In a palette of three greys, contrast is the scarce thing — scarcer than any
- * hue would be — so it is what the moment of commitment is spent on. Every
- * other control is a hairline or a word.
+ * The monochrome build spent full contrast here because it had no accent to
+ * spend. Terracotta does the same job more warmly, and the discipline is
+ * unchanged — this variant, the live indicator and the confirmed line, audited
+ * for strays everywhere else. Every other control is still a hairline or a
+ * word.
  */
 type Variant = 'commit' | 'primary' | 'quiet';
 
@@ -20,15 +22,18 @@ interface Props extends Omit<PressableProps, 'children'> {
 }
 
 const CONTAINER: Record<Variant, string> = {
-  // Solid, and the only solid thing on the screen when it appears.
-  commit: 'bg-ink dark:bg-paper',
+  // Solid, and the only solid colour on the screen when it appears.
+  commit: 'bg-accent',
   // Outlined. Present, deliberately quieter than the commitment above it.
   primary: 'border border-grey-line',
   quiet: '',
 };
 
 const LABEL: Record<Variant, string> = {
-  commit: 'text-paper dark:text-ink',
+  // White on terracotta in both schemes. The accent does not invert, because a
+  // button that changes colour with the system theme stops being the one
+  // recognisable thing on the screen.
+  commit: 'text-white',
   primary: 'text-ink dark:text-paper',
   quiet: 'text-grey',
 };
@@ -59,7 +64,7 @@ export function Button({
       {...props}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'commit' ? '#8A8A8E' : '#8A8A8E'} />
+        <ActivityIndicator color={variant === 'commit' ? '#A08A80' : '#A08A80'} />
       ) : (
         <Text className={cn('font-body-medium text-lead', LABEL[variant])}>{label}</Text>
       )}

@@ -250,12 +250,12 @@ export default function PublicVenue() {
               {photo ? (
                 <ImageBackground
                   source={{ uri: photo }}
-                  style={{ height: 380, backgroundColor: '#0B0B0C' }}
+                  style={{ height: 380, backgroundColor: '#1C1613' }}
                   className="mx-7 justify-end overflow-hidden rounded-card"
                   resizeMode="cover"
                 >
                   <LinearGradient
-                    colors={['transparent', 'rgba(11,11,12,0.35)', 'rgba(11,11,12,0.88)']}
+                    colors={['transparent', 'rgba(28,22,19,0.35)', 'rgba(28,22,19,0.88)']}
                     locations={[0.35, 0.68, 1]}
                     style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '75%' }}
                   />
@@ -281,7 +281,7 @@ export default function PublicVenue() {
                     <ImageBackground
                       key={url}
                       source={{ uri: url }}
-                      style={{ width: 200, height: 130, backgroundColor: '#0B0B0C' }}
+                      style={{ width: 200, height: 130, backgroundColor: '#1C1613' }}
                       className="overflow-hidden rounded-card"
                       resizeMode="cover"
                     />

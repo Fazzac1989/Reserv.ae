@@ -92,20 +92,20 @@ export default function Onboarding() {
                   onLongPress={() => setZones((current) => toggle(current, zone.value))}
                   className={
                     isHome
-                      ? 'rounded-card bg-ink px-5 py-4 dark:bg-paper'
+                      ? 'rounded-card bg-accent px-5 py-4'
                       : 'rounded-card border border-grey-line px-5 py-4'
                   }
                 >
                   <Body
                     className={
                       isHome
-                        ? 'font-body-medium text-paper dark:text-ink'
+                        ? 'font-body-medium text-white'
                         : 'font-body-medium text-ink dark:text-paper'
                     }
                   >
                     {zone.label}
                   </Body>
-                  <Muted className={isHome ? 'text-paper/70 dark:text-ink/70' : undefined}>
+                  <Muted className={isHome ? 'text-white/75' : undefined}>
                     {zone.blurb}
                     {!isHome && isAlso ? ' · happy to travel here' : ''}
                   </Muted>
@@ -179,20 +179,20 @@ export default function Onboarding() {
                     onPress={() => setBands((c) => toggle(c, band.value))}
                     className={
                       selected
-                        ? 'rounded-card bg-ink px-5 py-4 dark:bg-paper'
+                        ? 'rounded-card bg-accent px-5 py-4'
                         : 'rounded-card border border-grey-line px-5 py-4'
                     }
                   >
                     <Body
                       className={
                         selected
-                          ? 'font-body-medium text-paper dark:text-ink'
+                          ? 'font-body-medium text-white'
                           : 'font-body-medium text-ink dark:text-paper'
                       }
                     >
                       {band.label}
                     </Body>
-                    <Muted className={selected ? 'text-paper/70 dark:text-ink/70' : undefined}>
+                    <Muted className={selected ? 'text-white/75' : undefined}>
                       {band.blurb}
                     </Muted>
                   </Pressable>

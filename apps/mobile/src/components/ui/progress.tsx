@@ -14,7 +14,7 @@ export function StepProgress({ total, current }: { total: number; current: numbe
       {Array.from({ length: total }, (_, i) => (
         <View
           key={i}
-          className={i <= current ? 'h-px flex-1 bg-ink dark:bg-paper' : 'h-px flex-1 bg-grey-line'}
+          className={i <= current ? 'h-px flex-1 bg-accent' : 'h-px flex-1 bg-grey-line'}
         />
       ))}
     </View>

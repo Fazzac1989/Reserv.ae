@@ -18,9 +18,9 @@ interface Props {
  * by the time a real booking is on offer.
  */
 export function Chip({ label, selected, onPress, tone = 'default' }: Props) {
-  const selectedClass = tone === 'negative' ? 'bg-alert/15' : 'bg-ink dark:bg-paper';
+  const selectedClass = tone === 'negative' ? 'bg-alert/15' : 'bg-accent';
 
-  const selectedLabel = tone === 'negative' ? 'text-alert' : 'text-paper dark:text-ink';
+  const selectedLabel = tone === 'negative' ? 'text-alert' : 'text-white';
 
   return (
     <Pressable

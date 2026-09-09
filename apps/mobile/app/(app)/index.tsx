@@ -117,7 +117,7 @@ export default function Discover() {
           // asks for a keyword, and this asks for the thing people actually
           // arrive with.
           placeholder="What are you in the mood for?"
-          placeholderTextColor="#8A8A8E"
+          placeholderTextColor="#A08A80"
           returnKeyType="search"
           onSubmitEditing={search}
           accessibilityLabel={`Search restaurants or ask ${BRAND.assistant}`}

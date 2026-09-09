@@ -9,32 +9,52 @@ module.exports = {
     extend: {
       colors: {
         /**
-         * Black, white and grey. See DESIGN.md.
+         * Terracotta on warm sand. See DESIGN.md.
          *
-         * The earlier palette was warm — a cream ground and a champagne
-         * accent — and warmth reads as dated next to the products this is
-         * measured against. These are neutral: no blue in the black, no yellow
-         * in the white, so a photograph is the only colour on the screen.
+         * This is the third palette. It was cream and champagne, then black and
+         * grey, and it is warm again — which is worth being honest about rather
+         * than quietly reversing. The monochrome was correct about one thing and
+         * wrong about another: it was right that a tinted ground fights a
+         * photograph, and wrong that the answer was to remove all warmth. A
+         * gallery wall is the right reference for a gallery. It is not the right
+         * reference for somewhere you take somebody to dinner.
+         *
+         * The ground is tinted and the cards are white, which is what stops the
+         * tint reaching the photography: a photograph sits on white here, not on
+         * sand, so it keeps its own colour.
          */
         ink: {
-          DEFAULT: '#0B0B0C',
-          // The one surface that lifts off the base. A hair, not a step.
-          raised: '#171719',
+          // Warm near-black rather than neutral. On a sand ground a blue-black
+          // reads as a hole punched in the page.
+          DEFAULT: '#2A211D',
+          raised: '#1C1613',
         },
         paper: {
-          DEFAULT: '#F6F6F7',
+          // The ground. Everything sits on this.
+          DEFAULT: '#F9E7DE',
+          // Cards, sheets, anything that lifts. White on purpose — it is what
+          // keeps a photograph's colour honest against a tinted page.
           raised: '#FFFFFF',
         },
         grey: {
-          DEFAULT: '#8A8A8E',
-          // Hairlines. Anywhere a border would otherwise be drawn.
-          line: 'rgba(138, 138, 142, 0.16)',
+          DEFAULT: '#A08A80',
+          line: 'rgba(160, 138, 128, 0.22)',
         },
         /**
-         * The only chromatic colour in the application, and it means something
-         * went wrong. Success is not a colour here — it is full contrast, which
-         * is scarcer than any hue in a palette made of three greys.
+         * The accent, back after a spell with none.
+         *
+         * Monochrome spent contrast where an accent would go, which worked and
+         * was austere. This is the warmer answer: terracotta carries the
+         * moment of commitment and nothing else. The discipline is unchanged —
+         * it appears on the reserve action, the live indicator and the
+         * confirmed line, and is audited for strays everywhere else.
          */
+        accent: {
+          DEFAULT: '#DE8B63',
+          // Darkened for text-sized uses, where the lighter value fails AA on
+          // a sand ground.
+          text: '#B96A44',
+        },
         alert: '#C2453D',
       },
       fontFamily: {
@@ -52,7 +72,10 @@ module.exports = {
         meta: ['12px', { lineHeight: '16px', letterSpacing: '1.4px' }],
       },
       borderRadius: {
-        card: '14px',
+        // Rounder than the monochrome build. A 14px corner reads as
+        // architectural; this reads as an object you could pick up, which is
+        // the register the whole palette moved to.
+        card: '20px',
         input: '999px',
       },
     },

@@ -3,20 +3,19 @@ import { Pressable, View } from 'react-native';
 import { Tabs } from 'expo-router';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Feather } from '@expo/vector-icons';
 import { Meta } from '../../src/components/ui/text';
 import { registerForPush } from '../../src/lib/notifications';
 
 /**
- * Four places, named in words.
+ * Four places, as icons with a word under each.
  *
- * It was five. Home and Discover were separate tabs, and the top one answered
- * "what is happening today" while the one below answered "where should I go" —
- * which is the question people open this app with. They are one screen now,
- * so the greeting and the shelves are no longer a tab apart.
- *
- * Icons are what a tab bar reaches for when it has more destinations than it
- * can label. At four it can label all of them, and a word says which of My
- * Plans and Discover you are about to open where two pictograms would not.
+ * The monochrome build argued that at four destinations a bar can label all of
+ * them and a word beats a pictogram. That was true and this is a deliberate
+ * departure from it: the reference this design follows uses an icon bar, an
+ * icon bar is what a consumer app in this category looks like, and the word is
+ * kept underneath so nothing is actually guessed at. It is both, at the cost
+ * of a few pixels of height.
  *
  * The route names are unchanged even where the labels are not: `/suhail` and
  * `/you` are already linked to from inside the app and from notifications, and
@@ -24,10 +23,10 @@ import { registerForPush } from '../../src/lib/notifications';
  */
 
 const DESTINATIONS = [
-  { name: 'index', label: 'Discover' },
-  { name: 'suhail', label: 'Ask Reserv' },
-  { name: 'plans', label: 'My Plans' },
-  { name: 'you', label: 'Profile' },
+  { name: 'index', label: 'Discover', icon: 'home' },
+  { name: 'suhail', label: 'Ask Reserv', icon: 'message-circle' },
+  { name: 'plans', label: 'My Plans', icon: 'calendar' },
+  { name: 'you', label: 'Profile', icon: 'user' },
 ] as const;
 
 function TabBar({ state, navigation }: BottomTabBarProps) {
@@ -61,21 +60,22 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
             className="min-h-[44px] flex-1 items-center justify-center"
           >
             {/*
-              The current place is ink; the others are grey. No pill, no
-              underline, no fill. Full contrast is what a booking at stake is paid
-              in, and which tab you are on is not that.
+              The accent marks the current tab, which is the fourth thing it is
+              spent on and the reason the old "commitment only" rule no longer
+              holds. Everything else in the bar is grey.
+
+              Tracking is tightened from the 1.4px the meta size carries
+              everywhere else: two of these labels are two words, and at full
+              tracking four sit shoulder to shoulder with no air between.
             */}
-            {/*
-              Tracking tightened from the 1.4px the meta size carries
-              everywhere else. Two of these labels are two words, and at full
-              tracking four of them sit shoulder to shoulder with no air
-              between. This is the one place the type scale is overridden, and
-              it is because the bar has a width rather than because it looks
-              better in isolation.
-            */}
+            <Feather
+              name={destination.icon}
+              size={20}
+              color={focused ? '#DE8B63' : '#A08A80'}
+            />
             <Meta
               numberOfLines={1}
-              className={`tracking-[0.6px] ${focused ? 'text-ink dark:text-paper' : ''}`}
+              className={`mt-1 tracking-[0.6px] ${focused ? 'text-accent-text' : ''}`}
             >
               {destination.label}
             </Meta>
