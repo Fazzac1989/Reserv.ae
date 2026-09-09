@@ -107,6 +107,7 @@ export default function AppLayout() {
         preferences sit behind Profile. A bar with eight things in it is a menu.
       */}
       <Tabs.Screen name="discover" options={{ href: null }} />
+      <Tabs.Screen name="compare" options={{ href: null }} />
       <Tabs.Screen name="you" options={{ href: null }} />
       <Tabs.Screen name="search" options={{ href: null }} />
       <Tabs.Screen name="knows" options={{ href: null }} />

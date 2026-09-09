@@ -7,3 +7,4 @@ export * from './lifecycle/index';
 export * from './memory/index';
 export * from './venue/answers';
 export * from './money/index';
+export * from './options/index';
