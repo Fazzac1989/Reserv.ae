@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import type { AgentServiceEnv } from '@reservai/config';
 import { enabledRails } from '@reservai/config';
-import { nextChannel, type VenueBookingChannel } from '@reservai/core';
+import { ACTIVE_BOOKING_STATES, nextChannel, type VenueBookingChannel } from '@reservai/core';
 import { ClaudeProvider } from '@reservai/ai';
 import { requireUser } from '../auth';
 import { serviceClient, userClient } from '../supabase';
@@ -69,20 +69,23 @@ export async function registerLifecycleRoutes(
     const rows = data ?? [];
 
     return reply.send({
-      // Split here rather than in the app: "upcoming" means the same thing on
-      // every surface, and the rule lives in one place.
+      /*
+       * Split here rather than in the app: "upcoming" means the same thing on
+       * every surface, and the rule lives in one place.
+       *
+       * `alternative_offered` and `cancellation_requested` were missing when
+       * those states were added, and the omission was the worst possible one:
+       * a venue offering a different time is the single thing most worth
+       * telling somebody about, and it was the one status that could never
+       * reach them. The ops console had the same gap in its own list. Two
+       * places to update and no test that notices — the reason the list is
+       * spelled out here is so the next state added is a visible diff, but a
+       * visible diff nobody looks at is what happened twice now.
+       */
       upcoming: rows.filter(
         (b) =>
           Date.parse(b.scheduled_for) > now &&
-          [
-            'draft',
-            'user_approved',
-            'attempting',
-            'pending_venue',
-            'escalated',
-            'confirmed',
-            'reminded',
-          ].includes(b.status),
+          (ACTIVE_BOOKING_STATES as readonly string[]).includes(b.status),
       ),
       past: rows.filter(
         (b) =>

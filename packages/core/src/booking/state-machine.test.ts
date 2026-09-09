@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  ACTIVE_BOOKING_STATES,
+  UNSETTLED_BOOKING_STATES,
   ACTORS,
   BOOKING_EVENTS,
   BOOKING_STATES,
@@ -448,5 +450,42 @@ describe('rail fallback path', () => {
       'reminded -remind-> reminded',
       'reminded -complete-> completed',
     ]);
+  });
+});
+
+describe('the derived state lists', () => {
+  /*
+   * These exist because the same mistake happened twice. Two places listed
+   * booking states by hand, a state was added, and both lists were left
+   * behind — one of which meant a venue's counter-offer could never reach the
+   * person it was for.
+   */
+  it('counts every non-terminal state as active', () => {
+    for (const state of BOOKING_STATES) {
+      const active = (ACTIVE_BOOKING_STATES as readonly BookingState[]).includes(state);
+      expect(active, `${state}`).toBe(!isTerminal(state));
+    }
+  });
+
+  it('includes the states most likely to be forgotten', () => {
+    // Named rather than left to the derivation, so a future change that
+    // narrows the list has to delete a test that says why they matter.
+    expect(ACTIVE_BOOKING_STATES).toContain('alternative_offered');
+    expect(ACTIVE_BOOKING_STATES).toContain('cancellation_requested');
+    expect(UNSETTLED_BOOKING_STATES).toContain('alternative_offered');
+    expect(UNSETTLED_BOOKING_STATES).toContain('cancellation_requested');
+  });
+
+  it('treats a confirmed booking as active but not as work', () => {
+    expect(ACTIVE_BOOKING_STATES).toContain('confirmed');
+    expect(UNSETTLED_BOOKING_STATES).not.toContain('confirmed');
+    expect(UNSETTLED_BOOKING_STATES).not.toContain('reminded');
+  });
+
+  it('never counts a finished booking as either', () => {
+    for (const state of TERMINAL_STATES) {
+      expect(ACTIVE_BOOKING_STATES).not.toContain(state);
+      expect(UNSETTLED_BOOKING_STATES).not.toContain(state);
+    }
   });
 });

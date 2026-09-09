@@ -1,3 +1,4 @@
+import { UNSETTLED_BOOKING_STATES } from '@reservai/core';
 import type { Database } from '@reservai/db';
 import { createClient } from '../supabase/server';
 
@@ -25,15 +26,7 @@ export interface QueueRow {
  * is waiting on the guest and one is waiting on us — and the ops console is
  * where somebody notices when the guest never answers.
  */
-const OPEN_STATES: BookingState[] = [
-  'draft',
-  'user_approved',
-  'attempting',
-  'pending_venue',
-  'alternative_offered',
-  'cancellation_requested',
-  'escalated',
-];
+const OPEN_STATES = UNSETTLED_BOOKING_STATES;
 
 export async function listQueue(includeSettled = false): Promise<QueueRow[]> {
   const supabase = await createClient();

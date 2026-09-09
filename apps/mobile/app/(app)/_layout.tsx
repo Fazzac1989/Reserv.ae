@@ -8,25 +8,28 @@ import { Meta } from '../../src/components/ui/text';
 import { registerForPush } from '../../src/lib/notifications';
 
 /**
- * Four places, as icons with a word under each.
+ * Today, Plans, Ask, Saved.
  *
- * The monochrome build argued that at four destinations a bar can label all of
- * them and a word beats a pictogram. That was true and this is a deliberate
- * departure from it: the reference this design follows uses an icon bar, an
- * icon bar is what a consumer app in this category looks like, and the word is
- * kept underneath so nothing is actually guessed at. It is both, at the cost
- * of a few pixels of height.
+ * Discover is not here any more and Profile never was a destination — both are
+ * reached from Today. The change follows the promise: "your plans, taken care
+ * of" means the first screen answers what is happening and what needs deciding,
+ * and a bar whose first stop is a restaurant list answers a question nobody
+ * opened the app to ask. Discovery supports that; it does not lead it.
  *
- * The route names are unchanged even where the labels are not: `/suhail` and
- * `/you` are already linked to from inside the app and from notifications, and
- * renaming a working URL to match a label is a cost with no reader.
+ * Ask sits third rather than last because it is the thing people reach for when
+ * the other three did not have the answer, and the middle of a bar is where a
+ * thumb rests.
+ *
+ * The route names are unchanged where they already worked: `/suhail` is linked
+ * from notifications and from half a dozen screens, and renaming a working URL
+ * to match a label is a cost with no reader.
  */
 
 const DESTINATIONS = [
-  { name: 'index', label: 'Discover', icon: 'home' },
-  { name: 'suhail', label: 'Ask Reserv', icon: 'message-circle' },
-  { name: 'plans', label: 'My Plans', icon: 'calendar' },
-  { name: 'you', label: 'Profile', icon: 'user' },
+  { name: 'index', label: 'Today', icon: 'sun' },
+  { name: 'plans', label: 'Plans', icon: 'calendar' },
+  { name: 'suhail', label: 'Ask', icon: 'message-circle' },
+  { name: 'saved', label: 'Saved', icon: 'bookmark' },
 ] as const;
 
 function TabBar({ state, navigation }: BottomTabBarProps) {
@@ -98,8 +101,13 @@ export default function AppLayout() {
       {DESTINATIONS.map((d) => (
         <Tabs.Screen key={d.name} name={d.name} options={{ title: d.label }} />
       ))}
-      {/* Reached from a screen rather than the bar: search from Discover, the
-          other two from Profile. */}
+      {/*
+        Reached from a screen rather than the bar. Discover and Profile are one
+        tap from Today; search is one tap from Discover; Household, Routines and
+        preferences sit behind Profile. A bar with eight things in it is a menu.
+      */}
+      <Tabs.Screen name="discover" options={{ href: null }} />
+      <Tabs.Screen name="you" options={{ href: null }} />
       <Tabs.Screen name="search" options={{ href: null }} />
       <Tabs.Screen name="knows" options={{ href: null }} />
       <Tabs.Screen name="profile" options={{ href: null }} />

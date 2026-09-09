@@ -121,3 +121,31 @@ export type Actor = (typeof ACTORS)[number];
  * the cost of an ops task.
  */
 export const CONFIRMATION_CONFIDENCE_THRESHOLD = 0.9;
+
+/**
+ * Every state a booking can be in that is not over.
+ *
+ * Derived rather than listed, and the reason is a bug that happened twice.
+ * When `alternative_offered` and `cancellation_requested` were added, two
+ * places enumerated booking states by hand — the app's "upcoming" split and
+ * the ops console's queue — and both were missed. The second one meant a venue
+ * offering a different time could never reach the person who had to decide,
+ * which is the single most important message this product sends.
+ *
+ * A hand-written list is a list somebody has to remember to update. This one
+ * cannot fall behind the state machine because it is computed from it.
+ */
+export const ACTIVE_BOOKING_STATES = BOOKING_STATES.filter(
+  (s) => !(TERMINAL_STATES as readonly BookingState[]).includes(s),
+);
+
+/**
+ * Active, and not yet at rest.
+ *
+ * The ops queue wants a narrower set than the app does: a confirmed booking is
+ * still active — it is in the person's week — but it is not work. This is what
+ * somebody has to do something about.
+ */
+export const UNSETTLED_BOOKING_STATES = ACTIVE_BOOKING_STATES.filter(
+  (s) => s !== 'confirmed' && s !== 'reminded',
+);
