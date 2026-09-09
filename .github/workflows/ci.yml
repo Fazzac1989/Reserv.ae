@@ -16,9 +16,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # No `version` here on purpose. `packageManager` in package.json is
+      # the one that binds locally, and declaring it twice is not redundancy —
+      # the action refuses to start when the two disagree, which is how every
+      # run since the pnpm bump has failed before reaching a single check.
       - uses: pnpm/action-setup@v4
-        with:
-          version: 11
 
       - uses: actions/setup-node@v4
         with:
