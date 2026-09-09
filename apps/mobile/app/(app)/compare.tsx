@@ -98,7 +98,7 @@ function OptionCard({
       {option.photo ? (
         <Image
           source={{ uri: option.photo }}
-          style={{ height: 150, backgroundColor: '#1C1613' }}
+          style={{ height: 150, backgroundColor: '#171A16' }}
           resizeMode="cover"
         />
       ) : null}
@@ -145,9 +145,9 @@ function OptionCard({
           <Feather
             name={state === 'confirmed' ? 'check-circle' : 'clock'}
             size={14}
-            color={state === 'confirmed' ? '#DE8B63' : '#A08A80'}
+            color={state === 'confirmed' ? '#183F35' : '#8A8F86'}
           />
-          <Meta className={state === 'confirmed' ? 'text-accent-text' : undefined}>
+          <Meta className={state === 'confirmed' ? 'text-accent' : undefined}>
             {availabilityLabelOf(facts)}
           </Meta>
         </View>

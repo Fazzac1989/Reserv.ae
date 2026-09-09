@@ -64,7 +64,7 @@ export function Button({
       {...props}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'commit' ? '#A08A80' : '#A08A80'} />
+        <ActivityIndicator color={variant === 'commit' ? '#8A8F86' : '#8A8F86'} />
       ) : (
         <Text className={cn('font-body-medium text-lead', LABEL[variant])}>{label}</Text>
       )}

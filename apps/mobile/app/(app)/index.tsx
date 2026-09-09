@@ -11,6 +11,7 @@ import { LiveStatus } from '../../src/components/booking-state';
 import { listReservations, type Reservation } from '../../src/lib/agent';
 import { useProfile } from '../../src/lib/profile';
 import { statusCopy } from '../../src/components/reservation-card';
+import { StatusPill, toneForCopy } from '../../src/components/ui/status-pill';
 
 /**
  * Today.
@@ -92,22 +93,30 @@ function WeekStrip({ bookings }: { bookings: Reservation[] }) {
 
 function Entry({ booking, onPress }: { booking: Reservation; onPress: () => void }) {
   const status = statusCopy(booking);
-  const settled = ['confirmed', 'reminded'].includes(booking.status);
 
+  /*
+   * Every row carries a pill, confirmed ones included.
+   *
+   * The previous build hid the label on a settled booking, on the reasoning
+   * that a confirmed table needs no explanation. That is true when you read
+   * the row and false when you scan the screen — and scanning is what this
+   * screen is for. A green "Confirmed" beside a table is the reassurance
+   * somebody opened the app to get.
+   */
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${booking.venues?.name ?? 'Reservation'} at ${clock(booking.scheduled_for)}`}
+      accessibilityLabel={`${booking.venues?.name ?? 'Reservation'} at ${clock(booking.scheduled_for)}, ${status.label}`}
       className="min-h-[44px] flex-row gap-5 py-4"
     >
       <Meta className="w-14 pt-1.5">{clock(booking.scheduled_for)}</Meta>
-      <View className="flex-1 gap-0.5">
+      <View className="flex-1 gap-1.5">
         <Title>{booking.venues?.name ?? 'Reservation'}</Title>
         <Body className="text-grey">
           {booking.party_size === 1 ? 'Just you' : `Table for ${booking.party_size}`}
         </Body>
-        {settled ? null : <Meta className="mt-1 text-grey">{status.label}</Meta>}
+        <StatusPill tone={toneForCopy(status.tone)} label={status.short} />
       </View>
     </Pressable>
   );
@@ -150,7 +159,7 @@ export default function Today() {
           accessibilityLabel="Your profile"
           className="min-h-[44px] w-11 items-end justify-center"
         >
-          <Feather name="user" size={22} color="#A08A80" />
+          <Feather name="user" size={22} color="#8A8F86" />
         </Pressable>
       </View>
 
@@ -164,7 +173,7 @@ export default function Today() {
           value={draft}
           onChangeText={setDraft}
           placeholder="What would you like me to arrange?"
-          placeholderTextColor="#A08A80"
+          placeholderTextColor="#8A8F86"
           returnKeyType="send"
           onSubmitEditing={() => ask()}
           accessibilityLabel={`Ask ${BRAND.name} to arrange something`}
@@ -198,7 +207,7 @@ export default function Today() {
       */}
       {decisions.length > 0 ? (
         <View className="gap-3 rounded-card border border-accent/40 bg-paper-raised p-5 dark:bg-ink-raised">
-          <Meta className="text-accent-text">Needs your decision</Meta>
+          <Meta className="text-accent">Needs your decision</Meta>
           {decisions.map((booking) => (
             <Pressable
               key={booking.id}
@@ -290,7 +299,7 @@ export default function Today() {
           <Title>Have a look around</Title>
           <Muted>Places {BRAND.name} can actually get you into.</Muted>
         </View>
-        <Feather name="chevron-right" size={20} color="#A08A80" />
+        <Feather name="chevron-right" size={20} color="#8A8F86" />
       </Pressable>
     </ScreenScroll>
   );

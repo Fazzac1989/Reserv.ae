@@ -13,7 +13,7 @@ export function TextField({ label, hint, containerClassName, className, ...props
     <View className={cn('gap-2.5', containerClassName)}>
       {label ? <Meta>{label}</Meta> : null}
       <TextInput
-        placeholderTextColor="#A08A80"
+        placeholderTextColor="#8A8F86"
         className={cn(
           'rounded-input border border-grey-line px-5 py-4 font-body text-lead text-ink',
           'dark:text-paper',

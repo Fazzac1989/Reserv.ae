@@ -9,53 +9,71 @@ module.exports = {
     extend: {
       colors: {
         /**
-         * Terracotta on warm sand. See DESIGN.md.
+         * Forest green on warm ivory. See DESIGN.md.
          *
-         * This is the third palette. It was cream and champagne, then black and
-         * grey, and it is warm again — which is worth being honest about rather
-         * than quietly reversing. The monochrome was correct about one thing and
-         * wrong about another: it was right that a tinted ground fights a
-         * photograph, and wrong that the answer was to remove all warmth. A
-         * gallery wall is the right reference for a gallery. It is not the right
-         * reference for somewhere you take somebody to dinner.
+         * The fourth palette, and the approved one. It was cream and
+         * champagne, then black and grey, then terracotta on sand from a
+         * reference image, and it is this because the design board and the
+         * written brief agree — the earlier answer was given without the board
+         * in front of us.
          *
-         * The ground is tinted and the cards are white, which is what stops the
-         * tint reaching the photography: a photograph sits on white here, not on
-         * sand, so it keeps its own colour.
+         * What survives from the terracotta build is the thing that actually
+         * mattered: the ground is tinted and the cards are white. A photograph
+         * on a tinted ground picks up the tint; on a white card it keeps its
+         * own colour. That was the structural fix for the objection that
+         * killed the first warm palette, and it holds here.
          */
         ink: {
-          // Warm near-black rather than neutral. On a sand ground a blue-black
-          // reads as a hole punched in the page.
-          DEFAULT: '#2A211D',
-          raised: '#1C1613',
+          // Charcoal with a green cast rather than neutral black. On ivory a
+          // true black reads as a hole; this sits in the same family as the
+          // primary without competing with it.
+          DEFAULT: '#2B2E2A',
+          raised: '#171A16',
         },
         paper: {
-          // The ground. Everything sits on this.
-          DEFAULT: '#F9E7DE',
-          // Cards, sheets, anything that lifts. White on purpose — it is what
-          // keeps a photograph's colour honest against a tinted page.
+          DEFAULT: '#FAF8F3',
           raised: '#FFFFFF',
         },
         grey: {
-          DEFAULT: '#A08A80',
-          line: 'rgba(160, 138, 128, 0.22)',
+          DEFAULT: '#8A8F86',
+          line: 'rgba(138, 143, 134, 0.24)',
         },
         /**
-         * The accent, back after a spell with none.
+         * The primary, and the fourth thing it is spent on is the current tab.
          *
-         * Monochrome spent contrast where an accent would go, which worked and
-         * was austere. This is the warmer answer: terracotta carries the
-         * moment of commitment and nothing else. The discipline is unchanged —
-         * it appears on the reserve action, the live indicator and the
-         * confirmed line, and is audited for strays everywhere else.
+         * Dark enough to carry white text at any size, which is why there is no
+         * separate text variant here: the same green works as a fill and as a
+         * word, and a palette with two greens is a palette somebody eventually
+         * picks the wrong one from.
          */
         accent: {
-          DEFAULT: '#DE8B63',
-          // Darkened for text-sized uses, where the lighter value fails AA on
-          // a sand ground.
-          text: '#B96A44',
+          DEFAULT: '#183F35',
+          // The muted panel from the board — a sage wash for anything that
+          // needs to sit apart from the page without becoming a card.
+          panel: '#E7EDE8',
         },
-        alert: '#C2453D',
+        /**
+         * Waiting on somebody else.
+         *
+         * Its own colour because "confirmed" and "awaiting the venue" are the
+         * two states a person scans this app for, and telling them apart by
+         * reading is slower than telling them apart by colour. Amber rather
+         * than red: nothing has gone wrong, it simply has not happened yet.
+         */
+        pending: {
+          DEFAULT: '#C77D3A',
+          // The amber laid over the ivory ground, mixed once here rather than
+          // asked for as an opacity at the call site. `bg-pending/12` looked
+          // right in the source and emitted no rule at all, because 12 is not a
+          // step on Tailwind's opacity scale — a class that silently does
+          // nothing is worse than one that errors. Every tone now names a solid
+          // colour, which is also what the confirmed pill already did.
+          panel: '#F1E2D2',
+        },
+        alert: {
+          DEFAULT: '#C2453D',
+          panel: '#F0D8D2',
+        },
       },
       fontFamily: {
         display: ['Fraunces_400Regular'],
@@ -75,7 +93,10 @@ module.exports = {
         // Rounder than the monochrome build. A 14px corner reads as
         // architectural; this reads as an object you could pick up, which is
         // the register the whole palette moved to.
-        card: '20px',
+        // 16, per the brief. The terracotta build used 20, which reads softer
+        // and slightly more toylike; 16 is the editorial register the board is
+        // in.
+        card: '16px',
         input: '999px',
       },
     },

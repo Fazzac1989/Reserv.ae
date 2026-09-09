@@ -26,10 +26,18 @@ import { registerForPush } from '../../src/lib/notifications';
  */
 
 const DESTINATIONS = [
-  { name: 'index', label: 'Today', icon: 'sun' },
-  { name: 'plans', label: 'Plans', icon: 'calendar' },
-  { name: 'suhail', label: 'Ask', icon: 'message-circle' },
-  { name: 'saved', label: 'Saved', icon: 'bookmark' },
+  { name: 'index', label: 'Today', icon: 'home', raised: false },
+  { name: 'plans', label: 'Plans', icon: 'calendar', raised: false },
+  /*
+   * Ask is a raised circle rather than a flat icon, per the board.
+   *
+   * It is the one destination that is a verb. The other three are places you
+   * look at; this is the thing you press when none of them had the answer, and
+   * making it physically different is the difference between a tab bar and a
+   * tab bar with a front door in it.
+   */
+  { name: 'suhail', label: 'Ask', icon: 'mic', raised: true },
+  { name: 'saved', label: 'Saved', icon: 'bookmark', raised: false },
 ] as const;
 
 function TabBar({ state, navigation }: BottomTabBarProps) {
@@ -63,22 +71,45 @@ function TabBar({ state, navigation }: BottomTabBarProps) {
             className="min-h-[44px] flex-1 items-center justify-center"
           >
             {/*
-              The accent marks the current tab, which is the fourth thing it is
-              spent on and the reason the old "commitment only" rule no longer
-              holds. Everything else in the bar is grey.
-
-              Tracking is tightened from the 1.4px the meta size carries
-              everywhere else: two of these labels are two words, and at full
-              tracking four sit shoulder to shoulder with no air between.
+              A fixed slot the icon sits in, so the four labels share a
+              baseline. The raised circle used to be pushed up with a negative
+              margin, which moved the row's own height with it and left "Ask"
+              twelve pixels below its neighbours. Out of the flow entirely, the
+              circle can be as tall as it likes and the labels never know.
             */}
-            <Feather
-              name={destination.icon}
-              size={20}
-              color={focused ? '#DE8B63' : '#A08A80'}
-            />
+            <View className="h-5 w-14 items-center justify-center">
+              {destination.raised ? (
+                <View
+                  className="absolute bottom-0 h-14 w-14 items-center justify-center rounded-full bg-accent"
+                  // A real shadow rather than a border. The circle has to read
+                  // as sitting above the bar, and an outline reads as a hole in
+                  // it.
+                  style={{
+                    shadowColor: '#183F35',
+                    shadowOpacity: 0.28,
+                    shadowRadius: 12,
+                    shadowOffset: { width: 0, height: 4 },
+                    elevation: 6,
+                  }}
+                >
+                  <Feather name={destination.icon} size={22} color="#FFFFFF" />
+                </View>
+              ) : (
+                <Feather
+                  name={destination.icon}
+                  size={20}
+                  color={focused ? '#183F35' : '#8A8F86'}
+                />
+              )}
+            </View>
+            {/*
+              The accent marks the current tab. Tracking is tightened from the
+              1.4px the meta size carries everywhere else, because four labels
+              at full tracking sit shoulder to shoulder with no air between.
+            */}
             <Meta
               numberOfLines={1}
-              className={`mt-1 tracking-[0.6px] ${focused ? 'text-accent-text' : ''}`}
+              className={`mt-1 tracking-[0.6px] ${focused ? 'text-accent' : ''}`}
             >
               {destination.label}
             </Meta>

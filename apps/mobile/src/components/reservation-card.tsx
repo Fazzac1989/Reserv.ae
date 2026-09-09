@@ -16,8 +16,19 @@ import type { Reservation } from '../lib/agent';
  * they wait behind a tap instead of crowding every row with controls.
  */
 
-interface StatusCopy {
+export interface StatusCopy {
+  /** The sentence a card can afford. */
   label: string;
+  /**
+   * The same fact in two or three words, for a pill.
+   *
+   * Kept beside the long label rather than derived from the state a second
+   * time somewhere else. "They have offered another time" is right on a card
+   * and wraps onto two lines inside a pill, which stops being a pill; but two
+   * functions each deciding what a state means is how the long one and the
+   * short one end up disagreeing.
+   */
+  short: string;
   detail: string;
   tone: 'settled' | 'working' | 'attention' | 'closed';
 }
@@ -26,55 +37,77 @@ export function statusCopy(reservation: Reservation): StatusCopy {
   switch (reservation.status) {
     case 'confirmed':
     case 'reminded':
-      return { label: 'Confirmed', detail: 'The venue has your table.', tone: 'settled' };
+      return {
+        label: 'Confirmed',
+        short: 'Confirmed',
+        detail: 'The venue has your table.',
+        tone: 'settled',
+      };
     case 'draft':
       return {
         label: 'Not confirmed yet',
+        short: 'Needs approval',
         detail: 'Waiting for you to approve it.',
         tone: 'working',
       };
     case 'user_approved':
       return {
         label: 'Arranging',
+        short: 'Arranging',
         detail: 'I am getting in touch with the venue.',
         tone: 'working',
       };
     case 'attempting':
-      return { label: 'Arranging', detail: 'Speaking to the venue now.', tone: 'working' };
+      return {
+        label: 'Arranging',
+        short: 'Arranging',
+        detail: 'Speaking to the venue now.',
+        tone: 'working',
+      };
     case 'pending_venue':
       return {
         label: 'Waiting on the venue',
+        short: 'With the venue',
         detail: 'I have asked and am waiting for them to confirm.',
         tone: 'working',
       };
     case 'alternative_offered':
       return {
         label: 'They have offered another time',
+        short: 'New time offered',
         detail: 'Have a look — nothing is booked until you say yes.',
         tone: 'attention',
       };
     case 'cancellation_requested':
       return {
         label: 'Cancelling',
+        short: 'Cancelling',
         detail: 'I am telling the venue. The table is still theirs until they answer.',
         tone: 'working',
       };
     case 'escalated':
       return {
         label: 'Taking longer',
+        short: 'Taking longer',
         detail: 'Someone is sorting this out by hand. I will update you.',
         tone: 'attention',
       };
     case 'cancelled':
-      return { label: 'Cancelled', detail: 'This is no longer booked.', tone: 'closed' };
+      return {
+        label: 'Cancelled',
+        short: 'Cancelled',
+        detail: 'This is no longer booked.',
+        tone: 'closed',
+      };
     case 'failed':
       return {
         label: 'Could not book it',
+        short: 'Not booked',
         detail: 'The venue could not take it. Ask me for somewhere else.',
         tone: 'attention',
       };
     default:
-      return { label: 'Done', detail: '', tone: 'closed' };
+      return { label: 'Done', short: 'Done', detail: '', tone: 'closed' };
   }
 }
 

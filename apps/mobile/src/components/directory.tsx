@@ -102,7 +102,7 @@ function Card({
             source={{ uri: photo }}
             // Ink underneath, so the moment before a photograph arrives reads
             // as a dark card rather than as a broken one.
-            style={{ height, backgroundColor: '#1C1613' }}
+            style={{ height, backgroundColor: '#171A16' }}
             className="justify-end"
             resizeMode="cover"
           >
@@ -113,7 +113,7 @@ function Card({
               shows in the moment before it loads.
             */}
             <LinearGradient
-              colors={['transparent', 'rgba(28,22,19,0.35)', 'rgba(28,22,19,0.88)']}
+              colors={['transparent', 'rgba(23,26,22,0.35)', 'rgba(23,26,22,0.88)']}
               locations={[0.35, 0.68, 1]}
               style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '75%' }}
             />
@@ -147,7 +147,7 @@ function Card({
       {photo ? (
         <ImageBackground
           source={{ uri: photo }}
-          style={{ height: height - 92, backgroundColor: '#1C1613' }}
+          style={{ height: height - 92, backgroundColor: '#171A16' }}
           resizeMode="cover"
         />
       ) : (

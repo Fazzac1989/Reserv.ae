@@ -124,7 +124,7 @@ function AuthGate() {
         // being left to infer one.
         contentStyle: {
           flex: 1,
-          backgroundColor: scheme === 'dark' ? '#1C1613' : '#F9E7DE',
+          backgroundColor: scheme === 'dark' ? '#171A16' : '#FAF8F3',
         },
       }}
     />

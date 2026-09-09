@@ -55,7 +55,7 @@ function Result({
       {photo ? (
         <Image
           source={{ uri: photo }}
-          style={{ width: 96, height: 96, backgroundColor: '#1C1613' }}
+          style={{ width: 96, height: 96, backgroundColor: '#171A16' }}
           className="rounded-card"
           resizeMode="cover"
         />
@@ -149,7 +149,7 @@ export function VenueSearch({
             onChangeText={setDraft}
             onSubmitEditing={() => update({ q: draft })}
             placeholder="Restaurant, cuisine, area…"
-            placeholderTextColor="#A08A80"
+            placeholderTextColor="#8A8F86"
             returnKeyType="search"
             autoCorrect={false}
             accessibilityLabel="Search venues"

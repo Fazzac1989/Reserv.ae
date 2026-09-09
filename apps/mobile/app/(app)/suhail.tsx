@@ -398,7 +398,7 @@ export default function Conversation() {
                 value={draft}
                 onChangeText={setDraft}
                 placeholder="Ask for something…"
-                placeholderTextColor="#A08A80"
+                placeholderTextColor="#8A8F86"
                 multiline
                 editable={!thinking}
                 returnKeyType="send"
