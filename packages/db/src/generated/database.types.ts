@@ -168,6 +168,7 @@ export type Database = {
           consent_shared: Json | null
           consent_version: string | null
           created_at: string
+          deposit_fils: number | null
           earliest_acceptable: string | null
           external_ref: string | null
           guest_name: string | null
@@ -180,6 +181,9 @@ export type Database = {
           offered_note: string | null
           offered_start: string | null
           party_size: number
+          price_checked_at: string | null
+          price_fils: number | null
+          price_source: Database["public"]["Enums"]["price_source"] | null
           provider_name: string | null
           rated_at: string | null
           rating: number | null
@@ -208,6 +212,7 @@ export type Database = {
           consent_shared?: Json | null
           consent_version?: string | null
           created_at?: string
+          deposit_fils?: number | null
           earliest_acceptable?: string | null
           external_ref?: string | null
           guest_name?: string | null
@@ -220,6 +225,9 @@ export type Database = {
           offered_note?: string | null
           offered_start?: string | null
           party_size: number
+          price_checked_at?: string | null
+          price_fils?: number | null
+          price_source?: Database["public"]["Enums"]["price_source"] | null
           provider_name?: string | null
           rated_at?: string | null
           rating?: number | null
@@ -248,6 +256,7 @@ export type Database = {
           consent_shared?: Json | null
           consent_version?: string | null
           created_at?: string
+          deposit_fils?: number | null
           earliest_acceptable?: string | null
           external_ref?: string | null
           guest_name?: string | null
@@ -260,6 +269,9 @@ export type Database = {
           offered_note?: string | null
           offered_start?: string | null
           party_size?: number
+          price_checked_at?: string | null
+          price_fils?: number | null
+          price_source?: Database["public"]["Enums"]["price_source"] | null
           provider_name?: string | null
           rated_at?: string | null
           rating?: number | null
@@ -1241,11 +1253,16 @@ export type Database = {
       }
       suggestions: {
         Row: {
+          availability_checked_at: string | null
           created_at: string
           decided_at: string | null
+          deposit_fils: number | null
           distance_metres: number | null
           id: string
           outcome: Database["public"]["Enums"]["suggestion_outcome"]
+          price_checked_at: string | null
+          price_fils: number | null
+          price_source: Database["public"]["Enums"]["price_source"] | null
           proposed_ends_at: string
           proposed_starts_at: string
           rank: number
@@ -1253,15 +1270,21 @@ export type Database = {
           reasoning_snapshot: Json
           request_id: string
           slot_is_verified: boolean
+          travel_minutes: number | null
           updated_at: string
           venue_id: string
         }
         Insert: {
+          availability_checked_at?: string | null
           created_at?: string
           decided_at?: string | null
+          deposit_fils?: number | null
           distance_metres?: number | null
           id?: string
           outcome?: Database["public"]["Enums"]["suggestion_outcome"]
+          price_checked_at?: string | null
+          price_fils?: number | null
+          price_source?: Database["public"]["Enums"]["price_source"] | null
           proposed_ends_at: string
           proposed_starts_at: string
           rank: number
@@ -1269,15 +1292,21 @@ export type Database = {
           reasoning_snapshot?: Json
           request_id: string
           slot_is_verified?: boolean
+          travel_minutes?: number | null
           updated_at?: string
           venue_id: string
         }
         Update: {
+          availability_checked_at?: string | null
           created_at?: string
           decided_at?: string | null
+          deposit_fils?: number | null
           distance_metres?: number | null
           id?: string
           outcome?: Database["public"]["Enums"]["suggestion_outcome"]
+          price_checked_at?: string | null
+          price_fils?: number | null
+          price_source?: Database["public"]["Enums"]["price_source"] | null
           proposed_ends_at?: string
           proposed_starts_at?: string
           rank?: number
@@ -1285,6 +1314,7 @@ export type Database = {
           reasoning_snapshot?: Json
           request_id?: string
           slot_is_verified?: boolean
+          travel_minutes?: number | null
           updated_at?: string
           venue_id?: string
         }
@@ -2464,7 +2494,8 @@ export type Database = {
         | "out_of_bounds_negotiation"
         | "venue_data_gap"
       ops_task_status: "open" | "in_progress" | "resolved" | "dismissed"
-      rail_kind: "api" | "whatsapp" | "voice" | "manual"
+      price_source: "estimate" | "menu" | "venue_quote" | "platform"
+      rail_kind: "api" | "whatsapp" | "email" | "voice" | "manual"
       reminder_kind: "day_before" | "two_hours" | "rate_visit"
       request_status:
         | "received"
@@ -2689,7 +2720,8 @@ export const Constants = {
         "venue_data_gap",
       ],
       ops_task_status: ["open", "in_progress", "resolved", "dismissed"],
-      rail_kind: ["api", "whatsapp", "voice", "manual"],
+      price_source: ["estimate", "menu", "venue_quote", "platform"],
+      rail_kind: ["api", "whatsapp", "email", "voice", "manual"],
       reminder_kind: ["day_before", "two_hours", "rate_visit"],
       request_status: [
         "received",

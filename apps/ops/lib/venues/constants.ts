@@ -60,18 +60,34 @@ export function labelFor(value: string): string {
   return value.replace(/_/g, ' ');
 }
 
-/** Default SLA per rail, in minutes — the escalation clock from the build plan. */
+/**
+ * Default SLA per rail, in minutes — the escalation clock from the build plan.
+ *
+ * Email is the slowest thing that is still automatic. A restaurant reads its
+ * inbox between services rather than on receipt, so a twenty-minute clock like
+ * WhatsApp's would escalate almost every message to a human before anybody had
+ * a chance to reply. Four hours is roughly "before the next service".
+ */
 export const DEFAULT_SLA_MINUTES: Record<RailKind, number> = {
   api: 5,
   whatsapp: 20,
+  email: 240,
   voice: 45,
   manual: 60,
 };
 
-/** Lower runs first. Sensible starting order for a new venue. */
+/**
+ * Lower runs first. Sensible starting order for a new venue.
+ *
+ * Email sits between WhatsApp and voice: slower to answer than a message, but
+ * it reaches venues that will never accept a WhatsApp from a number they do
+ * not recognise, and every venue that answers one is a venue that never
+ * reaches the manual queue.
+ */
 export const DEFAULT_PRIORITY: Record<RailKind, number> = {
   api: 10,
   whatsapp: 20,
+  email: 25,
   voice: 30,
   manual: 90,
 };
